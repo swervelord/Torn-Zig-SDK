@@ -1,0 +1,8 @@
+.{
+    .name = .torn_external_consumer,
+    .version = "0.0.0",
+    .fingerprint = 0xfe8663c50ef853e4,
+    .minimum_zig_version = "0.17.0",
+    .dependencies = .{},
+    .paths = .{ "build.zig", "build.zig.zon", "main.zig" },
+}

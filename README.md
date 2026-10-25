@@ -1,0 +1,149 @@
+# Torn-Zig-SDK
+
+An allocator-explicit Zig SDK for the official Torn API. Import the module as `torn`.
+The pinned and minimum supported compiler is **Zig 0.17.0**, the stable release
+verified against the official index on October 25, 2026. There are no package or
+native library dependencies beyond Zig's standard library and operating-system
+facilities.
+
+## Installation
+
+Use a published commit to obtain a content-addressed package:
+
+```sh
+zig fetch --save=torn https://github.com/swervelord/Torn-Zig-SDK/archive/COMMIT.tar.gz
+```
+
+In your `build.zig`, call `b.dependency("torn", .{ .target = target, .optimize = optimize })`
+and add `.{ .name = "torn", .module = dependency.module("torn") }` to your module's
+imports. Keep the hash written by `zig fetch` in your `build.zig.zon`.
+The complete fresh consumer is in `tests/external-consumer/`.
+
+## Typed selections and batching
+
+```zig
+const torn = @import("torn");
+
+var engine = try torn.runtime.Client.init(allocator, io,
+    .{ .keys = &.{api_key} }, .{});
+defer engine.deinit();
+const client: torn.Client = .{ .engine = &engine };
+
+var result = try client.batch(.{
+    torn.selections.user.profile,
+    torn.selections.user.job,
+}, &.{.{ .name = "id", .value = "123" }}, &.{}, .{});
+defer result.deinit();
+if (result.execution.failure) |failure| {
+    // Inspect failure.kind, http_status, api_code and diagnostic.jsonPath().
+    _ = failure;
+} else {
+    const profile = result.value.?[0].profile;
+    const job = result.value.?[1].job;
+    _ = profile.name;
+    _ = job;
+}
+```
+
+This sends one `/user` request with `selections=job,profile`. Separate calls to
+`client.select` send separate requests. `client.select(Token, target, filters, options)`
+returns the token's concrete response in `.value`. `client.raw(Token, ...)` returns
+an owned `Execution` with exact JSON values. `client.execute(Input, ...)` supports
+runtime selection lists with weaker static guarantees. Mixed-resource static
+batches are compile errors. All selections in a batch share target and filters;
+the planner rejects conflicting target domains.
+
+`examples/typed_batch.zig` runs profile, job and timestamp in one mocked send,
+with direct typed field access and explicit result cleanup. `company.detail`
+requires a company ID; `torn.stock` requires a stock ID and uses the individual
+stock endpoint. These aliases preserve distinct behavior.
+
+## Exact operations, CSV, and custom decoding
+
+Every official operation is available under `torn.operations` using its official
+`operationId`, with `Params`, `Response`, `path`, and `media_type` declarations:
+
+```zig
+var response = try client.exact(torn.operations.getMyAmmo, .{}, .{});
+defer response.deinit();
+```
+
+Exact parameter values are checked against their official schemas before sending.
+Use the client key configuration for authentication; setting an operation's `key`
+parameter is rejected. CSV operations return owned text through the exact API or
+selection tokens. All text and JSON bodies enforce the same configurable byte cap.
+For custom projections, use `Execution.raw` with the allocator from its arena;
+keep projected slices within the execution's lifetime. Explicit plans are built by
+`torn.planner.build`; `client.executePlan` executes them.
+
+## Ownership and execution
+
+Results own their parsed trees, response buffers, reports, and typed backing data.
+They remain valid independently of temporary transport buffers. Release each owned
+handle exactly once with `deinit`; copying a handle does not clone its ownership.
+`model.Owned(T).toJson` serializes typed values and retained unknown fields;
+`originalJson` serializes the untouched retained input. `model.stringify` serializes
+standalone typed values.
+
+The runtime borrows a `std.Io` backend. Calls are synchronous to the caller and use
+cancelable Io concurrency internally for attempt deadlines. Keep the runtime at a
+stable address. Cancel and join all callers before destroying it. Supply a
+thread-safe allocator when sharing the client; do not share a scratch arena across
+concurrent calls. Owned results can move between threads if their allocator permits
+allocation and deallocation on those threads. See [runtime contracts](docs/runtime.md)
+for quotas, retries, routes, cancellation, configuration, and tested limits.
+
+Execution reports describe successful contributing requests, including operation,
+route, path, selections, API version, and fallback. They omit failed attempts and
+are not an attempt counter. A later failure retains earlier successful data and
+reports. Split recovery is enabled by default; runtime v1 recovery requires
+`.legacy_fallback = true` and a catalog-supported selection.
+
+## Contracts and generation
+
+The official v2 snapshot is **6.13.8** (234 exact operations, 712 component schemas).
+The distinct frozen namespace preserves **6.13.6** (711 schemas).
+The maintained compatibility namespace has 549 declarations. Routing covers 205
+capabilities, 207 typed selection/alias tokens, 202 JSON selections, three CSV
+channels, and an explicit 184-entry v1 catalog. Detailed mappings are generated in
+`docs/routing-coverage.json` and the generated declaration inventories.
+
+`current`, `frozen`, and `compatibility` are separate namespaces. Current elimination
+teams require `captains`; historical teams require `leaders`. Use
+`contracts.decodeCurrent`, `decodeFrozen`, or `decodeNamed` for independently
+validated model decoding. Primitive Zig aliases can share type identity; pass an
+explicit schema name to `decodeNamed` when its domain constraints matter.
+
+The official contract leaves stock-analysis item `stock`, bootlegging `dvd_copies`,
+and trade `items` values unconstrained: their presence is required, and their values
+are retained exactly. Open objects and compatibility unknown variants also preserve
+exact raw values. JSON integers never pass through floating point. Missing, null,
+and present optional fields use `model.Presence(T)`; required-nullable fields must
+be present. Duplicate property names are rejected; matching is case-sensitive.
+Overlapping official `oneOf` enum-or-string branches use documented any-match
+semantics. Unknown object fields remain available in retained JSON and round trips.
+
+The v1 catalog is maintained routing coverage, not an authoritative complete v1
+response specification. No such complete official contract is provided. Yata,
+TornStats and Weav3r are separate services outside this SDK.
+
+```sh
+zig fmt --check build.zig src tools tests examples
+zig build test
+zig build check
+zig build generate
+zig build generate-check
+zig build audit
+zig build examples
+zig build fuzz -Doptimize=safe
+```
+
+Zig 0.17 uses optimization names `debug`, `safe`, `fast`, and `small`. `safe`
+corresponds to ReleaseSafe. Generation and ordinary tests are offline and require
+no credential. Explicit `zig build refresh-spec` fetches a candidate with a custom
+user agent into `spec/openapi-candidate.json`; review changes before replacing a
+pinned contract and its provenance. The generator is Zig-native and verifies
+deterministic formatted outputs. See [provenance](docs/provenance.md) and
+[verification scope](docs/verification.md) for evidence and remaining limits.
+
+MIT License. Copyright (c) 2026 swervelord.

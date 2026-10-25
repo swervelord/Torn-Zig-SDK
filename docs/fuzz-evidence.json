@@ -1,0 +1,1 @@
+{"campaign":"os-entropy-property-mutations","iterations":100000,"numeric_cases":200000,"encoding_cases":100000,"json_inputs":100000,"accepted_json":50022,"elapsed_ms":152,"optimization":"safe","zig":"0.17.0"}

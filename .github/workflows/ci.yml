@@ -1,0 +1,106 @@
+name: Zig SDK verification
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: Native ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: x86_64-linux
+            extension: tar.xz
+            sha256: 1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026
+          - os: windows-2025
+            platform: x86_64-windows
+            extension: zip
+            sha256: b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428
+          - os: macos-15
+            platform: aarch64-macos
+            extension: tar.xz
+            sha256: b607e9b9234790a008116ae5bdb71c6243b84b9fb42a53a9e70fde41c06c536a
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Acquire and verify stable Zig 0.17.0
+        env:
+          ZIG_PLATFORM: ${{ matrix.platform }}
+          ZIG_EXTENSION: ${{ matrix.extension }}
+          ZIG_SHA256: ${{ matrix.sha256 }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $name = "zig-$env:ZIG_PLATFORM-0.17.0"
+          $archive = Join-Path $env:RUNNER_TEMP "$name.$env:ZIG_EXTENSION"
+          Invoke-WebRequest "https://ziglang.org/download/0.17.0/$name.$env:ZIG_EXTENSION" -Headers @{'User-Agent'='Torn-Zig-SDK-CI/0.1.0'} -OutFile $archive
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:ZIG_SHA256) { throw 'Zig archive SHA-256 mismatch' }
+          if ($env:ZIG_EXTENSION -eq 'zip') { Expand-Archive -LiteralPath $archive -DestinationPath $env:RUNNER_TEMP } else { tar -xf $archive -C $env:RUNNER_TEMP; if ($LASTEXITCODE -ne 0) { throw 'Zig archive extraction failed' } }
+          (Join-Path $env:RUNNER_TEMP $name) | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Verify exact version and formatting
+        run: |
+          if ((zig version) -ne '0.17.0') { throw 'Unexpected Zig version' }
+          zig fmt --check build.zig src tools tests examples
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Exhaustive type checks and Debug tests with leak and allocation checks
+        run: |
+          zig build check -Doptimize=debug
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          zig build test -Doptimize=debug
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Optimized tests with runtime safety
+        run: |
+          zig build test -Doptimize=safe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Reproducible generation provenance and coverage audit
+        run: |
+          zig build generate-check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          zig build audit
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          zig build generate
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run typed examples with safety disabled
+        run: |
+          zig build examples -Doptimize=fast
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          zig build examples -Doptimize=small
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Bounded property and mutation campaign
+        run: |
+          zig build fuzz -Doptimize=safe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Cross-compile additional architectures (compilation only)
+        if: runner.os == 'Linux'
+        run: |
+          foreach ($target in @('aarch64-linux-musl', 'aarch64-windows', 'x86_64-macos')) {
+            zig build check "-Dtarget=$target" -Doptimize=safe
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Fresh public package installation and three-selection typed batch
+        if: github.event_name != 'pull_request'
+        env:
+          PACKAGE_URL: https://github.com/${{ github.repository }}/archive/${{ github.sha }}.tar.gz
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $consumer = Join-Path $env:RUNNER_TEMP 'torn-external-consumer'
+          New-Item -ItemType Directory -Path $consumer | Out-Null
+          Copy-Item -Path 'tests/external-consumer/*' -Destination $consumer
+          Set-Location -LiteralPath $consumer
+          $env:ZIG_GLOBAL_CACHE_DIR = Join-Path $env:RUNNER_TEMP 'torn-fresh-package-cache'
+          zig fetch --save=torn $env:PACKAGE_URL
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          zig build run -Doptimize=safe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
