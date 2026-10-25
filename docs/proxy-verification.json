@@ -1,0 +1,1 @@
+{"verification":"http-connect-target-tls","target":"https://www.torn.com/swagger/openapi.json","http_status":200,"contract_version":"6.13.8","body_bytes":1402969,"private_key_used":false,"zig":"0.17.0"}

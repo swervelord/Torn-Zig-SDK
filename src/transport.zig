@@ -36,7 +36,10 @@ pub const Transport = struct {
     send_fn: *const fn (?*anyopaque, std.mem.Allocator, std.Io, Request) anyerror!Response = nativeSend,
 
     pub fn send(self: Transport, allocator: std.mem.Allocator, io: std.Io, request: Request) !Response {
-        return self.send_fn(self.context, allocator, io, request);
+        return self.send_fn(self.context, allocator, io, request) catch |err| {
+            try io.checkCancel();
+            return err;
+        };
     }
 };
 
@@ -47,7 +50,7 @@ fn validHeader(value: []const u8) bool {
 /// Uses the selected Io backend for cancelable DNS, TCP, TLS and body reads.
 /// Every send owns its HTTP client; credentials never cross a redirect.
 pub fn nativeSend(_: ?*anyopaque, allocator: std.mem.Allocator, io: std.Io, request: Request) !Response {
-    if (!validHeader(request.api_key) or !validHeader(request.user_agent)) return error.InvalidHeader;
+    if (!validHeader(request.api_key) or !validHeader(request.user_agent) or !validHeader(request.url)) return error.InvalidHeader;
     if (request.max_body_bytes == 0) return error.InvalidBodyLimit;
     const uri = try std.Uri.parse(request.url);
     var scratch = std.heap.ArenaAllocator.init(allocator);
@@ -57,10 +60,8 @@ pub fn nativeSend(_: ?*anyopaque, allocator: std.mem.Allocator, io: std.Io, requ
     var proxy: std.http.Client.Proxy = undefined;
     var proxy_host: [std.Io.net.HostName.max_len]u8 = undefined;
     if (request.proxy_url) |url| {
-        // Zig 0.17.0's CONNECT helper returns the proxy-protocol connection
-        // without a target TLS upgrade. Reject before proxy or origin auth.
-        if (std.ascii.eqlIgnoreCase(uri.scheme, "https")) return error.SecureProxyUnsupported;
         const proxy_uri = try std.Uri.parse(url);
+        if (std.ascii.eqlIgnoreCase(uri.scheme, "https")) return secureProxySend(&client, allocator, scratch.allocator(), io, request, uri, proxy_uri);
         const protocol = std.http.Client.Protocol.fromUri(proxy_uri) orelse return error.UnsupportedProxyScheme;
         const proxy_auth: ?[]const u8 = if (proxy_uri.user != null or proxy_uri.password != null) auth: {
             const user_component: std.Uri.Component = proxy_uri.user orelse .empty;
@@ -116,6 +117,112 @@ pub fn nativeSend(_: ?*anyopaque, allocator: std.mem.Allocator, io: std.Io, requ
         return error.BodyReadFailed;
     };
     return .{ .allocator = allocator, .status = status, .body = body, .retry_after_ms = retry_after_ms };
+}
+
+fn proxyAuthorization(arena: std.mem.Allocator, uri: std.Uri) !?[]const u8 {
+    if (uri.user == null and uri.password == null) return null;
+    const user_component: std.Uri.Component = uri.user orelse .empty;
+    const password_component: std.Uri.Component = uri.password orelse .empty;
+    const user = try user_component.toRawMaybeAlloc(arena);
+    const password = try password_component.toRawMaybeAlloc(arena);
+    if (std.mem.indexOfScalar(u8, user, ':') != null) return error.InvalidProxyUsername;
+    const credentials = try std.fmt.allocPrint(arena, "{s}:{s}", .{ user, password });
+    return try std.fmt.allocPrint(arena, "Basic {b64}", .{credentials});
+}
+
+/// std.http.Client's CONNECT helper does not upgrade the returned tunnel to
+/// target TLS in 0.17.0. Perform that upgrade explicitly before origin auth.
+fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena: std.mem.Allocator, io: std.Io, request: Request, target: std.Uri, proxy: std.Uri) !Response {
+    // Nested TLS to an HTTPS proxy needs a separately verified flush adapter.
+    if (!std.ascii.eqlIgnoreCase(proxy.scheme, "http")) return error.SecureProxyUnsupported;
+    var target_name_buffer: [std.Io.net.HostName.max_len]u8 = undefined;
+    var proxy_name_buffer: [std.Io.net.HostName.max_len]u8 = undefined;
+    const target_name = try std.Io.net.HostName.fromUri(target, &target_name_buffer);
+    const proxy_name = try std.Io.net.HostName.fromUri(proxy, &proxy_name_buffer);
+    const target_port = target.port orelse 443;
+    const proxy_auth = try proxyAuthorization(arena, proxy);
+    const now = std.Io.Clock.real.now(io);
+    try client.ca_bundle.rescan(allocator, io, now);
+    client.now = now;
+    client.read_buffer_size = @max(client.read_buffer_size, std.crypto.tls.Client.min_buffer_len);
+    client.write_buffer_size = @max(client.write_buffer_size, std.crypto.tls.Client.min_buffer_len);
+    const connection = try client.connectTcp(proxy_name, proxy.port orelse 80, .plain);
+    const proxy_headers: []const std.http.Header = if (proxy_auth) |authorization| &.{.{ .name = "Proxy-Authorization", .value = authorization }} else &.{};
+    var connect = client.request(.CONNECT, .{ .scheme = "http", .host = .{ .raw = target_name.bytes }, .port = target_port }, .{
+        .connection = connection,
+        .redirect_behavior = .unhandled,
+        .headers = .{ .authorization = .omit, .user_agent = .{ .override = request.user_agent } },
+        .extra_headers = proxy_headers,
+    }) catch |err| {
+        connection.closing = true;
+        client.connection_pool.release(connection, io);
+        return err;
+    };
+    defer connect.deinit();
+    try connect.sendBodiless();
+    const tunnel_response = try connect.receiveHead(&.{});
+    // A CONNECT response begins a byte tunnel, not an ordinary HTTP body.
+    // Never let Request.deinit drain it or return this connection to the pool.
+    connect.reader.state = .closing;
+    connection.closing = true;
+    if (tunnel_response.head.status != .ok) return .{
+        .allocator = allocator,
+        .status = @backingInt(tunnel_response.head.status),
+        .body = try allocator.dupe(u8, ""),
+    };
+    var entropy: [std.crypto.tls.Client.Options.entropy_len]u8 = undefined;
+    io.random(&entropy);
+    var tls = std.crypto.tls.Client.init(connection.reader(), connection.writer(), .{
+        .host = .{ .explicit = target_name.bytes },
+        .ca = .{ .bundle = .{ .gpa = allocator, .io = io, .lock = &client.ca_bundle_lock, .bundle = &client.ca_bundle } },
+        .read_buffer = try arena.alloc(u8, std.crypto.tls.Client.min_buffer_len + 8192),
+        .write_buffer = try arena.alloc(u8, std.crypto.tls.Client.min_buffer_len),
+        .entropy = &entropy,
+        .realtime_now = now,
+        .allow_truncation_attacks = true,
+    }) catch |err| {
+        try io.checkCancel();
+        if (err == error.OutOfMemory) return err;
+        return error.TlsInitializationFailed;
+    };
+    // Only the authenticated TLS stream receives the Torn API key.
+    try tls.writer.writeAll("GET ");
+    if (target.path.isEmpty()) try tls.writer.writeByte('/') else try target.path.formatPath(&tls.writer);
+    if (target.query) |query| {
+        try tls.writer.writeByte('?');
+        try query.formatQuery(&tls.writer);
+    }
+    try tls.writer.print(" HTTP/1.1\r\nHost: {s}:{d}\r\nAuthorization: ApiKey {s}\r\nUser-Agent: {s}\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n", .{ target_name.bytes, target_port, request.api_key, request.user_agent });
+    try tls.writer.flush();
+    try connection.flush();
+    var http: std.http.Reader = .{ .in = &tls.reader, .interface = undefined, .state = .ready, .max_head_len = 8192 };
+    var head = try std.http.Client.Response.Head.parse(try http.receiveHead());
+    while (head.status.class() == .informational) {
+        http.state = .ready;
+        head = try std.http.Client.Response.Head.parse(try http.receiveHead());
+    }
+    var retry_after_ms: u64 = 0;
+    var headers = head.iterateHeaders();
+    while (headers.next()) |header| if (std.ascii.eqlIgnoreCase(header.name, "retry-after")) {
+        retry_after_ms = parseRetryAfter(header.value, std.Io.Clock.real.now(io).toMilliseconds());
+    };
+    const expected_length = if (head.status == .no_content or head.status == .not_modified) @as(?u64, 0) else head.content_length;
+    if (expected_length) |length| if (length > request.max_body_bytes) return error.ResponseTooLarge;
+    if (head.content_encoding != .identity) return error.UnsupportedResponseCompression;
+    var transfer_buffer: [8192]u8 = undefined;
+    const body = http.bodyReader(&transfer_buffer, head.transfer_encoding, expected_length).allocRemaining(allocator, .limited(request.max_body_bytes)) catch |err| switch (err) {
+        error.StreamTooLong => return error.ResponseTooLarge,
+        error.ReadFailed => {
+            try io.checkCancel();
+            return error.BodyReadFailed;
+        },
+        else => return err,
+    };
+    if (expected_length) |expected| if (body.len != expected) {
+        allocator.free(body);
+        return error.BodyReadFailed;
+    };
+    return .{ .allocator = allocator, .status = @backingInt(head.status), .body = body, .retry_after_ms = retry_after_ms };
 }
 
 /// RFC 9110 delta-seconds and preferred IMF-fixdate. Invalid dates are ignored.
@@ -301,9 +408,11 @@ test "native HTTPS rejects a malformed TLS peer before sending authentication" {
     try peer.await(io);
 }
 
-test "HTTPS proxy rejects unsupported TLS upgrade before any network access" {
+test "nested TLS proxy rejects unsupported upgrade before any network access" {
     try std.testing.expectError(error.SecureProxyUnsupported, nativeSend(null, std.testing.allocator, std.testing.io, .{
-        .url = "https://does-not-resolve.invalid/user", .api_key = "test-key", .proxy_url = "http://127.0.0.1:1",
+        .url = "https://does-not-resolve.invalid/user",
+        .api_key = "test-key",
+        .proxy_url = "https://127.0.0.1:1",
     }));
 }
 
@@ -317,4 +426,47 @@ test "native chunked HTTP body fails explicitly beyond streaming limit" {
     defer std.testing.allocator.free(url);
     try std.testing.expectError(error.ResponseTooLarge, nativeSend(null, std.testing.allocator, io, .{ .url = url, .api_key = "test-key", .max_body_bytes = 3 }));
     try future.await(io);
+}
+
+test "HTTP CONNECT authenticates proxy then performs target TLS before origin auth" {
+    const Proxy = struct {
+        fn serve(listener: *std.Io.net.Server, io: std.Io) !void {
+            const stream = try listener.accept(io);
+            defer stream.close(io);
+            var read_buffer: [32768]u8 = undefined;
+            var reader = stream.reader(io, &read_buffer);
+            const first = (try reader.interface.takeDelimiter('\n')) orelse return error.MissingConnect;
+            try std.testing.expectEqualStrings("CONNECT does-not-resolve.invalid:443 HTTP/1.1\r", first);
+            var proxy_auth_seen = false;
+            while (try reader.interface.takeDelimiter('\n')) |line| {
+                if (std.mem.eql(u8, line, "\r")) break;
+                try std.testing.expect(std.mem.indexOf(u8, line, "test-key") == null);
+                if (std.mem.eql(u8, line, "Proxy-Authorization: Basic cHJveHktdXNlcjpwcm94eS1wYXNz\r")) proxy_auth_seen = true;
+            }
+            try std.testing.expect(proxy_auth_seen);
+            var write_buffer: [1024]u8 = undefined;
+            var writer = stream.writer(io, &write_buffer);
+            try writer.interface.writeAll("HTTP/1.1 200 Connection Established\r\n\r\n");
+            try writer.interface.flush();
+            // The byte following the CONNECT response must start target TLS,
+            // never a plaintext GET carrying the origin credential.
+            try std.testing.expectEqual(@as(u8, 0x16), try reader.interface.takeByte());
+            try writer.interface.writeAll("HTTP/1.1 400 Invalid TLS Peer\r\nContent-Length: 0\r\n\r\n");
+            try writer.interface.flush();
+        }
+    };
+    const io = std.testing.io;
+    const address = try std.Io.net.IpAddress.parseIp4("127.0.0.1", 0);
+    var listener = try address.listen(io, .{});
+    defer listener.deinit(io);
+    var proxy = try io.concurrent(Proxy.serve, .{ &listener, io });
+    defer proxy.cancel(io) catch {};
+    const proxy_url = try std.fmt.allocPrint(std.testing.allocator, "http://proxy-user:proxy-pass@127.0.0.1:{d}", .{listener.socket.address.getPort()});
+    defer std.testing.allocator.free(proxy_url);
+    try std.testing.expectError(error.TlsInitializationFailed, nativeSend(null, std.testing.allocator, io, .{
+        .url = "https://does-not-resolve.invalid/user",
+        .api_key = "test-key",
+        .proxy_url = proxy_url,
+    }));
+    try proxy.await(io);
 }

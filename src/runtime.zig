@@ -593,7 +593,9 @@ test "native body-read failure retries instead of returning truncated success" {
                 self.calls += 1;
             }
         }
-        fn waitFn(_: ?*anyopaque, _: std.Io, ms: u64) !void { try std.testing.expectEqual(@as(u64, 250), ms); }
+        fn waitFn(_: ?*anyopaque, _: std.Io, ms: u64) !void {
+            try std.testing.expectEqual(@as(u64, 250), ms);
+        }
     };
     const io = std.testing.io;
     const address = try std.Io.net.IpAddress.parseIp4("127.0.0.1", 0);
