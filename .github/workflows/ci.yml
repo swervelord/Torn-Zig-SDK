@@ -2,6 +2,7 @@ name: Zig SDK verification
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -52,6 +53,11 @@ jobs:
           if ((zig version) -ne '0.17.0') { throw 'Unexpected Zig version' }
           zig fmt --check build.zig src tools tests examples
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Native Linux thread sanitizer runtime checks
+        if: runner.os == 'Linux'
+        run: |
+          zig test src/runtime.zig -fsanitize-thread -lc -O safe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Exhaustive type checks and Debug tests with leak and allocation checks
         run: |
           zig build check -Doptimize=debug
@@ -86,7 +92,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           foreach ($target in @('aarch64-linux-musl', 'aarch64-windows', 'x86_64-macos')) {
-            zig build check "-Dtarget=$target" -Doptimize=safe
+            zig build cross-check "-Dtarget=$target" -Doptimize=safe
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
       - name: Fresh public package installation and three-selection typed batch

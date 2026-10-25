@@ -29,20 +29,21 @@ const Wire = struct {
     }
 };
 
-test "711 independently specified compatible pairs each cause exactly one actual send" {
+test "3042 independently specified compatible pairs each cause exactly one actual send" {
     var total: usize = 0;
-    for (cases.groups) |group| {
+    for (cases.all_groups) |group| {
         for (group.selections, 0..) |left, i| {
             for (group.selections[i + 1 ..]) |right| {
+                if (!cases.shouldTestPair(group, left, right)) continue;
                 const query = try cases.expectedQuery(std.testing.allocator, left, right);
                 defer std.testing.allocator.free(query);
-                const expected_url = try std.fmt.allocPrint(std.testing.allocator, "https://example.invalid/v2{s}?{s}", .{ group.path, query });
+                const expected_url = try std.fmt.allocPrint(std.testing.allocator, "https://example.invalid/v2{s}?{s}{s}", .{ group.path, query, group.query_suffix });
                 defer std.testing.allocator.free(expected_url);
                 var wire: Wire = .{ .steps = &.{.{ .url = expected_url }} };
                 var engine = try wire.engine();
                 defer engine.deinit();
                 const c: client.Client = .{ .engine = &engine };
-                var result = try c.execute(.{ .resource = group.resource, .selections = &.{ right, left, right }, .target = group.target }, .{});
+                var result = try c.execute(.{ .resource = group.resource, .selections = &.{ right, left, right }, .target = group.target, .filters = group.filters }, .{});
                 defer result.deinit();
                 try std.testing.expect(result.failure == null);
                 try std.testing.expectEqual(@as(usize, 1), wire.count);
@@ -52,7 +53,34 @@ test "711 independently specified compatible pairs each cause exactly one actual
             }
         }
     }
-    try std.testing.expectEqual(@as(usize, 711), total);
+    try std.testing.expectEqual(@as(usize, 3042), total);
+}
+
+test "full resource and semantic domain groups each execute one contributing call" {
+    for (cases.all_groups) |group| {
+        const a = std.testing.allocator;
+        const names = try a.dupe([]const u8, group.selections);
+        defer a.free(names);
+        std.mem.sort([]const u8, names, {}, struct {
+            fn less(_: void, x: []const u8, y: []const u8) bool {
+                return std.mem.lessThan(u8, x, y);
+            }
+        }.less);
+        const selections_query = try std.mem.join(a, "%2C", names);
+        defer a.free(selections_query);
+        const url = try std.fmt.allocPrint(a, "https://example.invalid/v2{s}?selections={s}{s}", .{ group.path, selections_query, group.query_suffix });
+        defer a.free(url);
+        var wire: Wire = .{ .steps = &.{.{ .url = url }} };
+        var engine = try wire.engine();
+        defer engine.deinit();
+        const c: client.Client = .{ .engine = &engine };
+        var result = try c.execute(.{ .resource = group.resource, .selections = group.selections, .target = group.target, .filters = group.filters }, .{});
+        defer result.deinit();
+        try std.testing.expect(result.failure == null);
+        try std.testing.expectEqual(@as(usize, 1), wire.count);
+        try std.testing.expectEqual(@as(usize, 1), result.reports.len);
+        try std.testing.expectEqual(group.selections.len, result.reports[0].selections.len);
+    }
 }
 
 test "split recovery retains target and encoded filters and reports successes only" {

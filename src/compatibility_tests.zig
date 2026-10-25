@@ -211,3 +211,35 @@ test "all trade discriminators and unknown variants roundtrip selected payloads"
         try std.testing.expectEqual(case[1], @backingInt(std.meta.activeTag(again.value)));
     }
 }
+
+test "exact numeric variant rejects sibling values and preserves arbitrary exponent notation" {
+    const a = std.testing.allocator;
+    var exact = try model.decode(c.DynamicValue, a, "18446744073709551616");
+    defer exact.deinit();
+    try std.testing.expectEqualStrings("18446744073709551616", exact.value.v3.lexeme);
+    var huge = try model.decode(model.ExactNumber, a, "1e999999999999999999999999999999999999999999999999999999");
+    defer huge.deinit();
+    const bytes = try huge.toJson(a);
+    defer a.free(bytes);
+    try std.testing.expectEqualStrings("1e999999999999999999999999999999999999999999999999999999", bytes);
+    try std.testing.expectError(error.InvalidType, model.decode(model.ExactNumber, a, "true"));
+    try std.testing.expectError(error.InvalidType, model.decode(model.ExactNumber, a, "\"1\""));
+    try std.testing.expectError(error.InvalidNumber, model.stringify(a, model.ExactNumber{ .lexeme = "01" }));
+}
+test "owned typed serialization preserves nested unknown fields after a known-field mutation" {
+    const T = struct { item: struct { id: u64 } };
+    const a = std.testing.allocator;
+    var result = try model.decode(T, a, "{\"item\":{\"id\":1,\"future\":9007199254740993,\"off\":false,\"nil\":null},\"outer\":\"kept\"}");
+    defer result.deinit();
+    result.value.item.id = 2;
+    const bytes = try result.toJson(a);
+    defer a.free(bytes);
+    var actual = try std.json.parseFromSlice(model.Raw, a, bytes, .{ .parse_numbers = false });
+    defer actual.deinit();
+    const item = actual.value.object.get("item").?.object;
+    try std.testing.expectEqualStrings("2", item.get("id").?.number_string);
+    try std.testing.expectEqualStrings("9007199254740993", item.get("future").?.number_string);
+    try std.testing.expect(!item.get("off").?.bool);
+    try std.testing.expect(item.get("nil").? == .null);
+    try std.testing.expectEqualStrings("kept", actual.value.object.get("outer").?.string);
+}

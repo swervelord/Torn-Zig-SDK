@@ -2409,73 +2409,1148 @@ pub const getUserGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: UserCrimesResponse,
-        v1: UserWeaponExpResponse,
-        v2: UserAmmoResponse,
-        v3: UserDiscordResponse,
-        v4: UserRacesResponse,
-        v5: UserEnlistedCarsResponse,
-        v6: UserForumPostsResponse,
-        v7: UserForumThreadsResponse,
-        v8: UserForumSubscribedThreadsResponse,
-        v9: UserForumFeedResponse,
-        v10: UserForumFriendsResponse,
-        v11: UserPropertyResponse,
-        v12: ReportsResponse,
-        v13: UserHofResponse,
-        v14: UserCalendarResponse,
-        v15: UserRacingRecordsResponse,
-        v16: UserEducationResponse,
-        v17: UserStocksResponse,
-        v18: UserBountiesResponse,
-        v19: UserJobRanksResponse,
-        v20: UserPropertiesResponse,
-        v21: UserFactionBalanceResponse,
-        v22: UserBasicResponse,
-        v23: RevivesResponse,
-        v24: UserHonorsResponse,
-        v25: UserMedalsResponse,
-        v26: UserMeritsResponse,
-        v27: RevivesFullResponse,
-        v28: UserProfileResponse,
-        v29: UserJobResponse,
-        v30: UserFactionResponse,
-        v31: UserCompetitionResponse,
-        v32: UserIconsResponse,
-        v33: UserItemMarketResponse,
-        v34: UserListResponse,
-        v35: UserEquipmentResponse,
-        v36: UserMissionsResponse,
-        v37: UserPersonalStatsResponse,
-        v38: UserOrganizedCrimeResponse,
-        v39: UserItemModsResponse,
-        v40: AttacksResponse,
-        v41: UserBarsResponse,
-        v42: UserCooldownsResponse,
-        v43: UserNotificationsResponse,
-        v44: UserPerksResponse,
-        v45: UserRefillsResponse,
-        v46: UserTravelResponse,
-        v47: UserVirusResponse,
-        v48: AttacksFullResponse,
-        v49: UserCasinoResponse,
-        v50: UserNetworthResponse,
-        v51: UserMoneyResponse,
-        v52: UserJobPointsResponse,
-        v53: UserWorkStatsResponse,
-        v54: UserSkillsResponse,
-        v55: UserBattleStatsResponse,
-        v56: UserGymResponse,
-        v57: UserTradeResponse,
-        v58: UserTradesResponse,
-        v59: UserNewEventsResponse,
-        v60: UserEventsResponse,
-        v61: UserMessagesResponse,
-        v62: UserNewMessagesResponse,
-        v63: UserLookupResponse,
-        v64: UserInventoryResponse,
-        v65: TimestampResponse,
+    pub const Response = struct {
+        crimes: model.Presence(UserCrime) = .absent,
+        weaponexp: model.Presence([]const UserWeaponExp) = .absent,
+        ammo: model.Presence([]const UserAmmo) = .absent,
+        discord: model.Presence(struct {
+            discord_id: DiscordId,
+            user_id: UserId,
+            pub const json_schema = "{\"required\":[\"discord_id\",\"user_id\"],\"properties\":{\"discord_id\":{\"$ref\":\"#/components/schemas/DiscordId\"},\"user_id\":{\"$ref\":\"#/components/schemas/UserId\"}},\"type\":\"object\"}";
+        }) = .absent,
+        races: model.Presence([]const UserRaceDetails) = .absent,
+        _metadata: model.Presence(union(enum) {
+            v0: RequestMetadataWithLinks,
+            v1: RequestMetadataWithLinksAndTotal,
+        }) = .absent,
+        enlistedcars: model.Presence([]const UserRaceCarDetails) = .absent,
+        forumPosts: model.Presence([]const ForumPost) = .absent,
+        forumThreads: model.Presence([]const ForumThreadUserExtended) = .absent,
+        forumSubscribedThreads: model.Presence([]const ForumSubscribedThread) = .absent,
+        forumFeed: model.Presence([]const ForumFeed) = .absent,
+        forumFriends: model.Presence([]const ForumFeed) = .absent,
+        property: model.Presence(UserPropertyDetails) = .absent,
+        reports: model.Presence([]const Report) = .absent,
+        hof: model.Presence(UserHofStats) = .absent,
+        calendar: model.Presence(UserCalendar) = .absent,
+        racingrecords: model.Presence([]const struct {
+            track: struct {
+                id: RaceTrackId,
+                name: []const u8,
+                pub const json_schema = "{\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/RaceTrackId\"},\"name\":{\"type\":\"string\"}},\"type\":\"object\"}";
+            },
+            records: []const struct {
+                car_id: ItemId,
+                car_name: []const u8,
+                lap_time: i64,
+                pub const json_schema = "{\"required\":[\"car_id\",\"car_name\",\"lap_time\"],\"properties\":{\"car_id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"car_name\":{\"type\":\"string\"},\"lap_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+            },
+            pub const json_schema = "{\"required\":[\"track\",\"records\"],\"properties\":{\"track\":{\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/RaceTrackId\"},\"name\":{\"type\":\"string\"}},\"type\":\"object\"},\"records\":{\"type\":\"array\",\"items\":{\"required\":[\"car_id\",\"car_name\",\"lap_time\"],\"properties\":{\"car_id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"car_name\":{\"type\":\"string\"},\"lap_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"}";
+        }) = .absent,
+        education: model.Presence(UserEducation) = .absent,
+        stocks: model.Presence([]const UserStock) = .absent,
+        bounties: model.Presence([]const Bounty) = .absent,
+        bounties_timestamp: model.Presence(i64) = .absent,
+        bounties_delay: model.Presence(i64) = .absent,
+        jobranks: model.Presence(UserJobRanks) = .absent,
+        properties: model.Presence([]const union(enum) {
+            v0: UserPropertyBasicDetails,
+            v1: UserPropertyDetailsExtended,
+            v2: UserPropertyDetailsExtendedRented,
+            v3: UserPropertyDetailsExtendedForRent,
+            v4: UserPropertyDetailsExtendedForSale,
+        }) = .absent,
+        factionBalance: model.Presence(?UserFactionBalance) = .absent,
+        profile: model.Presence(union(enum) {
+            v0: UserBasic,
+            v1: struct {
+                id: UserId,
+                name: []const u8,
+                level: i64,
+                rank: union(enum) {
+                    v0: UserRankEnum,
+                    v1: []const u8,
+                },
+                title: union(enum) {
+                    v0: UserTitleEnum,
+                    v1: []const u8,
+                },
+                donator_status: ?UserDonatorStatusEnum,
+                age: i64,
+                signed_up: i64,
+                faction_id: ?FactionId,
+                honor_id: HonorId,
+                revive_setting: ReviveSetting,
+                property: struct {
+                    id: PropertyId,
+                    name: []const u8,
+                    pub const json_schema = "{\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/PropertyId\"},\"name\":{\"type\":\"string\"}},\"type\":\"object\"}";
+                },
+                image: ?[]const u8,
+                gender: UserGenderEnum,
+                revivable: bool,
+                role: UserRoleEnum,
+                status: UserStatus,
+                spouse: ?ProfileSpouse,
+                awards: i64,
+                friends: i64,
+                enemies: i64,
+                forum_posts: i64,
+                karma: i64,
+                last_action: UserLastAction,
+                life: struct {
+                    current: i64,
+                    maximum: i64,
+                    pub const json_schema = "{\"required\":[\"current\",\"maximum\"],\"properties\":{\"current\":{\"type\":\"integer\",\"format\":\"int32\"},\"maximum\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                pub const json_schema = "{\"required\":[\"id\",\"name\",\"level\",\"rank\",\"title\",\"age\",\"signed_up\",\"faction_id\",\"honor_id\",\"property\",\"image\",\"gender\",\"revivable\",\"role\",\"status\",\"spouse\",\"awards\",\"friends\",\"enemies\",\"forum_posts\",\"karma\",\"last_action\",\"life\",\"donator_status\",\"revive_setting\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"rank\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserRankEnum\"},{\"type\":\"string\"}]},\"title\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserTitleEnum\"},{\"type\":\"string\"}]},\"donator_status\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserDonatorStatusEnum\"},{\"type\":\"null\"}]},\"age\":{\"description\":\"Age in days.\",\"type\":\"integer\",\"format\":\"int32\"},\"signed_up\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction_id\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/FactionId\"},{\"type\":\"null\"}]},\"honor_id\":{\"$ref\":\"#/components/schemas/HonorId\"},\"revive_setting\":{\"$ref\":\"#/components/schemas/ReviveSetting\",\"description\":\"This field is shown only for 'Limited' or 'Full' access keys and only for the key owner, otherwise, the status is 'Unknown'.\"},\"property\":{\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/PropertyId\"},\"name\":{\"type\":\"string\"}},\"type\":\"object\"},\"image\":{\"oneOf\":[{\"type\":\"string\"},{\"type\":\"null\"}]},\"gender\":{\"$ref\":\"#/components/schemas/UserGenderEnum\"},\"revivable\":{\"type\":\"boolean\"},\"role\":{\"$ref\":\"#/components/schemas/UserRoleEnum\"},\"status\":{\"$ref\":\"#/components/schemas/UserStatus\"},\"spouse\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/ProfileSpouse\"},{\"type\":\"null\"}]},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"enemies\":{\"type\":\"integer\",\"format\":\"int32\"},\"forum_posts\":{\"type\":\"integer\",\"format\":\"int32\"},\"karma\":{\"type\":\"integer\",\"format\":\"int32\"},\"last_action\":{\"$ref\":\"#/components/schemas/UserLastAction\"},\"life\":{\"required\":[\"current\",\"maximum\"],\"properties\":{\"current\":{\"type\":\"integer\",\"format\":\"int32\"},\"maximum\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+            },
+        }) = .absent,
+        revives: model.Presence(union(enum) {
+            v0: []const Revive,
+            v1: []const ReviveSimplified,
+        }) = .absent,
+        honors: model.Presence([]const UserHonor) = .absent,
+        medals: model.Presence([]const UserMedal) = .absent,
+        merits: model.Presence(UserMerits) = .absent,
+        job: model.Presence(union(enum) {
+            v0: UserJob,
+            v1: UserCompany,
+            v2: void,
+        }) = .absent,
+        faction: model.Presence(?UserFaction) = .absent,
+        competition: model.Presence(union(enum) {
+            v0: UserCompetitionHalloween,
+            v1: UserCompetitionEasterEggs,
+            v2: UserCompetitionRps,
+            v3: UserCompetitionElimination,
+        }) = .absent,
+        icons: model.Presence(union(enum) {
+            v0: []const UserIconPrivate,
+            v1: []const UserIconPublic,
+        }) = .absent,
+        itemmarket: model.Presence([]const UserItemMarketListing) = .absent,
+        list: model.Presence([]const UserList) = .absent,
+        equipment: model.Presence([]const UserEquipment) = .absent,
+        clothing: model.Presence([]const UserClothing) = .absent,
+        missions: model.Presence(struct {
+            credits: i64,
+            givers: []const struct {
+                id: UserId,
+                name: []const u8,
+                contracts: []const struct {
+                    title: []const u8,
+                    difficulty: MissionDifficultyEnum,
+                    status: MissionStatusEnum,
+                    created_at: i64,
+                    started_at: ?i64,
+                    expires_at: ?i64,
+                    completed_at: ?i64,
+                    rewards: ?struct {
+                        money: i64,
+                        credits: i64,
+                        pub const json_schema = "{\"required\":[\"money\",\"credits\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int32\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"title\",\"difficulty\",\"status\",\"created_at\",\"started_at\",\"expires_at\",\"completed_at\",\"rewards\"],\"properties\":{\"title\":{\"type\":\"string\"},\"difficulty\":{\"$ref\":\"#/components/schemas/MissionDifficultyEnum\"},\"status\":{\"$ref\":\"#/components/schemas/MissionStatusEnum\"},\"created_at\":{\"type\":\"integer\",\"format\":\"int32\"},\"started_at\":{\"description\":\"Null if the status is 'Available'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"expires_at\":{\"description\":\"Null if the status is not 'Accepted'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"completed_at\":{\"description\":\"Null if the status is not 'Failed' or 'Completed'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"rewards\":{\"description\":\"Null if the status is not 'Completed'.\",\"oneOf\":[{\"required\":[\"money\",\"credits\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int32\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},{\"type\":\"null\"}]}},\"type\":\"object\"}";
+                },
+                pub const json_schema = "{\"required\":[\"id\",\"name\",\"contracts\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"contracts\":{\"type\":\"array\",\"items\":{\"required\":[\"title\",\"difficulty\",\"status\",\"created_at\",\"started_at\",\"expires_at\",\"completed_at\",\"rewards\"],\"properties\":{\"title\":{\"type\":\"string\"},\"difficulty\":{\"$ref\":\"#/components/schemas/MissionDifficultyEnum\"},\"status\":{\"$ref\":\"#/components/schemas/MissionStatusEnum\"},\"created_at\":{\"type\":\"integer\",\"format\":\"int32\"},\"started_at\":{\"description\":\"Null if the status is 'Available'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"expires_at\":{\"description\":\"Null if the status is not 'Accepted'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"completed_at\":{\"description\":\"Null if the status is not 'Failed' or 'Completed'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"rewards\":{\"description\":\"Null if the status is not 'Completed'.\",\"oneOf\":[{\"required\":[\"money\",\"credits\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int32\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},{\"type\":\"null\"}]}},\"type\":\"object\"}}},\"type\":\"object\"}";
+            },
+            rewards: []const struct {
+                type: union(enum) {
+                    v0: MissionRewardUpgrade,
+                    v1: []const u8,
+                },
+                details: union(enum) {
+                    v0: MissionRewardDetailsAmmo,
+                    v1: MissionRewardDetailsUpgrade,
+                    v2: MissionRewardDetailsItem,
+                },
+                amount: i64,
+                cost: i64,
+                expires_at: i64,
+                pub const json_schema = "{\"required\":[\"type\",\"details\",\"amount\",\"cost\",\"expires_at\"],\"properties\":{\"type\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/MissionRewardUpgrade\"},{\"type\":\"string\"}]},\"details\":{\"description\":\"The response depends on the 'type' value.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/MissionRewardDetailsAmmo\"},{\"$ref\":\"#/components/schemas/MissionRewardDetailsUpgrade\"},{\"$ref\":\"#/components/schemas/MissionRewardDetailsItem\"}]},\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"cost\":{\"type\":\"integer\",\"format\":\"int32\"},\"expires_at\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+            },
+            pub const json_schema = "{\"required\":[\"credits\",\"givers\",\"rewards\"],\"properties\":{\"credits\":{\"type\":\"integer\",\"format\":\"int32\"},\"givers\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"contracts\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"contracts\":{\"type\":\"array\",\"items\":{\"required\":[\"title\",\"difficulty\",\"status\",\"created_at\",\"started_at\",\"expires_at\",\"completed_at\",\"rewards\"],\"properties\":{\"title\":{\"type\":\"string\"},\"difficulty\":{\"$ref\":\"#/components/schemas/MissionDifficultyEnum\"},\"status\":{\"$ref\":\"#/components/schemas/MissionStatusEnum\"},\"created_at\":{\"type\":\"integer\",\"format\":\"int32\"},\"started_at\":{\"description\":\"Null if the status is 'Available'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"expires_at\":{\"description\":\"Null if the status is not 'Accepted'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"completed_at\":{\"description\":\"Null if the status is not 'Failed' or 'Completed'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"rewards\":{\"description\":\"Null if the status is not 'Completed'.\",\"oneOf\":[{\"required\":[\"money\",\"credits\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int32\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},{\"type\":\"null\"}]}},\"type\":\"object\"}}},\"type\":\"object\"}},\"rewards\":{\"type\":\"array\",\"items\":{\"required\":[\"type\",\"details\",\"amount\",\"cost\",\"expires_at\"],\"properties\":{\"type\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/MissionRewardUpgrade\"},{\"type\":\"string\"}]},\"details\":{\"description\":\"The response depends on the 'type' value.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/MissionRewardDetailsAmmo\"},{\"$ref\":\"#/components/schemas/MissionRewardDetailsUpgrade\"},{\"$ref\":\"#/components/schemas/MissionRewardDetailsItem\"}]},\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"cost\":{\"type\":\"integer\",\"format\":\"int32\"},\"expires_at\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"}";
+        }) = .absent,
+        personalstats: model.Presence(union(enum) {
+            v0: struct {
+                attacking: struct {
+                    attacks: struct {
+                        won: i64,
+                        lost: i64,
+                        stalemate: i64,
+                        assist: i64,
+                        stealth: i64,
+                        pub const json_schema = "{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\",\"stealth\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"},\"stealth\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    defends: struct {
+                        won: i64,
+                        lost: i64,
+                        stalemate: i64,
+                        total: i64,
+                        pub const json_schema = "{\"required\":[\"won\",\"lost\",\"stalemate\",\"total\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    elo: i64,
+                    unarmored_wins: i64,
+                    highest_level_beaten: i64,
+                    escapes: struct {
+                        player: i64,
+                        foes: i64,
+                        pub const json_schema = "{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    killstreak: struct {
+                        best: i64,
+                        current: i64,
+                        pub const json_schema = "{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    hits: struct {
+                        success: i64,
+                        miss: i64,
+                        critical: i64,
+                        one_hit_kills: i64,
+                        pub const json_schema = "{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    damage: struct {
+                        total: i64,
+                        best: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"best\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    networth: struct {
+                        money_mugged: i64,
+                        largest_mug: i64,
+                        items_looted: i64,
+                        pub const json_schema = "{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    ammunition: struct {
+                        total: i64,
+                        special: i64,
+                        hollow_point: i64,
+                        tracer: i64,
+                        piercing: i64,
+                        incendiary: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    faction: struct {
+                        respect: i64,
+                        retaliations: i64,
+                        ranked_war_hits: i64,
+                        raid_hits: i64,
+                        territory: struct {
+                            wall_joins: i64,
+                            wall_clears: i64,
+                            wall_time: i64,
+                            pub const json_schema = "{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        pub const json_schema = "{\"required\":[\"respect\",\"retaliations\",\"ranked_war_hits\",\"raid_hits\",\"territory\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"retaliations\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"raid_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"territory\":{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"attacks\",\"defends\",\"elo\",\"unarmored_wins\",\"highest_level_beaten\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\",\"stealth\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"},\"stealth\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"total\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"unarmored_wins\":{\"type\":\"integer\",\"format\":\"int32\"},\"highest_level_beaten\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"total\",\"best\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"retaliations\",\"ranked_war_hits\",\"raid_hits\",\"territory\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"retaliations\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"raid_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"territory\":{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                battle_stats: struct {
+                    strength: i64,
+                    defense: i64,
+                    speed: i64,
+                    dexterity: i64,
+                    total: i64,
+                    pub const json_schema = "{\"required\":[\"strength\",\"defense\",\"speed\",\"dexterity\",\"total\"],\"properties\":{\"strength\":{\"type\":\"integer\",\"format\":\"int64\"},\"defense\":{\"type\":\"integer\",\"format\":\"int64\"},\"speed\":{\"type\":\"integer\",\"format\":\"int64\"},\"dexterity\":{\"type\":\"integer\",\"format\":\"int64\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                },
+                jobs: struct {
+                    job_points_used: i64,
+                    trains_received: i64,
+                    stats: struct {
+                        manual: i64,
+                        intelligence: i64,
+                        endurance: i64,
+                        total: i64,
+                        pub const json_schema = "{\"required\":[\"manual\",\"intelligence\",\"endurance\",\"total\"],\"properties\":{\"manual\":{\"type\":\"integer\",\"format\":\"int32\"},\"intelligence\":{\"type\":\"integer\",\"format\":\"int32\"},\"endurance\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"job_points_used\",\"trains_received\",\"stats\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"},\"stats\":{\"required\":[\"manual\",\"intelligence\",\"endurance\",\"total\"],\"properties\":{\"manual\":{\"type\":\"integer\",\"format\":\"int32\"},\"intelligence\":{\"type\":\"integer\",\"format\":\"int32\"},\"endurance\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                trading: struct {
+                    items: struct {
+                        bought: struct {
+                            market: i64,
+                            shops: i64,
+                            pub const json_schema = "{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        auctions: struct {
+                            won: i64,
+                            sold: i64,
+                            pub const json_schema = "{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        sent: i64,
+                        pub const json_schema = "{\"required\":[\"bought\",\"sent\",\"auctions\"],\"properties\":{\"bought\":{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"auctions\":{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"sent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    trades: i64,
+                    points: struct {
+                        bought: i64,
+                        sold: i64,
+                        pub const json_schema = "{\"required\":[\"bought\",\"sold\"],\"properties\":{\"bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    bazaar: struct {
+                        customers: i64,
+                        sales: i64,
+                        profit: i64,
+                        pub const json_schema = "{\"required\":[\"customers\",\"sales\",\"profit\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    item_market: model.Presence(struct {
+                        customers: i64,
+                        sales: i64,
+                        revenue: i64,
+                        fees: i64,
+                        pub const json_schema = "{\"required\":[\"customers\",\"sales\",\"revenue\",\"fees\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"revenue\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    }) = .absent,
+                    pub const json_schema = "{\"required\":[\"items\",\"trades\",\"points\",\"bazaar\"],\"properties\":{\"items\":{\"required\":[\"bought\",\"sent\",\"auctions\"],\"properties\":{\"bought\":{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"auctions\":{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"sent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trades\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"required\":[\"bought\",\"sold\"],\"properties\":{\"bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bazaar\":{\"required\":[\"customers\",\"sales\",\"profit\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"item_market\":{\"required\":[\"customers\",\"sales\",\"revenue\",\"fees\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"revenue\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                jail: struct {
+                    times_jailed: i64,
+                    busts: struct {
+                        success: i64,
+                        fails: i64,
+                        pub const json_schema = "{\"required\":[\"success\",\"fails\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"fails\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    bails: struct {
+                        amount: i64,
+                        fees: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"times_jailed\",\"busts\",\"bails\"],\"properties\":{\"times_jailed\":{\"type\":\"integer\",\"format\":\"int32\"},\"busts\":{\"required\":[\"success\",\"fails\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"fails\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bails\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                hospital: struct {
+                    times_hospitalized: i64,
+                    medical_items_used: i64,
+                    blood_withdrawn: i64,
+                    reviving: struct {
+                        skill: i64,
+                        revives: i64,
+                        revives_received: i64,
+                        pub const json_schema = "{\"required\":[\"skill\",\"revives\",\"revives_received\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"times_hospitalized\",\"medical_items_used\",\"blood_withdrawn\",\"reviving\"],\"properties\":{\"times_hospitalized\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"blood_withdrawn\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\",\"revives_received\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                finishing_hits: struct {
+                    heavy_artillery: i64,
+                    machine_guns: i64,
+                    rifles: i64,
+                    sub_machine_guns: i64,
+                    shotguns: i64,
+                    pistols: i64,
+                    temporary: i64,
+                    piercing: i64,
+                    slashing: i64,
+                    clubbing: i64,
+                    mechanical: i64,
+                    hand_to_hand: i64,
+                    pub const json_schema = "{\"required\":[\"heavy_artillery\",\"machine_guns\",\"rifles\",\"sub_machine_guns\",\"shotguns\",\"pistols\",\"temporary\",\"piercing\",\"slashing\",\"clubbing\",\"mechanical\",\"hand_to_hand\"],\"properties\":{\"heavy_artillery\":{\"type\":\"integer\",\"format\":\"int32\"},\"machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"rifles\":{\"type\":\"integer\",\"format\":\"int32\"},\"sub_machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"shotguns\":{\"type\":\"integer\",\"format\":\"int32\"},\"pistols\":{\"type\":\"integer\",\"format\":\"int32\"},\"temporary\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"slashing\":{\"type\":\"integer\",\"format\":\"int32\"},\"clubbing\":{\"type\":\"integer\",\"format\":\"int32\"},\"mechanical\":{\"type\":\"integer\",\"format\":\"int32\"},\"hand_to_hand\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                communication: struct {
+                    mails_sent: struct {
+                        total: i64,
+                        friends: i64,
+                        faction: i64,
+                        colleagues: i64,
+                        spouse: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    classified_ads: i64,
+                    personals: i64,
+                    pub const json_schema = "{\"required\":[\"mails_sent\",\"classified_ads\",\"personals\"],\"properties\":{\"mails_sent\":{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"classified_ads\":{\"type\":\"integer\",\"format\":\"int32\"},\"personals\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                crimes: union(enum) {
+                    v0: PersonalStatsCrimesV1,
+                    v1: PersonalStatsCrimesV2,
+                },
+                bounties: struct {
+                    placed: struct {
+                        amount: i64,
+                        value: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    collected: struct {
+                        amount: i64,
+                        value: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    received: struct {
+                        amount: i64,
+                        value: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"placed\",\"collected\",\"received\"],\"properties\":{\"placed\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"collected\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"received\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                investments: struct {
+                    bank: struct {
+                        total: i64,
+                        profit: i64,
+                        current: i64,
+                        time_remaining: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"profit\",\"current\",\"time_remaining\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"current\":{\"type\":\"integer\",\"format\":\"int64\"},\"time_remaining\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    stocks: struct {
+                        profits: i64,
+                        losses: i64,
+                        fees: i64,
+                        net_profits: i64,
+                        payouts: i64,
+                        pub const json_schema = "{\"required\":[\"profits\",\"losses\",\"fees\",\"net_profits\",\"payouts\"],\"properties\":{\"profits\":{\"type\":\"integer\",\"format\":\"int64\"},\"losses\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"},\"net_profits\":{\"type\":\"integer\",\"format\":\"int64\"},\"payouts\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"bank\",\"stocks\"],\"properties\":{\"bank\":{\"required\":[\"total\",\"profit\",\"current\",\"time_remaining\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"current\":{\"type\":\"integer\",\"format\":\"int64\"},\"time_remaining\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"stocks\":{\"required\":[\"profits\",\"losses\",\"fees\",\"net_profits\",\"payouts\"],\"properties\":{\"profits\":{\"type\":\"integer\",\"format\":\"int64\"},\"losses\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"},\"net_profits\":{\"type\":\"integer\",\"format\":\"int64\"},\"payouts\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                items: struct {
+                    found: struct {
+                        city: i64,
+                        dump: i64,
+                        easter_eggs: i64,
+                        pub const json_schema = "{\"required\":[\"city\",\"dump\",\"easter_eggs\"],\"properties\":{\"city\":{\"type\":\"integer\",\"format\":\"int32\"},\"dump\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    trashed: i64,
+                    used: struct {
+                        books: i64,
+                        boosters: i64,
+                        consumables: i64,
+                        candy: i64,
+                        alcohol: i64,
+                        energy_drinks: i64,
+                        stat_enhancers: i64,
+                        easter_eggs: i64,
+                        pub const json_schema = "{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    viruses_coded: i64,
+                    pub const json_schema = "{\"required\":[\"found\",\"trashed\",\"used\",\"viruses_coded\"],\"properties\":{\"found\":{\"required\":[\"city\",\"dump\",\"easter_eggs\"],\"properties\":{\"city\":{\"type\":\"integer\",\"format\":\"int32\"},\"dump\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int32\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"viruses_coded\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                travel: struct {
+                    total: i64,
+                    time_spent: i64,
+                    items_bought: i64,
+                    hunting: struct {
+                        skill: i64,
+                        pub const json_schema = "{\"required\":[\"skill\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    attacks_won: i64,
+                    defends_lost: i64,
+                    argentina: i64,
+                    canada: i64,
+                    cayman_islands: i64,
+                    china: i64,
+                    hawaii: i64,
+                    japan: i64,
+                    mexico: i64,
+                    united_arab_emirates: i64,
+                    united_kingdom: i64,
+                    south_africa: i64,
+                    switzerland: i64,
+                    pub const json_schema = "{\"required\":[\"total\",\"time_spent\",\"items_bought\",\"hunting\",\"attacks_won\",\"defends_lost\",\"argentina\",\"canada\",\"cayman_islands\",\"china\",\"hawaii\",\"japan\",\"mexico\",\"united_arab_emirates\",\"united_kingdom\",\"south_africa\",\"switzerland\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"},\"items_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"hunting\":{\"required\":[\"skill\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"attacks_won\":{\"type\":\"integer\",\"format\":\"int32\"},\"defends_lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int32\"},\"canada\":{\"type\":\"integer\",\"format\":\"int32\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int32\"},\"china\":{\"type\":\"integer\",\"format\":\"int32\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int32\"},\"japan\":{\"type\":\"integer\",\"format\":\"int32\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int32\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int32\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                drugs: struct {
+                    cannabis: i64,
+                    ecstasy: i64,
+                    ketamine: i64,
+                    lsd: i64,
+                    opium: i64,
+                    pcp: i64,
+                    shrooms: i64,
+                    speed: i64,
+                    vicodin: i64,
+                    xanax: i64,
+                    total: i64,
+                    overdoses: i64,
+                    rehabilitations: struct {
+                        amount: i64,
+                        fees: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                missions: struct {
+                    missions: i64,
+                    contracts: struct {
+                        total: i64,
+                        duke: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"duke\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"duke\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    credits: i64,
+                    pub const json_schema = "{\"required\":[\"missions\",\"contracts\",\"credits\"],\"properties\":{\"missions\":{\"type\":\"integer\",\"format\":\"int32\"},\"contracts\":{\"required\":[\"total\",\"duke\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"duke\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                racing: struct {
+                    skill: i64,
+                    points: i64,
+                    races: struct {
+                        entered: i64,
+                        won: i64,
+                        pub const json_schema = "{\"required\":[\"entered\",\"won\"],\"properties\":{\"entered\":{\"type\":\"integer\",\"format\":\"int32\"},\"won\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"skill\",\"points\",\"races\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"races\":{\"required\":[\"entered\",\"won\"],\"properties\":{\"entered\":{\"type\":\"integer\",\"format\":\"int32\"},\"won\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                networth: struct {
+                    total: i64,
+                    wallet: i64,
+                    vaults: i64,
+                    bank: i64,
+                    overseas_bank: i64,
+                    points: i64,
+                    inventory: i64,
+                    display_case: i64,
+                    bazaar: i64,
+                    item_market: i64,
+                    property: i64,
+                    stock_market: i64,
+                    auction_house: i64,
+                    bookie: i64,
+                    company: i64,
+                    enlisted_cars: i64,
+                    piggy_bank: i64,
+                    pending: i64,
+                    loans: i64,
+                    unpaid_fees: i64,
+                    pub const json_schema = "{\"required\":[\"total\",\"wallet\",\"vaults\",\"bank\",\"overseas_bank\",\"points\",\"inventory\",\"display_case\",\"bazaar\",\"item_market\",\"property\",\"stock_market\",\"auction_house\",\"bookie\",\"company\",\"enlisted_cars\",\"piggy_bank\",\"pending\",\"loans\",\"unpaid_fees\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"wallet\":{\"type\":\"integer\",\"format\":\"int64\"},\"vaults\":{\"type\":\"integer\",\"format\":\"int64\"},\"bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"overseas_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"points\":{\"type\":\"integer\",\"format\":\"int64\"},\"inventory\":{\"type\":\"integer\",\"format\":\"int64\"},\"display_case\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"item_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"property\":{\"type\":\"integer\",\"format\":\"int64\"},\"stock_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"auction_house\":{\"type\":\"integer\",\"format\":\"int64\"},\"bookie\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"},\"enlisted_cars\":{\"type\":\"integer\",\"format\":\"int64\"},\"piggy_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"pending\":{\"type\":\"integer\",\"format\":\"int64\"},\"loans\":{\"type\":\"integer\",\"format\":\"int64\"},\"unpaid_fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                },
+                other: struct {
+                    activity: struct {
+                        time: i64,
+                        streak: struct {
+                            best: i64,
+                            current: i64,
+                            pub const json_schema = "{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        pub const json_schema = "{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                    },
+                    awards: i64,
+                    merits_bought: i64,
+                    refills: struct {
+                        energy: i64,
+                        nerve: i64,
+                        token: i64,
+                        pub const json_schema = "{\"required\":[\"energy\",\"nerve\",\"token\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"},\"token\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    donator_days: i64,
+                    ranked_war_wins: i64,
+                    pub const json_schema = "{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\",\"token\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"},\"token\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                pub const json_schema = "{\"properties\":{\"attacking\":{\"required\":[\"attacks\",\"defends\",\"elo\",\"unarmored_wins\",\"highest_level_beaten\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\",\"stealth\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"},\"stealth\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"total\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"unarmored_wins\":{\"type\":\"integer\",\"format\":\"int32\"},\"highest_level_beaten\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"total\",\"best\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"retaliations\",\"ranked_war_hits\",\"raid_hits\",\"territory\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"retaliations\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"raid_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"territory\":{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}},\"type\":\"object\"},\"battle_stats\":{\"required\":[\"strength\",\"defense\",\"speed\",\"dexterity\",\"total\"],\"properties\":{\"strength\":{\"type\":\"integer\",\"format\":\"int64\"},\"defense\":{\"type\":\"integer\",\"format\":\"int64\"},\"speed\":{\"type\":\"integer\",\"format\":\"int64\"},\"dexterity\":{\"type\":\"integer\",\"format\":\"int64\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"jobs\":{\"required\":[\"job_points_used\",\"trains_received\",\"stats\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"},\"stats\":{\"required\":[\"manual\",\"intelligence\",\"endurance\",\"total\"],\"properties\":{\"manual\":{\"type\":\"integer\",\"format\":\"int32\"},\"intelligence\":{\"type\":\"integer\",\"format\":\"int32\"},\"endurance\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"trading\":{\"required\":[\"items\",\"trades\",\"points\",\"bazaar\"],\"properties\":{\"items\":{\"required\":[\"bought\",\"sent\",\"auctions\"],\"properties\":{\"bought\":{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"auctions\":{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"sent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trades\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"required\":[\"bought\",\"sold\"],\"properties\":{\"bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bazaar\":{\"required\":[\"customers\",\"sales\",\"profit\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"item_market\":{\"required\":[\"customers\",\"sales\",\"revenue\",\"fees\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"revenue\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"jail\":{\"required\":[\"times_jailed\",\"busts\",\"bails\"],\"properties\":{\"times_jailed\":{\"type\":\"integer\",\"format\":\"int32\"},\"busts\":{\"required\":[\"success\",\"fails\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"fails\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bails\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"hospital\":{\"required\":[\"times_hospitalized\",\"medical_items_used\",\"blood_withdrawn\",\"reviving\"],\"properties\":{\"times_hospitalized\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"blood_withdrawn\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\",\"revives_received\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"finishing_hits\":{\"required\":[\"heavy_artillery\",\"machine_guns\",\"rifles\",\"sub_machine_guns\",\"shotguns\",\"pistols\",\"temporary\",\"piercing\",\"slashing\",\"clubbing\",\"mechanical\",\"hand_to_hand\"],\"properties\":{\"heavy_artillery\":{\"type\":\"integer\",\"format\":\"int32\"},\"machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"rifles\":{\"type\":\"integer\",\"format\":\"int32\"},\"sub_machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"shotguns\":{\"type\":\"integer\",\"format\":\"int32\"},\"pistols\":{\"type\":\"integer\",\"format\":\"int32\"},\"temporary\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"slashing\":{\"type\":\"integer\",\"format\":\"int32\"},\"clubbing\":{\"type\":\"integer\",\"format\":\"int32\"},\"mechanical\":{\"type\":\"integer\",\"format\":\"int32\"},\"hand_to_hand\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"communication\":{\"required\":[\"mails_sent\",\"classified_ads\",\"personals\"],\"properties\":{\"mails_sent\":{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"classified_ads\":{\"type\":\"integer\",\"format\":\"int32\"},\"personals\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"crimes\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/PersonalStatsCrimesV1\"},{\"$ref\":\"#/components/schemas/PersonalStatsCrimesV2\"}]},\"bounties\":{\"required\":[\"placed\",\"collected\",\"received\"],\"properties\":{\"placed\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"collected\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"received\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"investments\":{\"required\":[\"bank\",\"stocks\"],\"properties\":{\"bank\":{\"required\":[\"total\",\"profit\",\"current\",\"time_remaining\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"current\":{\"type\":\"integer\",\"format\":\"int64\"},\"time_remaining\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"stocks\":{\"required\":[\"profits\",\"losses\",\"fees\",\"net_profits\",\"payouts\"],\"properties\":{\"profits\":{\"type\":\"integer\",\"format\":\"int64\"},\"losses\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"},\"net_profits\":{\"type\":\"integer\",\"format\":\"int64\"},\"payouts\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"items\":{\"required\":[\"found\",\"trashed\",\"used\",\"viruses_coded\"],\"properties\":{\"found\":{\"required\":[\"city\",\"dump\",\"easter_eggs\"],\"properties\":{\"city\":{\"type\":\"integer\",\"format\":\"int32\"},\"dump\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int32\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"viruses_coded\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"travel\":{\"required\":[\"total\",\"time_spent\",\"items_bought\",\"hunting\",\"attacks_won\",\"defends_lost\",\"argentina\",\"canada\",\"cayman_islands\",\"china\",\"hawaii\",\"japan\",\"mexico\",\"united_arab_emirates\",\"united_kingdom\",\"south_africa\",\"switzerland\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"},\"items_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"hunting\":{\"required\":[\"skill\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"attacks_won\":{\"type\":\"integer\",\"format\":\"int32\"},\"defends_lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int32\"},\"canada\":{\"type\":\"integer\",\"format\":\"int32\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int32\"},\"china\":{\"type\":\"integer\",\"format\":\"int32\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int32\"},\"japan\":{\"type\":\"integer\",\"format\":\"int32\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int32\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int32\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"drugs\":{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"missions\":{\"required\":[\"missions\",\"contracts\",\"credits\"],\"properties\":{\"missions\":{\"type\":\"integer\",\"format\":\"int32\"},\"contracts\":{\"required\":[\"total\",\"duke\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"duke\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"racing\":{\"required\":[\"skill\",\"points\",\"races\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"races\":{\"required\":[\"entered\",\"won\"],\"properties\":{\"entered\":{\"type\":\"integer\",\"format\":\"int32\"},\"won\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"total\",\"wallet\",\"vaults\",\"bank\",\"overseas_bank\",\"points\",\"inventory\",\"display_case\",\"bazaar\",\"item_market\",\"property\",\"stock_market\",\"auction_house\",\"bookie\",\"company\",\"enlisted_cars\",\"piggy_bank\",\"pending\",\"loans\",\"unpaid_fees\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"wallet\":{\"type\":\"integer\",\"format\":\"int64\"},\"vaults\":{\"type\":\"integer\",\"format\":\"int64\"},\"bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"overseas_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"points\":{\"type\":\"integer\",\"format\":\"int64\"},\"inventory\":{\"type\":\"integer\",\"format\":\"int64\"},\"display_case\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"item_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"property\":{\"type\":\"integer\",\"format\":\"int64\"},\"stock_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"auction_house\":{\"type\":\"integer\",\"format\":\"int64\"},\"bookie\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"},\"enlisted_cars\":{\"type\":\"integer\",\"format\":\"int64\"},\"piggy_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"pending\":{\"type\":\"integer\",\"format\":\"int64\"},\"loans\":{\"type\":\"integer\",\"format\":\"int64\"},\"unpaid_fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"other\":{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\",\"token\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"},\"token\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"required\":[\"attacking\",\"battle_stats\",\"jobs\",\"trading\",\"jail\",\"hospital\",\"finishing_hits\",\"communication\",\"crimes\",\"bounties\",\"investments\",\"items\",\"travel\",\"drugs\",\"missions\",\"racing\",\"networth\",\"other\"]}";
+            },
+            v1: struct {
+                attacking: struct {
+                    attacks: struct {
+                        won: i64,
+                        lost: i64,
+                        stalemate: i64,
+                        assist: i64,
+                        stealth: i64,
+                        pub const json_schema = "{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\",\"stealth\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"},\"stealth\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    defends: struct {
+                        won: i64,
+                        lost: i64,
+                        stalemate: i64,
+                        total: i64,
+                        pub const json_schema = "{\"required\":[\"won\",\"lost\",\"stalemate\",\"total\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    elo: i64,
+                    unarmored_wins: i64,
+                    highest_level_beaten: i64,
+                    escapes: struct {
+                        player: i64,
+                        foes: i64,
+                        pub const json_schema = "{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    killstreak: struct {
+                        best: i64,
+                        pub const json_schema = "{\"required\":[\"best\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    hits: struct {
+                        success: i64,
+                        miss: i64,
+                        critical: i64,
+                        one_hit_kills: i64,
+                        pub const json_schema = "{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    damage: struct {
+                        total: i64,
+                        best: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"best\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    networth: struct {
+                        money_mugged: i64,
+                        largest_mug: i64,
+                        items_looted: i64,
+                        pub const json_schema = "{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    ammunition: struct {
+                        total: i64,
+                        special: i64,
+                        hollow_point: i64,
+                        tracer: i64,
+                        piercing: i64,
+                        incendiary: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    faction: struct {
+                        respect: i64,
+                        retaliations: i64,
+                        ranked_war_hits: i64,
+                        raid_hits: i64,
+                        territory: struct {
+                            wall_joins: i64,
+                            wall_clears: i64,
+                            wall_time: i64,
+                            pub const json_schema = "{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        pub const json_schema = "{\"required\":[\"respect\",\"retaliations\",\"ranked_war_hits\",\"raid_hits\",\"territory\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"retaliations\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"raid_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"territory\":{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"attacks\",\"defends\",\"elo\",\"unarmored_wins\",\"highest_level_beaten\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\",\"stealth\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"},\"stealth\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"total\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"unarmored_wins\":{\"type\":\"integer\",\"format\":\"int32\"},\"highest_level_beaten\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"total\",\"best\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"retaliations\",\"ranked_war_hits\",\"raid_hits\",\"territory\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"retaliations\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"raid_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"territory\":{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                jobs: struct {
+                    job_points_used: i64,
+                    trains_received: i64,
+                    pub const json_schema = "{\"required\":[\"job_points_used\",\"trains_received\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                trading: struct {
+                    items: struct {
+                        bought: struct {
+                            market: i64,
+                            shops: i64,
+                            pub const json_schema = "{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        auctions: struct {
+                            won: i64,
+                            sold: i64,
+                            pub const json_schema = "{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        sent: i64,
+                        pub const json_schema = "{\"required\":[\"bought\",\"sent\",\"auctions\"],\"properties\":{\"bought\":{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"auctions\":{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"sent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    trades: i64,
+                    points: struct {
+                        bought: i64,
+                        sold: i64,
+                        pub const json_schema = "{\"required\":[\"bought\",\"sold\"],\"properties\":{\"bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    bazaar: struct {
+                        customers: i64,
+                        sales: i64,
+                        profit: i64,
+                        pub const json_schema = "{\"required\":[\"customers\",\"sales\",\"profit\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    item_market: model.Presence(struct {
+                        customers: i64,
+                        sales: i64,
+                        revenue: i64,
+                        fees: i64,
+                        pub const json_schema = "{\"required\":[\"customers\",\"sales\",\"revenue\",\"fees\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"revenue\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    }) = .absent,
+                    pub const json_schema = "{\"required\":[\"items\",\"trades\",\"points\",\"bazaar\"],\"properties\":{\"items\":{\"required\":[\"bought\",\"sent\",\"auctions\"],\"properties\":{\"bought\":{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"auctions\":{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"sent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trades\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"required\":[\"bought\",\"sold\"],\"properties\":{\"bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bazaar\":{\"required\":[\"customers\",\"sales\",\"profit\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"item_market\":{\"required\":[\"customers\",\"sales\",\"revenue\",\"fees\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"revenue\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                jail: struct {
+                    times_jailed: i64,
+                    busts: struct {
+                        success: i64,
+                        fails: i64,
+                        pub const json_schema = "{\"required\":[\"success\",\"fails\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"fails\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    bails: struct {
+                        amount: i64,
+                        fees: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"times_jailed\",\"busts\",\"bails\"],\"properties\":{\"times_jailed\":{\"type\":\"integer\",\"format\":\"int32\"},\"busts\":{\"required\":[\"success\",\"fails\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"fails\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bails\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                hospital: struct {
+                    times_hospitalized: i64,
+                    medical_items_used: i64,
+                    blood_withdrawn: i64,
+                    reviving: struct {
+                        skill: i64,
+                        revives: i64,
+                        revives_received: i64,
+                        pub const json_schema = "{\"required\":[\"skill\",\"revives\",\"revives_received\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"times_hospitalized\",\"medical_items_used\",\"blood_withdrawn\",\"reviving\"],\"properties\":{\"times_hospitalized\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"blood_withdrawn\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\",\"revives_received\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                finishing_hits: struct {
+                    heavy_artillery: i64,
+                    machine_guns: i64,
+                    rifles: i64,
+                    sub_machine_guns: i64,
+                    shotguns: i64,
+                    pistols: i64,
+                    temporary: i64,
+                    piercing: i64,
+                    slashing: i64,
+                    clubbing: i64,
+                    mechanical: i64,
+                    hand_to_hand: i64,
+                    pub const json_schema = "{\"required\":[\"heavy_artillery\",\"machine_guns\",\"rifles\",\"sub_machine_guns\",\"shotguns\",\"pistols\",\"temporary\",\"piercing\",\"slashing\",\"clubbing\",\"mechanical\",\"hand_to_hand\"],\"properties\":{\"heavy_artillery\":{\"type\":\"integer\",\"format\":\"int32\"},\"machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"rifles\":{\"type\":\"integer\",\"format\":\"int32\"},\"sub_machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"shotguns\":{\"type\":\"integer\",\"format\":\"int32\"},\"pistols\":{\"type\":\"integer\",\"format\":\"int32\"},\"temporary\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"slashing\":{\"type\":\"integer\",\"format\":\"int32\"},\"clubbing\":{\"type\":\"integer\",\"format\":\"int32\"},\"mechanical\":{\"type\":\"integer\",\"format\":\"int32\"},\"hand_to_hand\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                communication: struct {
+                    mails_sent: struct {
+                        total: i64,
+                        friends: i64,
+                        faction: i64,
+                        colleagues: i64,
+                        spouse: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    classified_ads: i64,
+                    personals: i64,
+                    pub const json_schema = "{\"required\":[\"mails_sent\",\"classified_ads\",\"personals\"],\"properties\":{\"mails_sent\":{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"classified_ads\":{\"type\":\"integer\",\"format\":\"int32\"},\"personals\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                crimes: union(enum) {
+                    v0: PersonalStatsCrimesV1,
+                    v1: PersonalStatsCrimesV2,
+                },
+                bounties: struct {
+                    placed: struct {
+                        amount: i64,
+                        value: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    collected: struct {
+                        amount: i64,
+                        value: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    received: struct {
+                        amount: i64,
+                        value: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"placed\",\"collected\",\"received\"],\"properties\":{\"placed\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"collected\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"received\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                items: struct {
+                    found: struct {
+                        city: i64,
+                        dump: i64,
+                        easter_eggs: i64,
+                        pub const json_schema = "{\"required\":[\"city\",\"dump\",\"easter_eggs\"],\"properties\":{\"city\":{\"type\":\"integer\",\"format\":\"int32\"},\"dump\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    trashed: i64,
+                    used: struct {
+                        books: i64,
+                        boosters: i64,
+                        consumables: i64,
+                        candy: i64,
+                        alcohol: i64,
+                        energy_drinks: i64,
+                        stat_enhancers: i64,
+                        easter_eggs: i64,
+                        pub const json_schema = "{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    viruses_coded: i64,
+                    pub const json_schema = "{\"required\":[\"found\",\"trashed\",\"used\",\"viruses_coded\"],\"properties\":{\"found\":{\"required\":[\"city\",\"dump\",\"easter_eggs\"],\"properties\":{\"city\":{\"type\":\"integer\",\"format\":\"int32\"},\"dump\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int32\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"viruses_coded\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                travel: struct {
+                    total: i64,
+                    time_spent: i64,
+                    items_bought: i64,
+                    hunting: struct {
+                        skill: i64,
+                        pub const json_schema = "{\"required\":[\"skill\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    attacks_won: i64,
+                    defends_lost: i64,
+                    argentina: i64,
+                    canada: i64,
+                    cayman_islands: i64,
+                    china: i64,
+                    hawaii: i64,
+                    japan: i64,
+                    mexico: i64,
+                    united_arab_emirates: i64,
+                    united_kingdom: i64,
+                    south_africa: i64,
+                    switzerland: i64,
+                    pub const json_schema = "{\"required\":[\"total\",\"time_spent\",\"items_bought\",\"hunting\",\"attacks_won\",\"defends_lost\",\"argentina\",\"canada\",\"cayman_islands\",\"china\",\"hawaii\",\"japan\",\"mexico\",\"united_arab_emirates\",\"united_kingdom\",\"south_africa\",\"switzerland\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"},\"items_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"hunting\":{\"required\":[\"skill\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"attacks_won\":{\"type\":\"integer\",\"format\":\"int32\"},\"defends_lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int32\"},\"canada\":{\"type\":\"integer\",\"format\":\"int32\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int32\"},\"china\":{\"type\":\"integer\",\"format\":\"int32\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int32\"},\"japan\":{\"type\":\"integer\",\"format\":\"int32\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int32\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int32\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                drugs: struct {
+                    cannabis: i64,
+                    ecstasy: i64,
+                    ketamine: i64,
+                    lsd: i64,
+                    opium: i64,
+                    pcp: i64,
+                    shrooms: i64,
+                    speed: i64,
+                    vicodin: i64,
+                    xanax: i64,
+                    total: i64,
+                    overdoses: i64,
+                    rehabilitations: struct {
+                        amount: i64,
+                        fees: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                missions: struct {
+                    missions: i64,
+                    contracts: struct {
+                        total: i64,
+                        duke: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"duke\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"duke\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    credits: i64,
+                    pub const json_schema = "{\"required\":[\"missions\",\"contracts\",\"credits\"],\"properties\":{\"missions\":{\"type\":\"integer\",\"format\":\"int32\"},\"contracts\":{\"required\":[\"total\",\"duke\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"duke\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                racing: struct {
+                    skill: i64,
+                    points: i64,
+                    races: struct {
+                        entered: i64,
+                        won: i64,
+                        pub const json_schema = "{\"required\":[\"entered\",\"won\"],\"properties\":{\"entered\":{\"type\":\"integer\",\"format\":\"int32\"},\"won\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"skill\",\"points\",\"races\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"races\":{\"required\":[\"entered\",\"won\"],\"properties\":{\"entered\":{\"type\":\"integer\",\"format\":\"int32\"},\"won\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                networth: struct {
+                    total: i64,
+                    pub const json_schema = "{\"required\":[\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                },
+                other: struct {
+                    activity: struct {
+                        time: i64,
+                        streak: struct {
+                            best: i64,
+                            current: i64,
+                            pub const json_schema = "{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        pub const json_schema = "{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                    },
+                    awards: i64,
+                    merits_bought: i64,
+                    refills: struct {
+                        energy: i64,
+                        nerve: i64,
+                        token: i64,
+                        pub const json_schema = "{\"required\":[\"energy\",\"nerve\",\"token\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"},\"token\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    donator_days: i64,
+                    ranked_war_wins: i64,
+                    pub const json_schema = "{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\",\"token\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"},\"token\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                pub const json_schema = "{\"properties\":{\"attacking\":{\"required\":[\"attacks\",\"defends\",\"elo\",\"unarmored_wins\",\"highest_level_beaten\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\",\"stealth\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"},\"stealth\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"total\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"unarmored_wins\":{\"type\":\"integer\",\"format\":\"int32\"},\"highest_level_beaten\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"total\",\"best\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"retaliations\",\"ranked_war_hits\",\"raid_hits\",\"territory\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"retaliations\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"raid_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"territory\":{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}},\"type\":\"object\"},\"jobs\":{\"required\":[\"job_points_used\",\"trains_received\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trading\":{\"required\":[\"items\",\"trades\",\"points\",\"bazaar\"],\"properties\":{\"items\":{\"required\":[\"bought\",\"sent\",\"auctions\"],\"properties\":{\"bought\":{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"auctions\":{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"sent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trades\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"required\":[\"bought\",\"sold\"],\"properties\":{\"bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bazaar\":{\"required\":[\"customers\",\"sales\",\"profit\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"item_market\":{\"required\":[\"customers\",\"sales\",\"revenue\",\"fees\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"revenue\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"jail\":{\"required\":[\"times_jailed\",\"busts\",\"bails\"],\"properties\":{\"times_jailed\":{\"type\":\"integer\",\"format\":\"int32\"},\"busts\":{\"required\":[\"success\",\"fails\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"fails\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bails\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"hospital\":{\"required\":[\"times_hospitalized\",\"medical_items_used\",\"blood_withdrawn\",\"reviving\"],\"properties\":{\"times_hospitalized\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"blood_withdrawn\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\",\"revives_received\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"finishing_hits\":{\"required\":[\"heavy_artillery\",\"machine_guns\",\"rifles\",\"sub_machine_guns\",\"shotguns\",\"pistols\",\"temporary\",\"piercing\",\"slashing\",\"clubbing\",\"mechanical\",\"hand_to_hand\"],\"properties\":{\"heavy_artillery\":{\"type\":\"integer\",\"format\":\"int32\"},\"machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"rifles\":{\"type\":\"integer\",\"format\":\"int32\"},\"sub_machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"shotguns\":{\"type\":\"integer\",\"format\":\"int32\"},\"pistols\":{\"type\":\"integer\",\"format\":\"int32\"},\"temporary\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"slashing\":{\"type\":\"integer\",\"format\":\"int32\"},\"clubbing\":{\"type\":\"integer\",\"format\":\"int32\"},\"mechanical\":{\"type\":\"integer\",\"format\":\"int32\"},\"hand_to_hand\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"communication\":{\"required\":[\"mails_sent\",\"classified_ads\",\"personals\"],\"properties\":{\"mails_sent\":{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"classified_ads\":{\"type\":\"integer\",\"format\":\"int32\"},\"personals\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"crimes\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/PersonalStatsCrimesV1\"},{\"$ref\":\"#/components/schemas/PersonalStatsCrimesV2\"}]},\"bounties\":{\"required\":[\"placed\",\"collected\",\"received\"],\"properties\":{\"placed\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"collected\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"received\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"items\":{\"required\":[\"found\",\"trashed\",\"used\",\"viruses_coded\"],\"properties\":{\"found\":{\"required\":[\"city\",\"dump\",\"easter_eggs\"],\"properties\":{\"city\":{\"type\":\"integer\",\"format\":\"int32\"},\"dump\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int32\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"viruses_coded\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"travel\":{\"required\":[\"total\",\"time_spent\",\"items_bought\",\"hunting\",\"attacks_won\",\"defends_lost\",\"argentina\",\"canada\",\"cayman_islands\",\"china\",\"hawaii\",\"japan\",\"mexico\",\"united_arab_emirates\",\"united_kingdom\",\"south_africa\",\"switzerland\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"},\"items_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"hunting\":{\"required\":[\"skill\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"attacks_won\":{\"type\":\"integer\",\"format\":\"int32\"},\"defends_lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int32\"},\"canada\":{\"type\":\"integer\",\"format\":\"int32\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int32\"},\"china\":{\"type\":\"integer\",\"format\":\"int32\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int32\"},\"japan\":{\"type\":\"integer\",\"format\":\"int32\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int32\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int32\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"drugs\":{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"missions\":{\"required\":[\"missions\",\"contracts\",\"credits\"],\"properties\":{\"missions\":{\"type\":\"integer\",\"format\":\"int32\"},\"contracts\":{\"required\":[\"total\",\"duke\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"duke\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"racing\":{\"required\":[\"skill\",\"points\",\"races\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"races\":{\"required\":[\"entered\",\"won\"],\"properties\":{\"entered\":{\"type\":\"integer\",\"format\":\"int32\"},\"won\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"other\":{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\",\"token\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"},\"token\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"required\":[\"attacking\",\"jobs\",\"trading\",\"jail\",\"hospital\",\"finishing_hits\",\"communication\",\"crimes\",\"bounties\",\"items\",\"travel\",\"drugs\",\"missions\",\"racing\",\"networth\",\"other\"]}";
+            },
+            v2: struct {
+                attacking: struct {
+                    attacks: struct {
+                        won: i64,
+                        lost: i64,
+                        stalemate: i64,
+                        assist: i64,
+                        pub const json_schema = "{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    defends: struct {
+                        won: i64,
+                        lost: i64,
+                        stalemate: i64,
+                        pub const json_schema = "{\"required\":[\"won\",\"lost\",\"stalemate\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    elo: i64,
+                    escapes: struct {
+                        player: i64,
+                        foes: i64,
+                        pub const json_schema = "{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    killstreak: struct {
+                        best: i64,
+                        pub const json_schema = "{\"required\":[\"best\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    hits: struct {
+                        success: i64,
+                        miss: i64,
+                        critical: i64,
+                        one_hit_kills: i64,
+                        pub const json_schema = "{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    damage: struct {
+                        total: i64,
+                        best: i64,
+                        pub const json_schema = "{\"required\":[\"best\",\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    networth: struct {
+                        money_mugged: i64,
+                        largest_mug: i64,
+                        items_looted: i64,
+                        pub const json_schema = "{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    ammunition: struct {
+                        total: i64,
+                        special: i64,
+                        hollow_point: i64,
+                        tracer: i64,
+                        piercing: i64,
+                        incendiary: i64,
+                        pub const json_schema = "{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    faction: struct {
+                        respect: i64,
+                        ranked_war_hits: i64,
+                        pub const json_schema = "{\"required\":[\"respect\",\"ranked_war_hits\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"attacks\",\"defends\",\"elo\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"best\",\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"ranked_war_hits\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                jobs: struct {
+                    job_points_used: i64,
+                    trains_received: i64,
+                    pub const json_schema = "{\"required\":[\"job_points_used\",\"trains_received\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                hospital: struct {
+                    medical_items_used: i64,
+                    reviving: struct {
+                        skill: i64,
+                        revives: i64,
+                        pub const json_schema = "{\"required\":[\"skill\",\"revives\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"medical_items_used\",\"reviving\"],\"properties\":{\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                crimes: struct {
+                    total: i64,
+                    version: []const u8,
+                    pub const json_schema = "{\"required\":[\"total\",\"version\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"version\":{\"type\":\"string\"}},\"type\":\"object\"}";
+                },
+                items: struct {
+                    found: struct {
+                        dump: i64,
+                        pub const json_schema = "{\"required\":[\"dump\"],\"properties\":{\"dump\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    used: struct {
+                        books: i64,
+                        boosters: i64,
+                        consumables: i64,
+                        candy: i64,
+                        alcohol: i64,
+                        energy_drinks: i64,
+                        stat_enhancers: i64,
+                        easter_eggs: i64,
+                        pub const json_schema = "{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"found\",\"used\"],\"properties\":{\"found\":{\"required\":[\"dump\"],\"properties\":{\"dump\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                travel: struct {
+                    total: i64,
+                    time_spent: i64,
+                    pub const json_schema = "{\"required\":[\"total\",\"time_spent\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                drugs: struct {
+                    cannabis: i64,
+                    ecstasy: i64,
+                    ketamine: i64,
+                    lsd: i64,
+                    opium: i64,
+                    pcp: i64,
+                    shrooms: i64,
+                    speed: i64,
+                    vicodin: i64,
+                    xanax: i64,
+                    total: i64,
+                    overdoses: i64,
+                    rehabilitations: struct {
+                        amount: i64,
+                        fees: i64,
+                        pub const json_schema = "{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                },
+                networth: struct {
+                    total: i64,
+                    pub const json_schema = "{\"required\":[\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+                },
+                other: struct {
+                    activity: struct {
+                        time: i64,
+                        streak: struct {
+                            best: i64,
+                            current: i64,
+                            pub const json_schema = "{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                        },
+                        pub const json_schema = "{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+                    },
+                    awards: i64,
+                    merits_bought: i64,
+                    refills: struct {
+                        energy: i64,
+                        nerve: i64,
+                        pub const json_schema = "{\"required\":[\"energy\",\"nerve\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    donator_days: i64,
+                    ranked_war_wins: i64,
+                    pub const json_schema = "{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                },
+                pub const json_schema = "{\"properties\":{\"attacking\":{\"required\":[\"attacks\",\"defends\",\"elo\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"best\",\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"ranked_war_hits\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"jobs\":{\"required\":[\"job_points_used\",\"trains_received\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hospital\":{\"required\":[\"medical_items_used\",\"reviving\"],\"properties\":{\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"crimes\":{\"required\":[\"total\",\"version\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"version\":{\"type\":\"string\"}},\"type\":\"object\"},\"items\":{\"required\":[\"found\",\"used\"],\"properties\":{\"found\":{\"required\":[\"dump\"],\"properties\":{\"dump\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"travel\":{\"required\":[\"total\",\"time_spent\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"drugs\":{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"other\":{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"required\":[\"attacking\",\"jobs\",\"hospital\",\"crimes\",\"items\",\"travel\",\"drugs\",\"networth\",\"other\"]}";
+            },
+            v3: union(enum) {
+                v0: PersonalStatsAttackingPublic,
+                v1: PersonalStatsJobsPublic,
+                v2: PersonalStatsTrading,
+                v3: PersonalStatsJail,
+                v4: PersonalStatsHospital,
+                v5: PersonalStatsFinishingHits,
+                v6: PersonalStatsCommunication,
+                v7: PersonalStatsCrimes,
+                v8: PersonalStatsBounties,
+                v9: PersonalStatsItems,
+                v10: PersonalStatsTravel,
+                v11: PersonalStatsDrugs,
+                v12: PersonalStatsMissions,
+                v13: PersonalStatsRacing,
+                v14: PersonalStatsNetworthPublic,
+                v15: PersonalStatsOther,
+            },
+            v4: []const PersonalStatsHistoricStat,
+        }) = .absent,
+        organizedCrime: model.Presence(union(enum) {
+            v0: FactionCrime,
+            v1: UserOrganizedCrimeError,
+            v2: void,
+        }) = .absent,
+        itemmods: model.Presence([]const UserItemMod) = .absent,
+        attacks: model.Presence(union(enum) {
+            v0: []const Attack,
+            v1: []const AttackSimplified,
+        }) = .absent,
+        bars: model.Presence(UserBars) = .absent,
+        cooldowns: model.Presence(struct {
+            drug: i64,
+            medical: i64,
+            booster: i64,
+            pub const json_schema = "{\"required\":[\"drug\",\"medical\",\"booster\"],\"properties\":{\"drug\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical\":{\"type\":\"integer\",\"format\":\"int32\"},\"booster\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+        }) = .absent,
+        notifications: model.Presence(struct {
+            messages: i64,
+            events: i64,
+            awards: i64,
+            competition: i64,
+            pub const json_schema = "{\"required\":[\"messages\",\"events\",\"awards\",\"competition\"],\"properties\":{\"messages\":{\"type\":\"integer\",\"format\":\"int32\"},\"events\":{\"type\":\"integer\",\"format\":\"int32\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"competition\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+        }) = .absent,
+        perks: model.Presence(struct {
+            faction: []const []const u8,
+            job: []const []const u8,
+            property: []const []const u8,
+            education: []const []const u8,
+            enhancer: []const []const u8,
+            book: []const []const u8,
+            stock: []const []const u8,
+            merit: []const []const u8,
+            pub const json_schema = "{\"required\":[\"faction\",\"job\",\"property\",\"education\",\"enhancer\",\"book\",\"stock\",\"merit\"],\"properties\":{\"faction\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"job\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"property\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"education\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"enhancer\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"book\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"stock\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"merit\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"type\":\"object\"}";
+        }) = .absent,
+        refills: model.Presence(struct {
+            energy: bool,
+            nerve: bool,
+            token: bool,
+            special_count: i64,
+            pub const json_schema = "{\"required\":[\"energy\",\"nerve\",\"token\",\"special_count\"],\"properties\":{\"energy\":{\"type\":\"boolean\"},\"nerve\":{\"type\":\"boolean\"},\"token\":{\"type\":\"boolean\"},\"special_count\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+        }) = .absent,
+        travel: model.Presence(struct {
+            destination: CountryEnum,
+            method: ?UserFlyMethodEnum,
+            departed_at: ?i64,
+            arrival_at: ?i64,
+            time_left: i64,
+            pub const json_schema = "{\"required\":[\"destination\",\"method\",\"departed_at\",\"arrival_at\",\"time_left\"],\"properties\":{\"destination\":{\"$ref\":\"#/components/schemas/CountryEnum\"},\"method\":{\"description\":\"Null if the player has never flown before.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/UserFlyMethodEnum\"},{\"type\":\"null\"}]},\"departed_at\":{\"description\":\"Null if the player has never flown before.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"arrival_at\":{\"description\":\"Null if the player has never flown before.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"time_left\":{\"description\":\"Time left in seconds.\",\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+        }) = .absent,
+        virus: model.Presence(?UserVirus) = .absent,
+        casino: model.Presence(struct {
+            tokens: i64,
+            streak: i64,
+            pub const json_schema = "{\"required\":[\"tokens\",\"streak\"],\"properties\":{\"tokens\":{\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+        }) = .absent,
+        networth: model.Presence(struct {
+            money: struct {
+                pending: i64,
+                wallet: i64,
+                vault: i64,
+                bookie: i64,
+                city_bank: i64,
+                cayman_bank: i64,
+                piggy_bank: i64,
+                loans: i64,
+                unpaid_fees: i64,
+                pub const json_schema = "{\"required\":[\"pending\",\"wallet\",\"vault\",\"bookie\",\"city_bank\",\"cayman_bank\",\"piggy_bank\",\"loans\",\"unpaid_fees\"],\"properties\":{\"pending\":{\"type\":\"integer\",\"format\":\"int64\"},\"wallet\":{\"type\":\"integer\",\"format\":\"int64\"},\"vault\":{\"type\":\"integer\",\"format\":\"int64\"},\"bookie\":{\"type\":\"integer\",\"format\":\"int64\"},\"city_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"cayman_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"piggy_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"loans\":{\"type\":\"integer\",\"format\":\"int64\"},\"unpaid_fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            items: struct {
+                inventory: i64,
+                display_case: i64,
+                bazaar: i64,
+                trades: i64,
+                item_market: i64,
+                auction_house: i64,
+                enlisted_cars: i64,
+                pub const json_schema = "{\"required\":[\"inventory\",\"display_case\",\"bazaar\",\"trades\",\"item_market\",\"auction_house\",\"enlisted_cars\"],\"properties\":{\"inventory\":{\"type\":\"integer\",\"format\":\"int64\"},\"display_case\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"trades\":{\"type\":\"integer\",\"format\":\"int64\"},\"item_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"auction_house\":{\"type\":\"integer\",\"format\":\"int64\"},\"enlisted_cars\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            assets: struct {
+                property: i64,
+                stock_market: i64,
+                company: i64,
+                pub const json_schema = "{\"required\":[\"property\",\"stock_market\",\"company\"],\"properties\":{\"property\":{\"type\":\"integer\",\"format\":\"int64\"},\"stock_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            points: i64,
+            total: i64,
+            timestamp: i64,
+            pub const json_schema = "{\"required\":[\"money\",\"items\",\"assets\",\"points\",\"total\",\"timestamp\"],\"properties\":{\"money\":{\"required\":[\"pending\",\"wallet\",\"vault\",\"bookie\",\"city_bank\",\"cayman_bank\",\"piggy_bank\",\"loans\",\"unpaid_fees\"],\"properties\":{\"pending\":{\"type\":\"integer\",\"format\":\"int64\"},\"wallet\":{\"type\":\"integer\",\"format\":\"int64\"},\"vault\":{\"type\":\"integer\",\"format\":\"int64\"},\"bookie\":{\"type\":\"integer\",\"format\":\"int64\"},\"city_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"cayman_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"piggy_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"loans\":{\"type\":\"integer\",\"format\":\"int64\"},\"unpaid_fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"items\":{\"required\":[\"inventory\",\"display_case\",\"bazaar\",\"trades\",\"item_market\",\"auction_house\",\"enlisted_cars\"],\"properties\":{\"inventory\":{\"type\":\"integer\",\"format\":\"int64\"},\"display_case\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"trades\":{\"type\":\"integer\",\"format\":\"int64\"},\"item_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"auction_house\":{\"type\":\"integer\",\"format\":\"int64\"},\"enlisted_cars\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"assets\":{\"required\":[\"property\",\"stock_market\",\"company\"],\"properties\":{\"property\":{\"type\":\"integer\",\"format\":\"int64\"},\"stock_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"points\":{\"type\":\"integer\",\"format\":\"int64\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+        }) = .absent,
+        money: model.Presence(struct {
+            points: i64,
+            wallet: i64,
+            company: i64,
+            vault: i64,
+            cayman_bank: i64,
+            city_bank: ?struct {
+                amount: i64,
+                profit: i64,
+                duration: i64,
+                interest_rate: f64,
+                until: i64,
+                invested_at: i64,
+                pub const json_schema = "{\"required\":[\"amount\",\"profit\",\"duration\",\"interest_rate\",\"until\",\"invested_at\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int64\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"duration\":{\"description\":\"Initial duration in days.\",\"type\":\"integer\",\"format\":\"int32\"},\"interest_rate\":{\"type\":\"number\",\"format\":\"float\"},\"until\":{\"type\":\"integer\",\"format\":\"int64\"},\"invested_at\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+            },
+            faction: ?struct {
+                money: i64,
+                points: i64,
+                pub const json_schema = "{\"required\":[\"money\",\"points\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int64\"},\"points\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            daily_networth: i64,
+            pub const json_schema = "{\"required\":[\"points\",\"wallet\",\"company\",\"vault\",\"cayman_bank\",\"city_bank\",\"faction\",\"daily_networth\"],\"properties\":{\"points\":{\"type\":\"integer\",\"format\":\"int64\"},\"wallet\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"},\"vault\":{\"type\":\"integer\",\"format\":\"int64\"},\"cayman_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"city_bank\":{\"oneOf\":[{\"required\":[\"amount\",\"profit\",\"duration\",\"interest_rate\",\"until\",\"invested_at\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int64\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"duration\":{\"description\":\"Initial duration in days.\",\"type\":\"integer\",\"format\":\"int32\"},\"interest_rate\":{\"type\":\"number\",\"format\":\"float\"},\"until\":{\"type\":\"integer\",\"format\":\"int64\"},\"invested_at\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},{\"type\":\"null\"}]},\"faction\":{\"oneOf\":[{\"required\":[\"money\",\"points\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int64\"},\"points\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},{\"type\":\"null\"}]},\"daily_networth\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+        }) = .absent,
+        jobpoints: model.Presence(struct {
+            jobs: struct {
+                army: i64,
+                casino: i64,
+                education: i64,
+                grocer: i64,
+                law: i64,
+                medical: i64,
+                pub const json_schema = "{\"required\":[\"army\",\"casino\",\"education\",\"grocer\",\"law\",\"medical\"],\"properties\":{\"army\":{\"type\":\"integer\",\"format\":\"int32\"},\"casino\":{\"type\":\"integer\",\"format\":\"int32\"},\"education\":{\"type\":\"integer\",\"format\":\"int32\"},\"grocer\":{\"type\":\"integer\",\"format\":\"int32\"},\"law\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+            },
+            companies: []const UserCompanyPoints,
+            pub const json_schema = "{\"required\":[\"jobs\",\"companies\"],\"properties\":{\"jobs\":{\"required\":[\"army\",\"casino\",\"education\",\"grocer\",\"law\",\"medical\"],\"properties\":{\"army\":{\"type\":\"integer\",\"format\":\"int32\"},\"casino\":{\"type\":\"integer\",\"format\":\"int32\"},\"education\":{\"type\":\"integer\",\"format\":\"int32\"},\"grocer\":{\"type\":\"integer\",\"format\":\"int32\"},\"law\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"companies\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserCompanyPoints\"}}},\"type\":\"object\"}";
+        }) = .absent,
+        workstats: model.Presence(struct {
+            endurance: i64,
+            intelligence: i64,
+            manual_labor: i64,
+            total: i64,
+            pub const json_schema = "{\"required\":[\"endurance\",\"intelligence\",\"manual_labor\",\"total\"],\"properties\":{\"endurance\":{\"type\":\"integer\",\"format\":\"int32\"},\"intelligence\":{\"type\":\"integer\",\"format\":\"int32\"},\"manual_labor\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+        }) = .absent,
+        skills: model.Presence([]const UserSkillDetail) = .absent,
+        battlestats: model.Presence(struct {
+            strength: UserBattleStatDetail,
+            defense: UserBattleStatDetail,
+            speed: UserBattleStatDetail,
+            dexterity: UserBattleStatDetail,
+            total: i64,
+            pub const json_schema = "{\"required\":[\"strength\",\"defense\",\"speed\",\"dexterity\",\"total\"],\"properties\":{\"strength\":{\"$ref\":\"#/components/schemas/UserBattleStatDetail\"},\"defense\":{\"$ref\":\"#/components/schemas/UserBattleStatDetail\"},\"speed\":{\"$ref\":\"#/components/schemas/UserBattleStatDetail\"},\"dexterity\":{\"$ref\":\"#/components/schemas/UserBattleStatDetail\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+        }) = .absent,
+        gym: model.Presence(struct {
+            id: GymId,
+            name: []const u8,
+            pub const json_schema = "{\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/GymId\"},\"name\":{\"type\":\"string\"}},\"type\":\"object\"}";
+        }) = .absent,
+        trade: model.Presence(UserTradeDetailed) = .absent,
+        trades: model.Presence([]const UserTrade) = .absent,
+        events: model.Presence([]const UserEvent) = .absent,
+        messages: model.Presence([]const UserMessage) = .absent,
+        selections: model.Presence([]const UserSelectionName) = .absent,
+        inventory: model.Presence(UserInventory) = .absent,
+        timestamp: model.Presence(i64) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"crimes\":{\"$ref\":\"#/components/schemas/UserCrime\"},\"weaponexp\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserWeaponExp\"}},\"ammo\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserAmmo\"}},\"discord\":{\"required\":[\"discord_id\",\"user_id\"],\"properties\":{\"discord_id\":{\"$ref\":\"#/components/schemas/DiscordId\"},\"user_id\":{\"$ref\":\"#/components/schemas/UserId\"}},\"type\":\"object\"},\"races\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserRaceDetails\"}},\"_metadata\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/RequestMetadataWithLinks\"},{\"$ref\":\"#/components/schemas/RequestMetadataWithLinksAndTotal\"}]},\"enlistedcars\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserRaceCarDetails\"}},\"forumPosts\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumPost\"}},\"forumThreads\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumThreadUserExtended\"}},\"forumSubscribedThreads\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumSubscribedThread\"}},\"forumFeed\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumFeed\"}},\"forumFriends\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumFeed\"}},\"property\":{\"$ref\":\"#/components/schemas/UserPropertyDetails\"},\"reports\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Report\"}},\"hof\":{\"$ref\":\"#/components/schemas/UserHofStats\"},\"calendar\":{\"$ref\":\"#/components/schemas/UserCalendar\"},\"racingrecords\":{\"type\":\"array\",\"items\":{\"required\":[\"track\",\"records\"],\"properties\":{\"track\":{\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/RaceTrackId\"},\"name\":{\"type\":\"string\"}},\"type\":\"object\"},\"records\":{\"type\":\"array\",\"items\":{\"required\":[\"car_id\",\"car_name\",\"lap_time\"],\"properties\":{\"car_id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"car_name\":{\"type\":\"string\"},\"lap_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"}},\"education\":{\"$ref\":\"#/components/schemas/UserEducation\"},\"stocks\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserStock\"}},\"bounties\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Bounty\"}},\"bounties_timestamp\":{\"type\":\"integer\",\"format\":\"int32\"},\"bounties_delay\":{\"description\":\"The minimum amount of time needed before the cache timestamp can change.\",\"type\":\"integer\",\"format\":\"int32\"},\"jobranks\":{\"$ref\":\"#/components/schemas/UserJobRanks\"},\"properties\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserPropertyBasicDetails\"},{\"$ref\":\"#/components/schemas/UserPropertyDetailsExtended\"},{\"$ref\":\"#/components/schemas/UserPropertyDetailsExtendedRented\"},{\"$ref\":\"#/components/schemas/UserPropertyDetailsExtendedForRent\"},{\"$ref\":\"#/components/schemas/UserPropertyDetailsExtendedForSale\"}]}},\"factionBalance\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserFactionBalance\"},{\"type\":\"null\"}]},\"profile\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/UserBasic\"},{\"required\":[\"id\",\"name\",\"level\",\"rank\",\"title\",\"age\",\"signed_up\",\"faction_id\",\"honor_id\",\"property\",\"image\",\"gender\",\"revivable\",\"role\",\"status\",\"spouse\",\"awards\",\"friends\",\"enemies\",\"forum_posts\",\"karma\",\"last_action\",\"life\",\"donator_status\",\"revive_setting\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"rank\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserRankEnum\"},{\"type\":\"string\"}]},\"title\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserTitleEnum\"},{\"type\":\"string\"}]},\"donator_status\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserDonatorStatusEnum\"},{\"type\":\"null\"}]},\"age\":{\"description\":\"Age in days.\",\"type\":\"integer\",\"format\":\"int32\"},\"signed_up\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction_id\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/FactionId\"},{\"type\":\"null\"}]},\"honor_id\":{\"$ref\":\"#/components/schemas/HonorId\"},\"revive_setting\":{\"$ref\":\"#/components/schemas/ReviveSetting\",\"description\":\"This field is shown only for 'Limited' or 'Full' access keys and only for the key owner, otherwise, the status is 'Unknown'.\"},\"property\":{\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/PropertyId\"},\"name\":{\"type\":\"string\"}},\"type\":\"object\"},\"image\":{\"oneOf\":[{\"type\":\"string\"},{\"type\":\"null\"}]},\"gender\":{\"$ref\":\"#/components/schemas/UserGenderEnum\"},\"revivable\":{\"type\":\"boolean\"},\"role\":{\"$ref\":\"#/components/schemas/UserRoleEnum\"},\"status\":{\"$ref\":\"#/components/schemas/UserStatus\"},\"spouse\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/ProfileSpouse\"},{\"type\":\"null\"}]},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"enemies\":{\"type\":\"integer\",\"format\":\"int32\"},\"forum_posts\":{\"type\":\"integer\",\"format\":\"int32\"},\"karma\":{\"type\":\"integer\",\"format\":\"int32\"},\"last_action\":{\"$ref\":\"#/components/schemas/UserLastAction\"},\"life\":{\"required\":[\"current\",\"maximum\"],\"properties\":{\"current\":{\"type\":\"integer\",\"format\":\"int32\"},\"maximum\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}]},\"revives\":{\"anyOf\":[{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Revive\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ReviveSimplified\"}}]},\"honors\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserHonor\"}},\"medals\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserMedal\"}},\"merits\":{\"$ref\":\"#/components/schemas/UserMerits\"},\"job\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserJob\"},{\"$ref\":\"#/components/schemas/UserCompany\"},{\"type\":\"null\"}]},\"faction\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserFaction\"},{\"type\":\"null\"}]},\"competition\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserCompetitionHalloween\"},{\"$ref\":\"#/components/schemas/UserCompetitionEasterEggs\"},{\"$ref\":\"#/components/schemas/UserCompetitionRps\"},{\"$ref\":\"#/components/schemas/UserCompetitionElimination\"}]},\"icons\":{\"oneOf\":[{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserIconPrivate\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserIconPublic\"}}]},\"itemmarket\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserItemMarketListing\"}},\"list\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserList\"}},\"equipment\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserEquipment\"}},\"clothing\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserClothing\"}},\"missions\":{\"required\":[\"credits\",\"givers\",\"rewards\"],\"properties\":{\"credits\":{\"type\":\"integer\",\"format\":\"int32\"},\"givers\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"contracts\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"contracts\":{\"type\":\"array\",\"items\":{\"required\":[\"title\",\"difficulty\",\"status\",\"created_at\",\"started_at\",\"expires_at\",\"completed_at\",\"rewards\"],\"properties\":{\"title\":{\"type\":\"string\"},\"difficulty\":{\"$ref\":\"#/components/schemas/MissionDifficultyEnum\"},\"status\":{\"$ref\":\"#/components/schemas/MissionStatusEnum\"},\"created_at\":{\"type\":\"integer\",\"format\":\"int32\"},\"started_at\":{\"description\":\"Null if the status is 'Available'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"expires_at\":{\"description\":\"Null if the status is not 'Accepted'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"completed_at\":{\"description\":\"Null if the status is not 'Failed' or 'Completed'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"rewards\":{\"description\":\"Null if the status is not 'Completed'.\",\"oneOf\":[{\"required\":[\"money\",\"credits\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int32\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},{\"type\":\"null\"}]}},\"type\":\"object\"}}},\"type\":\"object\"}},\"rewards\":{\"type\":\"array\",\"items\":{\"required\":[\"type\",\"details\",\"amount\",\"cost\",\"expires_at\"],\"properties\":{\"type\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/MissionRewardUpgrade\"},{\"type\":\"string\"}]},\"details\":{\"description\":\"The response depends on the 'type' value.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/MissionRewardDetailsAmmo\"},{\"$ref\":\"#/components/schemas/MissionRewardDetailsUpgrade\"},{\"$ref\":\"#/components/schemas/MissionRewardDetailsItem\"}]},\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"cost\":{\"type\":\"integer\",\"format\":\"int32\"},\"expires_at\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"},\"personalstats\":{\"anyOf\":[{\"allOf\":[{\"$ref\":\"#/components/schemas/PersonalStatsAttackingExtended\"},{\"$ref\":\"#/components/schemas/PersonalStatsBattleStats\"},{\"$ref\":\"#/components/schemas/PersonalStatsJobsExtended\"},{\"$ref\":\"#/components/schemas/PersonalStatsTrading\"},{\"$ref\":\"#/components/schemas/PersonalStatsJail\"},{\"$ref\":\"#/components/schemas/PersonalStatsHospital\"},{\"$ref\":\"#/components/schemas/PersonalStatsFinishingHits\"},{\"$ref\":\"#/components/schemas/PersonalStatsCommunication\"},{\"$ref\":\"#/components/schemas/PersonalStatsCrimes\"},{\"$ref\":\"#/components/schemas/PersonalStatsBounties\"},{\"$ref\":\"#/components/schemas/PersonalStatsInvestments\"},{\"$ref\":\"#/components/schemas/PersonalStatsItems\"},{\"$ref\":\"#/components/schemas/PersonalStatsTravel\"},{\"$ref\":\"#/components/schemas/PersonalStatsDrugs\"},{\"$ref\":\"#/components/schemas/PersonalStatsMissions\"},{\"$ref\":\"#/components/schemas/PersonalStatsRacing\"},{\"$ref\":\"#/components/schemas/PersonalStatsNetworthExtended\"},{\"$ref\":\"#/components/schemas/PersonalStatsOther\"}]},{\"allOf\":[{\"$ref\":\"#/components/schemas/PersonalStatsAttackingPublic\"},{\"$ref\":\"#/components/schemas/PersonalStatsJobsPublic\"},{\"$ref\":\"#/components/schemas/PersonalStatsTrading\"},{\"$ref\":\"#/components/schemas/PersonalStatsJail\"},{\"$ref\":\"#/components/schemas/PersonalStatsHospital\"},{\"$ref\":\"#/components/schemas/PersonalStatsFinishingHits\"},{\"$ref\":\"#/components/schemas/PersonalStatsCommunication\"},{\"$ref\":\"#/components/schemas/PersonalStatsCrimes\"},{\"$ref\":\"#/components/schemas/PersonalStatsBounties\"},{\"$ref\":\"#/components/schemas/PersonalStatsItems\"},{\"$ref\":\"#/components/schemas/PersonalStatsTravel\"},{\"$ref\":\"#/components/schemas/PersonalStatsDrugs\"},{\"$ref\":\"#/components/schemas/PersonalStatsMissions\"},{\"$ref\":\"#/components/schemas/PersonalStatsRacing\"},{\"$ref\":\"#/components/schemas/PersonalStatsNetworthPublic\"},{\"$ref\":\"#/components/schemas/PersonalStatsOther\"}]},{\"allOf\":[{\"$ref\":\"#/components/schemas/PersonalStatsAttackingPopular\"},{\"$ref\":\"#/components/schemas/PersonalStatsJobsPublic\"},{\"$ref\":\"#/components/schemas/PersonalStatsHospitalPopular\"},{\"$ref\":\"#/components/schemas/PersonalStatsCrimesPopular\"},{\"$ref\":\"#/components/schemas/PersonalStatsItemsPopular\"},{\"$ref\":\"#/components/schemas/PersonalStatsTravelPopular\"},{\"$ref\":\"#/components/schemas/PersonalStatsDrugs\"},{\"$ref\":\"#/components/schemas/PersonalStatsNetworthPublic\"},{\"$ref\":\"#/components/schemas/PersonalStatsOtherPopular\"}]},{\"oneOf\":[{\"$ref\":\"#/components/schemas/PersonalStatsAttackingPublic\"},{\"$ref\":\"#/components/schemas/PersonalStatsJobsPublic\"},{\"$ref\":\"#/components/schemas/PersonalStatsTrading\"},{\"$ref\":\"#/components/schemas/PersonalStatsJail\"},{\"$ref\":\"#/components/schemas/PersonalStatsHospital\"},{\"$ref\":\"#/components/schemas/PersonalStatsFinishingHits\"},{\"$ref\":\"#/components/schemas/PersonalStatsCommunication\"},{\"$ref\":\"#/components/schemas/PersonalStatsCrimes\"},{\"$ref\":\"#/components/schemas/PersonalStatsBounties\"},{\"$ref\":\"#/components/schemas/PersonalStatsItems\"},{\"$ref\":\"#/components/schemas/PersonalStatsTravel\"},{\"$ref\":\"#/components/schemas/PersonalStatsDrugs\"},{\"$ref\":\"#/components/schemas/PersonalStatsMissions\"},{\"$ref\":\"#/components/schemas/PersonalStatsRacing\"},{\"$ref\":\"#/components/schemas/PersonalStatsNetworthPublic\"},{\"$ref\":\"#/components/schemas/PersonalStatsOther\"}]},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PersonalStatsHistoricStat\"}}]},\"organizedCrime\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/FactionCrime\"},{\"$ref\":\"#/components/schemas/UserOrganizedCrimeError\"},{\"type\":\"null\"}]},\"itemmods\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserItemMod\"}},\"attacks\":{\"anyOf\":[{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Attack\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/AttackSimplified\"}}]},\"bars\":{\"$ref\":\"#/components/schemas/UserBars\"},\"cooldowns\":{\"required\":[\"drug\",\"medical\",\"booster\"],\"properties\":{\"drug\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical\":{\"type\":\"integer\",\"format\":\"int32\"},\"booster\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"notifications\":{\"required\":[\"messages\",\"events\",\"awards\",\"competition\"],\"properties\":{\"messages\":{\"type\":\"integer\",\"format\":\"int32\"},\"events\":{\"type\":\"integer\",\"format\":\"int32\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"competition\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"perks\":{\"required\":[\"faction\",\"job\",\"property\",\"education\",\"enhancer\",\"book\",\"stock\",\"merit\"],\"properties\":{\"faction\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"job\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"property\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"education\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"enhancer\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"book\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"stock\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"merit\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"type\":\"object\"},\"refills\":{\"required\":[\"energy\",\"nerve\",\"token\",\"special_count\"],\"properties\":{\"energy\":{\"type\":\"boolean\"},\"nerve\":{\"type\":\"boolean\"},\"token\":{\"type\":\"boolean\"},\"special_count\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"travel\":{\"required\":[\"destination\",\"method\",\"departed_at\",\"arrival_at\",\"time_left\"],\"properties\":{\"destination\":{\"$ref\":\"#/components/schemas/CountryEnum\"},\"method\":{\"description\":\"Null if the player has never flown before.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/UserFlyMethodEnum\"},{\"type\":\"null\"}]},\"departed_at\":{\"description\":\"Null if the player has never flown before.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"arrival_at\":{\"description\":\"Null if the player has never flown before.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"time_left\":{\"description\":\"Time left in seconds.\",\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"virus\":{\"description\":\"Null if the player is currently not programming a virus.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/UserVirus\"},{\"type\":\"null\"}]},\"casino\":{\"required\":[\"tokens\",\"streak\"],\"properties\":{\"tokens\":{\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money\",\"items\",\"assets\",\"points\",\"total\",\"timestamp\"],\"properties\":{\"money\":{\"required\":[\"pending\",\"wallet\",\"vault\",\"bookie\",\"city_bank\",\"cayman_bank\",\"piggy_bank\",\"loans\",\"unpaid_fees\"],\"properties\":{\"pending\":{\"type\":\"integer\",\"format\":\"int64\"},\"wallet\":{\"type\":\"integer\",\"format\":\"int64\"},\"vault\":{\"type\":\"integer\",\"format\":\"int64\"},\"bookie\":{\"type\":\"integer\",\"format\":\"int64\"},\"city_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"cayman_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"piggy_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"loans\":{\"type\":\"integer\",\"format\":\"int64\"},\"unpaid_fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"items\":{\"required\":[\"inventory\",\"display_case\",\"bazaar\",\"trades\",\"item_market\",\"auction_house\",\"enlisted_cars\"],\"properties\":{\"inventory\":{\"type\":\"integer\",\"format\":\"int64\"},\"display_case\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"trades\":{\"type\":\"integer\",\"format\":\"int64\"},\"item_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"auction_house\":{\"type\":\"integer\",\"format\":\"int64\"},\"enlisted_cars\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"assets\":{\"required\":[\"property\",\"stock_market\",\"company\"],\"properties\":{\"property\":{\"type\":\"integer\",\"format\":\"int64\"},\"stock_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"points\":{\"type\":\"integer\",\"format\":\"int64\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"money\":{\"required\":[\"points\",\"wallet\",\"company\",\"vault\",\"cayman_bank\",\"city_bank\",\"faction\",\"daily_networth\"],\"properties\":{\"points\":{\"type\":\"integer\",\"format\":\"int64\"},\"wallet\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"},\"vault\":{\"type\":\"integer\",\"format\":\"int64\"},\"cayman_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"city_bank\":{\"oneOf\":[{\"required\":[\"amount\",\"profit\",\"duration\",\"interest_rate\",\"until\",\"invested_at\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int64\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"duration\":{\"description\":\"Initial duration in days.\",\"type\":\"integer\",\"format\":\"int32\"},\"interest_rate\":{\"type\":\"number\",\"format\":\"float\"},\"until\":{\"type\":\"integer\",\"format\":\"int64\"},\"invested_at\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},{\"type\":\"null\"}]},\"faction\":{\"oneOf\":[{\"required\":[\"money\",\"points\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int64\"},\"points\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},{\"type\":\"null\"}]},\"daily_networth\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"jobpoints\":{\"required\":[\"jobs\",\"companies\"],\"properties\":{\"jobs\":{\"required\":[\"army\",\"casino\",\"education\",\"grocer\",\"law\",\"medical\"],\"properties\":{\"army\":{\"type\":\"integer\",\"format\":\"int32\"},\"casino\":{\"type\":\"integer\",\"format\":\"int32\"},\"education\":{\"type\":\"integer\",\"format\":\"int32\"},\"grocer\":{\"type\":\"integer\",\"format\":\"int32\"},\"law\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"companies\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserCompanyPoints\"}}},\"type\":\"object\"},\"workstats\":{\"required\":[\"endurance\",\"intelligence\",\"manual_labor\",\"total\"],\"properties\":{\"endurance\":{\"type\":\"integer\",\"format\":\"int32\"},\"intelligence\":{\"type\":\"integer\",\"format\":\"int32\"},\"manual_labor\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"skills\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserSkillDetail\"}},\"battlestats\":{\"required\":[\"strength\",\"defense\",\"speed\",\"dexterity\",\"total\"],\"properties\":{\"strength\":{\"$ref\":\"#/components/schemas/UserBattleStatDetail\"},\"defense\":{\"$ref\":\"#/components/schemas/UserBattleStatDetail\"},\"speed\":{\"$ref\":\"#/components/schemas/UserBattleStatDetail\"},\"dexterity\":{\"$ref\":\"#/components/schemas/UserBattleStatDetail\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"gym\":{\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/GymId\"},\"name\":{\"type\":\"string\"}},\"type\":\"object\"},\"trade\":{\"$ref\":\"#/components/schemas/UserTradeDetailed\"},\"trades\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserTrade\"}},\"events\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserEvent\"}},\"messages\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserMessage\"}},\"selections\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserSelectionName\"}},\"inventory\":{\"$ref\":\"#/components/schemas/UserInventory\"},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"User\"],\"summary\":\"Get any User selection\",\"description\":\"Key access level depends on the required selections. <br>Choose one or more selections (comma separated).\",\"operationId\":\"getUserGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserSelectionName\"}}},{\"name\":\"id\",\"in\":\"query\",\"description\":\"selection id\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserDiscordPathId\"},{\"$ref\":\"#/components/schemas/TornCrimeId\"},{\"$ref\":\"#/components/schemas/TradeId\"},{\"type\":\"string\"}]}},{\"name\":\"legacy\",\"in\":\"query\",\"description\":\"Legacy selection names for which you want or expect API v1 response\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserSelectionName\"}}},{\"$ref\":\"#/components/parameters/ApiLimit\"},{\"$ref\":\"#/components/parameters/ApiFrom\"},{\"$ref\":\"#/components/parameters/ApiTo\"},{\"$ref\":\"#/components/parameters/ApiSort\"},{\"name\":\"cat\",\"in\":\"query\",\"description\":\"Selection category. Can belong to one of the specified types.\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/ReportTypeEnum\"},{\"$ref\":\"#/components/schemas/UserListEnum\"},{\"$ref\":\"#/components/schemas/PersonalStatsCategoryEnum\"},{\"$ref\":\"#/components/schemas/RacingRaceTypeEnum\"},{\"$ref\":\"#/components/schemas/TornInventoryItemType\"},{\"$ref\":\"#/components/schemas/TradeCategoryEnum\"}]}},{\"name\":\"stat\",\"in\":\"query\",\"description\":\"Selection stat\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PersonalStatsStatName\"}}},{\"$ref\":\"#/components/parameters/ApiFiltersUser\"},{\"$ref\":\"#/components/parameters/ApiStripTags\"},{\"$ref\":\"#/components/parameters/ApiOffsetNoDefault\"},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/UserCrimesResponse\"},{\"$ref\":\"#/components/schemas/UserWeaponExpResponse\"},{\"$ref\":\"#/components/schemas/UserAmmoResponse\"},{\"$ref\":\"#/components/schemas/UserDiscordResponse\"},{\"$ref\":\"#/components/schemas/UserRacesResponse\"},{\"$ref\":\"#/components/schemas/UserEnlistedCarsResponse\"},{\"$ref\":\"#/components/schemas/UserForumPostsResponse\"},{\"$ref\":\"#/components/schemas/UserForumThreadsResponse\"},{\"$ref\":\"#/components/schemas/UserForumSubscribedThreadsResponse\"},{\"$ref\":\"#/components/schemas/UserForumFeedResponse\"},{\"$ref\":\"#/components/schemas/UserForumFriendsResponse\"},{\"$ref\":\"#/components/schemas/UserPropertyResponse\"},{\"$ref\":\"#/components/schemas/ReportsResponse\"},{\"$ref\":\"#/components/schemas/UserHofResponse\"},{\"$ref\":\"#/components/schemas/UserCalendarResponse\"},{\"$ref\":\"#/components/schemas/UserRacingRecordsResponse\"},{\"$ref\":\"#/components/schemas/UserEducationResponse\"},{\"$ref\":\"#/components/schemas/UserStocksResponse\"},{\"$ref\":\"#/components/schemas/UserBountiesResponse\"},{\"$ref\":\"#/components/schemas/UserJobRanksResponse\"},{\"$ref\":\"#/components/schemas/UserPropertiesResponse\"},{\"$ref\":\"#/components/schemas/UserFactionBalanceResponse\"},{\"$ref\":\"#/components/schemas/UserBasicResponse\"},{\"$ref\":\"#/components/schemas/RevivesResponse\"},{\"$ref\":\"#/components/schemas/UserHonorsResponse\"},{\"$ref\":\"#/components/schemas/UserMedalsResponse\"},{\"$ref\":\"#/components/schemas/UserMeritsResponse\"},{\"$ref\":\"#/components/schemas/RevivesFullResponse\"},{\"$ref\":\"#/components/schemas/UserProfileResponse\"},{\"$ref\":\"#/components/schemas/UserJobResponse\"},{\"$ref\":\"#/components/schemas/UserFactionResponse\"},{\"$ref\":\"#/components/schemas/UserCompetitionResponse\"},{\"$ref\":\"#/components/schemas/UserIconsResponse\"},{\"$ref\":\"#/components/schemas/UserItemMarketResponse\"},{\"$ref\":\"#/components/schemas/UserListResponse\"},{\"$ref\":\"#/components/schemas/UserEquipmentResponse\"},{\"$ref\":\"#/components/schemas/UserMissionsResponse\"},{\"$ref\":\"#/components/schemas/UserPersonalStatsResponse\"},{\"$ref\":\"#/components/schemas/UserOrganizedCrimeResponse\"},{\"$ref\":\"#/components/schemas/UserItemModsResponse\"},{\"$ref\":\"#/components/schemas/AttacksResponse\"},{\"$ref\":\"#/components/schemas/UserBarsResponse\"},{\"$ref\":\"#/components/schemas/UserCooldownsResponse\"},{\"$ref\":\"#/components/schemas/UserNotificationsResponse\"},{\"$ref\":\"#/components/schemas/UserPerksResponse\"},{\"$ref\":\"#/components/schemas/UserRefillsResponse\"},{\"$ref\":\"#/components/schemas/UserTravelResponse\"},{\"$ref\":\"#/components/schemas/UserVirusResponse\"},{\"$ref\":\"#/components/schemas/AttacksFullResponse\"},{\"$ref\":\"#/components/schemas/UserCasinoResponse\"},{\"$ref\":\"#/components/schemas/UserNetworthResponse\"},{\"$ref\":\"#/components/schemas/UserMoneyResponse\"},{\"$ref\":\"#/components/schemas/UserJobPointsResponse\"},{\"$ref\":\"#/components/schemas/UserWorkStatsResponse\"},{\"$ref\":\"#/components/schemas/UserSkillsResponse\"},{\"$ref\":\"#/components/schemas/UserBattleStatsResponse\"},{\"$ref\":\"#/components/schemas/UserGymResponse\"},{\"$ref\":\"#/components/schemas/UserTradeResponse\"},{\"$ref\":\"#/components/schemas/UserTradesResponse\"},{\"$ref\":\"#/components/schemas/UserNewEventsResponse\"},{\"$ref\":\"#/components/schemas/UserEventsResponse\"},{\"$ref\":\"#/components/schemas/UserMessagesResponse\"},{\"$ref\":\"#/components/schemas/UserNewMessagesResponse\"},{\"$ref\":\"#/components/schemas/UserLookupResponse\"},{\"$ref\":\"#/components/schemas/UserInventoryResponse\"},{\"$ref\":\"#/components/schemas/TimestampResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";
@@ -3672,46 +4747,102 @@ pub const getFactionGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: FactionHofResponse,
-        v1: FactionMembersResponse,
-        v2: FactionBasicResponse,
-        v3: FactionWarsResponse,
-        v4: NewsResponse,
-        v5: RevivesResponse,
-        v6: FactionTerritoryWarsHistoryResponse,
-        v7: AttacksResponse,
-        v8: FactionBalanceResponse,
-        v9: FactionRaidWarReportResponse,
-        v10: FactionTerritoriesOwnershipResponse,
-        v11: FactionPositionsResponse,
-        v12: RevivesFullResponse,
-        v13: AttacksFullResponse,
-        v14: FactionApplicationsResponse,
-        v15: FactionOngoingChainResponse,
-        v16: FactionChainsResponse,
-        v17: FactionChainReportResponse,
-        v18: FactionCrimesResponse,
-        v19: FactionCrimeResponse,
-        v20: FactionRaidsResponse,
-        v21: FactionWarfareResponse,
-        v22: FactionRankedWarReportResponse,
-        v23: FactionTerritoryWarReportResponse,
-        v24: FactionTerritoriesResponse,
-        v25: FactionUpgradesResponse,
-        v26: FactionStatsResponse,
-        v27: FactionContributorsResponse,
-        v28: FactionInventoryResponse,
-        v29: FactionCrimeExpResponse,
-        v30: FactionRacketsResponse,
-        v31: FactionRankedWarResponse,
-        v32: FactionLookupResponse,
-        v33: FactionWarfareDirtyBombsResponse,
-        v34: FactionWarfareChainsResponse,
-        v35: FactionWarfareTerritoryWarsResponse,
-        v36: FactionWarfareRaidsResponse,
-        v37: FactionWarfareRankedResponse,
-        v38: TimestampResponse,
+    pub const Response = struct {
+        hof: model.Presence(FactionHofStats) = .absent,
+        members: model.Presence([]const FactionMember) = .absent,
+        basic: model.Presence(FactionBasic) = .absent,
+        pacts: model.Presence([]const FactionPact) = .absent,
+        wars: model.Presence(FactionWars) = .absent,
+        news: model.Presence([]const News) = .absent,
+        _metadata: model.Presence(union(enum) {
+            v0: RequestMetadataWithLinks,
+            v1: RequestMetadataWithLinksAndTotal,
+        }) = .absent,
+        revives: model.Presence(union(enum) {
+            v0: []const Revive,
+            v1: []const ReviveSimplified,
+        }) = .absent,
+        territorywars: model.Presence([]const FactionTerritoryWarFinished) = .absent,
+        attacks: model.Presence(union(enum) {
+            v0: []const Attack,
+            v1: []const AttackSimplified,
+        }) = .absent,
+        balance: model.Presence(FactionBalance) = .absent,
+        raidreport: model.Presence(FactionRaidReport) = .absent,
+        territoryOwnership: model.Presence([]const FactionTerritoryOwnership) = .absent,
+        positions: model.Presence([]const FactionPosition) = .absent,
+        applications: model.Presence([]const FactionApplication) = .absent,
+        chain: model.Presence(FactionOngoingChain) = .absent,
+        chains: model.Presence([]const FactionChain) = .absent,
+        chainreport: model.Presence(FactionChainReport) = .absent,
+        crimes: model.Presence([]const FactionCrime) = .absent,
+        crime: model.Presence(FactionCrime) = .absent,
+        raids: model.Presence([]const FactionRaidWarfare) = .absent,
+        warfare: model.Presence(union(enum) {
+            v0: []const FactionRankedWarDetails,
+            v1: []const FactionTerritoryWarfare,
+            v2: []const FactionChainWarfare,
+            v3: []const FactionRaidWarfare,
+            v4: []const FactionWarfareDirtyBomb,
+        }) = .absent,
+        rankedwarreport: model.Presence(struct {
+            id: RankedWarId,
+            start: i64,
+            end: i64,
+            winner: FactionId,
+            forfeit: bool,
+            factions: []const struct {
+                id: FactionId,
+                name: []const u8,
+                score: i64,
+                attacks: i64,
+                rank: struct {
+                    before: []const u8,
+                    after: []const u8,
+                    pub const json_schema = "{\"required\":[\"before\",\"after\"],\"properties\":{\"before\":{\"type\":\"string\"},\"after\":{\"type\":\"string\"}},\"type\":\"object\"}";
+                },
+                rewards: struct {
+                    respect: i64,
+                    points: i64,
+                    items: []const struct {
+                        id: ItemId,
+                        name: []const u8,
+                        quantity: i64,
+                        pub const json_schema = "{\"required\":[\"id\",\"name\",\"quantity\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"name\":{\"type\":\"string\"},\"quantity\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+                    },
+                    pub const json_schema = "{\"required\":[\"respect\",\"points\",\"items\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"items\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"quantity\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"name\":{\"type\":\"string\"},\"quantity\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"}";
+                },
+                members: []const struct {
+                    id: UserId,
+                    name: []const u8,
+                    level: i64,
+                    attacks: i64,
+                    score: f64,
+                    pub const json_schema = "{\"required\":[\"id\",\"name\",\"level\",\"attacks\",\"score\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"attacks\":{\"type\":\"integer\",\"format\":\"int32\"},\"score\":{\"type\":\"number\",\"format\":\"float\"}},\"type\":\"object\"}";
+                },
+                pub const json_schema = "{\"required\":[\"id\",\"name\",\"score\",\"attacks\",\"rank\",\"rewards\",\"members\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/FactionId\"},\"name\":{\"type\":\"string\"},\"score\":{\"type\":\"integer\",\"format\":\"int32\"},\"attacks\":{\"type\":\"integer\",\"format\":\"int32\"},\"rank\":{\"required\":[\"before\",\"after\"],\"properties\":{\"before\":{\"type\":\"string\"},\"after\":{\"type\":\"string\"}},\"type\":\"object\"},\"rewards\":{\"required\":[\"respect\",\"points\",\"items\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"items\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"quantity\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"name\":{\"type\":\"string\"},\"quantity\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"},\"members\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"level\",\"attacks\",\"score\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"attacks\":{\"type\":\"integer\",\"format\":\"int32\"},\"score\":{\"type\":\"number\",\"format\":\"float\"}},\"type\":\"object\"}}},\"type\":\"object\"}";
+            },
+            pub const json_schema = "{\"required\":[\"id\",\"start\",\"end\",\"winner\",\"forfeit\",\"factions\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/RankedWarId\"},\"start\":{\"description\":\"Timestamp the war started at.\",\"type\":\"integer\",\"format\":\"int32\"},\"end\":{\"description\":\"Timestamp the war ended at.\",\"type\":\"integer\",\"format\":\"int32\"},\"winner\":{\"$ref\":\"#/components/schemas/FactionId\"},\"forfeit\":{\"type\":\"boolean\"},\"factions\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"score\",\"attacks\",\"rank\",\"rewards\",\"members\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/FactionId\"},\"name\":{\"type\":\"string\"},\"score\":{\"type\":\"integer\",\"format\":\"int32\"},\"attacks\":{\"type\":\"integer\",\"format\":\"int32\"},\"rank\":{\"required\":[\"before\",\"after\"],\"properties\":{\"before\":{\"type\":\"string\"},\"after\":{\"type\":\"string\"}},\"type\":\"object\"},\"rewards\":{\"required\":[\"respect\",\"points\",\"items\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"items\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"quantity\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"name\":{\"type\":\"string\"},\"quantity\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"},\"members\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"level\",\"attacks\",\"score\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"attacks\":{\"type\":\"integer\",\"format\":\"int32\"},\"score\":{\"type\":\"number\",\"format\":\"float\"}},\"type\":\"object\"}}},\"type\":\"object\"}}},\"type\":\"object\"}";
+        }) = .absent,
+        territorywarreport: model.Presence(FactionTerritoryWarReport) = .absent,
+        territory: model.Presence([]const FactionTerritory) = .absent,
+        upgrades: model.Presence(FactionUpgrades) = .absent,
+        state: model.Presence(FactionBranchStateEnum) = .absent,
+        stats: model.Presence([]const FactionStat) = .absent,
+        contributors: model.Presence([]const FactionContributor) = .absent,
+        inventory_timestamp: model.Presence(i64) = .absent,
+        inventory: model.Presence([]const FactionInventoryItem) = .absent,
+        crimeexp: model.Presence([]const UserId) = .absent,
+        rackets: model.Presence([]const TornRacket) = .absent,
+        rankedwars: model.Presence([]const FactionRankedWarDetails) = .absent,
+        selections: model.Presence([]const FactionSelectionName) = .absent,
+        dirtybombs: model.Presence([]const FactionWarfareDirtyBomb) = .absent,
+        warfarechains: model.Presence([]const FactionChainWarfare) = .absent,
+        warfareterritory: model.Presence([]const FactionTerritoryWarfare) = .absent,
+        warfareraids: model.Presence([]const FactionRaidWarfare) = .absent,
+        warfareranked: model.Presence([]const FactionRankedWarDetails) = .absent,
+        timestamp: model.Presence(i64) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"hof\":{\"$ref\":\"#/components/schemas/FactionHofStats\"},\"members\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionMember\"}},\"basic\":{\"$ref\":\"#/components/schemas/FactionBasic\"},\"pacts\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionPact\"}},\"wars\":{\"$ref\":\"#/components/schemas/FactionWars\"},\"news\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/News\"}},\"_metadata\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/RequestMetadataWithLinks\"},{\"$ref\":\"#/components/schemas/RequestMetadataWithLinksAndTotal\"}]},\"revives\":{\"anyOf\":[{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Revive\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ReviveSimplified\"}}]},\"territorywars\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionTerritoryWarFinished\"}},\"attacks\":{\"anyOf\":[{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Attack\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/AttackSimplified\"}}]},\"balance\":{\"$ref\":\"#/components/schemas/FactionBalance\"},\"raidreport\":{\"$ref\":\"#/components/schemas/FactionRaidReport\"},\"territoryOwnership\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionTerritoryOwnership\"}},\"positions\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionPosition\"}},\"applications\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionApplication\"}},\"chain\":{\"$ref\":\"#/components/schemas/FactionOngoingChain\"},\"chains\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionChain\"}},\"chainreport\":{\"$ref\":\"#/components/schemas/FactionChainReport\"},\"crimes\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionCrime\"}},\"crime\":{\"$ref\":\"#/components/schemas/FactionCrime\"},\"raids\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionRaidWarfare\"}},\"warfare\":{\"oneOf\":[{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionRankedWarDetails\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionTerritoryWarfare\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionChainWarfare\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionRaidWarfare\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionWarfareDirtyBomb\"}}]},\"rankedwarreport\":{\"required\":[\"id\",\"start\",\"end\",\"winner\",\"forfeit\",\"factions\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/RankedWarId\"},\"start\":{\"description\":\"Timestamp the war started at.\",\"type\":\"integer\",\"format\":\"int32\"},\"end\":{\"description\":\"Timestamp the war ended at.\",\"type\":\"integer\",\"format\":\"int32\"},\"winner\":{\"$ref\":\"#/components/schemas/FactionId\"},\"forfeit\":{\"type\":\"boolean\"},\"factions\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"score\",\"attacks\",\"rank\",\"rewards\",\"members\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/FactionId\"},\"name\":{\"type\":\"string\"},\"score\":{\"type\":\"integer\",\"format\":\"int32\"},\"attacks\":{\"type\":\"integer\",\"format\":\"int32\"},\"rank\":{\"required\":[\"before\",\"after\"],\"properties\":{\"before\":{\"type\":\"string\"},\"after\":{\"type\":\"string\"}},\"type\":\"object\"},\"rewards\":{\"required\":[\"respect\",\"points\",\"items\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"items\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"quantity\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"name\":{\"type\":\"string\"},\"quantity\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"},\"members\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"level\",\"attacks\",\"score\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"attacks\":{\"type\":\"integer\",\"format\":\"int32\"},\"score\":{\"type\":\"number\",\"format\":\"float\"}},\"type\":\"object\"}}},\"type\":\"object\"}}},\"type\":\"object\"},\"territorywarreport\":{\"$ref\":\"#/components/schemas/FactionTerritoryWarReport\"},\"territory\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionTerritory\"}},\"upgrades\":{\"$ref\":\"#/components/schemas/FactionUpgrades\"},\"state\":{\"$ref\":\"#/components/schemas/FactionBranchStateEnum\"},\"stats\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionStat\"}},\"contributors\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionContributor\"}},\"inventory_timestamp\":{\"type\":\"integer\",\"format\":\"int64\"},\"inventory\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionInventoryItem\"}},\"crimeexp\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserId\"}},\"rackets\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornRacket\"}},\"rankedwars\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionRankedWarDetails\"}},\"selections\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionSelectionName\"}},\"dirtybombs\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionWarfareDirtyBomb\"}},\"warfarechains\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionChainWarfare\"}},\"warfareterritory\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionTerritoryWarfare\"}},\"warfareraids\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionRaidWarfare\"}},\"warfareranked\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionRankedWarDetails\"}},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"Faction\"],\"summary\":\"Get any Faction selection\",\"description\":\"Key access level depends on the required selections. <br> Choose one or more selections (comma separated).\",\"operationId\":\"getFactionGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionSelectionName\"}}},{\"name\":\"id\",\"in\":\"query\",\"description\":\"selection id\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/FactionId\"},{\"$ref\":\"#/components/schemas/FactionCrimeId\"},{\"$ref\":\"#/components/schemas/ChainId\"},{\"$ref\":\"#/components/schemas/RankedWarId\"},{\"$ref\":\"#/components/schemas/TerritoryWarId\"},{\"$ref\":\"#/components/schemas/RaidWarId\"}]}},{\"name\":\"legacy\",\"in\":\"query\",\"description\":\"Legacy selection names for which you want or expect API v1 response\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionSelectionName\"}}},{\"$ref\":\"#/components/parameters/ApiLimit\"},{\"$ref\":\"#/components/parameters/ApiFrom\"},{\"$ref\":\"#/components/parameters/ApiTo\"},{\"name\":\"cat\",\"in\":\"query\",\"description\":\"Selection category\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"all\",\"current\"]},{\"type\":\"string\",\"enum\":[\"all\",\"recruiting\",\"planning\",\"failure\",\"successful\",\"expired\",\"available\",\"completed\"]},{\"$ref\":\"#/components/schemas/FactionNewsCategory\"},{\"$ref\":\"#/components/schemas/FactionRankedWarsCategoryEnum\"},{\"$ref\":\"#/components/schemas/FactionArmoryCategoryEnum\"},{\"$ref\":\"#/components/schemas/ReportTypeEnum\"},{\"$ref\":\"#/components/schemas/FactionWarfareTypeEnum\"},{\"$ref\":\"#/components/schemas/FactionTerritoryWarsCategoryEnum\"}]}},{\"name\":\"stat\",\"in\":\"query\",\"description\":\"Stat category\",\"required\":false,\"schema\":{\"$ref\":\"#/components/schemas/FactionStatEnum\"}},{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"created_at\",\"executed_at\",\"ready_at\",\"expired_at\",\"incoming\",\"outgoing\"]}},{\"$ref\":\"#/components/parameters/ApiStripTags\"},{\"$ref\":\"#/components/parameters/ApiSort\"},{\"$ref\":\"#/components/parameters/ApiOffsetNoDefault\"},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/FactionHofResponse\"},{\"$ref\":\"#/components/schemas/FactionMembersResponse\"},{\"$ref\":\"#/components/schemas/FactionBasicResponse\"},{\"$ref\":\"#/components/schemas/FactionWarsResponse\"},{\"$ref\":\"#/components/schemas/NewsResponse\"},{\"$ref\":\"#/components/schemas/RevivesResponse\"},{\"$ref\":\"#/components/schemas/FactionTerritoryWarsHistoryResponse\"},{\"$ref\":\"#/components/schemas/AttacksResponse\"},{\"$ref\":\"#/components/schemas/FactionBalanceResponse\"},{\"$ref\":\"#/components/schemas/FactionRaidWarReportResponse\"},{\"$ref\":\"#/components/schemas/FactionTerritoriesOwnershipResponse\"},{\"$ref\":\"#/components/schemas/FactionPositionsResponse\"},{\"$ref\":\"#/components/schemas/RevivesFullResponse\"},{\"$ref\":\"#/components/schemas/AttacksFullResponse\"},{\"$ref\":\"#/components/schemas/FactionApplicationsResponse\"},{\"$ref\":\"#/components/schemas/FactionOngoingChainResponse\"},{\"$ref\":\"#/components/schemas/FactionChainsResponse\"},{\"$ref\":\"#/components/schemas/FactionChainReportResponse\"},{\"$ref\":\"#/components/schemas/FactionCrimesResponse\"},{\"$ref\":\"#/components/schemas/FactionCrimeResponse\"},{\"$ref\":\"#/components/schemas/FactionRaidsResponse\"},{\"$ref\":\"#/components/schemas/FactionWarfareResponse\"},{\"$ref\":\"#/components/schemas/FactionRankedWarReportResponse\"},{\"$ref\":\"#/components/schemas/FactionTerritoryWarReportResponse\"},{\"$ref\":\"#/components/schemas/FactionTerritoriesResponse\"},{\"$ref\":\"#/components/schemas/FactionUpgradesResponse\"},{\"$ref\":\"#/components/schemas/FactionStatsResponse\"},{\"$ref\":\"#/components/schemas/FactionContributorsResponse\"},{\"$ref\":\"#/components/schemas/FactionInventoryResponse\"},{\"$ref\":\"#/components/schemas/FactionCrimeExpResponse\"},{\"$ref\":\"#/components/schemas/FactionRacketsResponse\"},{\"$ref\":\"#/components/schemas/FactionRankedWarResponse\"},{\"$ref\":\"#/components/schemas/FactionLookupResponse\"},{\"$ref\":\"#/components/schemas/FactionWarfareDirtyBombsResponse\"},{\"$ref\":\"#/components/schemas/FactionWarfareChainsResponse\"},{\"$ref\":\"#/components/schemas/FactionWarfareTerritoryWarsResponse\"},{\"$ref\":\"#/components/schemas/FactionWarfareRaidsResponse\"},{\"$ref\":\"#/components/schemas/FactionWarfareRankedResponse\"},{\"$ref\":\"#/components/schemas/TimestampResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";
@@ -3994,16 +5125,29 @@ pub const getCompanyGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: CompanyApplicationsResponse,
-        v1: CompanyEmployeesResponse,
-        v2: CompanyEmployeesResponseBasic,
-        v3: CompanyProfileResponseMixed,
-        v4: CompanyProfileResponse,
-        v5: NewsResponse,
-        v6: CompanyStockResponse,
-        v7: CompanyLookupResponse,
-        v8: TimestampResponse,
+    pub const Response = struct {
+        applications: model.Presence([]const CompanyApplication) = .absent,
+        employees: model.Presence(union(enum) {
+            v0: []const union(enum) {
+                v0: CompanyEmployee,
+                v1: CompanyEmployeeExtended,
+                v2: CompanyEmployeeFull,
+            },
+            v1: []const CompanyEmployee,
+        }) = .absent,
+        profile: model.Presence(union(enum) {
+            v0: union(enum) {
+                v0: CompanyProfile,
+                v1: CompanyProfileExtended,
+            },
+            v1: CompanyProfile,
+        }) = .absent,
+        news: model.Presence([]const News) = .absent,
+        _metadata: model.Presence(RequestMetadataWithLinks) = .absent,
+        stock: model.Presence([]const CompanyStockItem) = .absent,
+        selections: model.Presence([]const CompanySelectionName) = .absent,
+        timestamp: model.Presence(i64) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"applications\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/CompanyApplication\"}},\"employees\":{\"anyOf\":[{\"type\":\"array\",\"items\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/CompanyEmployee\"},{\"$ref\":\"#/components/schemas/CompanyEmployeeExtended\"},{\"$ref\":\"#/components/schemas/CompanyEmployeeFull\"}]}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/CompanyEmployee\"}}]},\"profile\":{\"anyOf\":[{\"oneOf\":[{\"$ref\":\"#/components/schemas/CompanyProfile\"},{\"$ref\":\"#/components/schemas/CompanyProfileExtended\"}]},{\"$ref\":\"#/components/schemas/CompanyProfile\"}]},\"news\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/News\"}},\"_metadata\":{\"$ref\":\"#/components/schemas/RequestMetadataWithLinks\"},\"stock\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/CompanyStockItem\"}},\"selections\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/CompanySelectionName\"}},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"Company\"],\"summary\":\"Get any Company selection\",\"description\":\"Key access level depends on the required selections. <br> Choose one or more selections (comma separated).\",\"operationId\":\"getCompanyGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/CompanySelectionName\"}}},{\"name\":\"id\",\"in\":\"query\",\"description\":\"selection id\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/CompanyId\"}]}},{\"name\":\"legacy\",\"in\":\"query\",\"description\":\"Legacy selection names for which you want or expect API v1 response\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/CompanySelectionName\"}}},{\"name\":\"cat\",\"in\":\"query\",\"description\":\"Selection category\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/CompanyNewsCategory\"}]}},{\"$ref\":\"#/components/parameters/ApiLimit\"},{\"$ref\":\"#/components/parameters/ApiStripTags\"},{\"$ref\":\"#/components/parameters/ApiOffsetNoDefault\"},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/CompanyApplicationsResponse\"},{\"$ref\":\"#/components/schemas/CompanyEmployeesResponse\"},{\"$ref\":\"#/components/schemas/CompanyEmployeesResponseBasic\"},{\"$ref\":\"#/components/schemas/CompanyProfileResponseMixed\"},{\"$ref\":\"#/components/schemas/CompanyProfileResponse\"},{\"$ref\":\"#/components/schemas/NewsResponse\"},{\"$ref\":\"#/components/schemas/CompanyStockResponse\"},{\"$ref\":\"#/components/schemas/CompanyLookupResponse\"},{\"$ref\":\"#/components/schemas/TimestampResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";
@@ -4185,13 +5329,21 @@ pub const getForumGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: ForumCategoriesResponse,
-        v1: ForumThreadsResponse,
-        v2: ForumThreadResponse,
-        v3: ForumPostsResponse,
-        v4: ForumLookupResponse,
-        v5: TimestampResponse,
+    pub const Response = struct {
+        categories: model.Presence([]const struct {
+            id: ForumId,
+            title: []const u8,
+            acronym: []const u8,
+            threads: i64,
+            pub const json_schema = "{\"required\":[\"id\",\"title\",\"acronym\",\"threads\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/ForumId\"},\"title\":{\"type\":\"string\"},\"acronym\":{\"type\":\"string\"},\"threads\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+        }) = .absent,
+        threads: model.Presence([]const ForumThreadBase) = .absent,
+        _metadata: model.Presence(RequestMetadataWithLinks) = .absent,
+        thread: model.Presence(ForumThreadExtended) = .absent,
+        posts: model.Presence([]const ForumPost) = .absent,
+        selections: model.Presence([]const ForumSelectionName) = .absent,
+        timestamp: model.Presence(i64) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"categories\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"title\",\"acronym\",\"threads\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/ForumId\"},\"title\":{\"type\":\"string\"},\"acronym\":{\"type\":\"string\"},\"threads\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"threads\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumThreadBase\"}},\"_metadata\":{\"$ref\":\"#/components/schemas/RequestMetadataWithLinks\"},\"thread\":{\"$ref\":\"#/components/schemas/ForumThreadExtended\"},\"posts\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumPost\"}},\"selections\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumSelectionName\"}},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"Forum\"],\"summary\":\"Get any Forum selection\",\"description\":\"Requires public access key. <br>Choose one or more selections (comma separated).\",\"operationId\":\"getForumGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumSelectionName\"}}},{\"name\":\"id\",\"in\":\"query\",\"description\":\"selection id\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/ForumThreadId\"},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumId\"}}]}},{\"$ref\":\"#/components/parameters/ApiStripTags\"},{\"$ref\":\"#/components/parameters/ApiLimit\"},{\"$ref\":\"#/components/parameters/ApiSort\"},{\"$ref\":\"#/components/parameters/ApiFrom\"},{\"$ref\":\"#/components/parameters/ApiTo\"},{\"$ref\":\"#/components/parameters/ApiOffsetNoDefault\"},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/ForumCategoriesResponse\"},{\"$ref\":\"#/components/schemas/ForumThreadsResponse\"},{\"$ref\":\"#/components/schemas/ForumThreadResponse\"},{\"$ref\":\"#/components/schemas/ForumPostsResponse\"},{\"$ref\":\"#/components/schemas/ForumLookupResponse\"},{\"$ref\":\"#/components/schemas/TimestampResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";
@@ -4248,9 +5400,54 @@ pub const getKeyGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: KeyInfoResponse,
-        v1: KeyLogResponse,
+    pub const Response = struct {
+        info: model.Presence(struct {
+            selections: struct {
+                company: []const []const u8,
+                faction: []const FactionSelectionName,
+                market: []const MarketSelectionName,
+                property: []const []const u8,
+                torn: []const TornSelectionName,
+                user: []const UserSelectionName,
+                racing: []const RacingSelectionName,
+                forum: []const ForumSelectionName,
+                key: []const KeySelectionName,
+                pub const json_schema = "{\"required\":[\"company\",\"faction\",\"market\",\"property\",\"torn\",\"user\",\"racing\",\"forum\",\"key\"],\"properties\":{\"company\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"faction\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionSelectionName\"}},\"market\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/MarketSelectionName\"}},\"property\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"torn\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornSelectionName\"}},\"user\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserSelectionName\"}},\"racing\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RacingSelectionName\"}},\"forum\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumSelectionName\"}},\"key\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/KeySelectionName\"}}},\"type\":\"object\"}";
+            },
+            user: struct {
+                faction_id: ?FactionId,
+                company_id: ?CompanyId,
+                id: UserId,
+                pub const json_schema = "{\"required\":[\"id\",\"faction_id\",\"company_id\"],\"properties\":{\"faction_id\":{\"description\":\"Null only if the user is not in a faction.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/FactionId\"},{\"type\":\"null\"}]},\"company_id\":{\"description\":\"Null only if the user is not in a company.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/CompanyId\"},{\"type\":\"null\"}]},\"id\":{\"$ref\":\"#/components/schemas/UserId\"}},\"type\":\"object\"}";
+            },
+            access: struct {
+                level: i64,
+                type: ApiKeyAccessTypeEnum,
+                faction: bool,
+                company: bool,
+                log: struct {
+                    custom_permissions: bool,
+                    available: []const KeyInfoAvailableLog,
+                    pub const json_schema = "{\"required\":[\"custom_permissions\",\"available\"],\"properties\":{\"custom_permissions\":{\"description\":\"Shows if key has custom log permissions enabled.\",\"type\":\"boolean\"},\"available\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/KeyInfoAvailableLog\"}}},\"type\":\"object\"}";
+                },
+                pub const json_schema = "{\"required\":[\"level\",\"type\",\"faction\",\"company\",\"log\"],\"properties\":{\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"type\":{\"$ref\":\"#/components/schemas/ApiKeyAccessTypeEnum\"},\"faction\":{\"type\":\"boolean\"},\"company\":{\"type\":\"boolean\"},\"log\":{\"required\":[\"custom_permissions\",\"available\"],\"properties\":{\"custom_permissions\":{\"description\":\"Shows if key has custom log permissions enabled.\",\"type\":\"boolean\"},\"available\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/KeyInfoAvailableLog\"}}},\"type\":\"object\"}},\"type\":\"object\"}";
+            },
+            pub const json_schema = "{\"required\":[\"selections\",\"access\",\"user\"],\"properties\":{\"selections\":{\"required\":[\"company\",\"faction\",\"market\",\"property\",\"torn\",\"user\",\"racing\",\"forum\",\"key\"],\"properties\":{\"company\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"faction\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionSelectionName\"}},\"market\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/MarketSelectionName\"}},\"property\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"torn\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornSelectionName\"}},\"user\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserSelectionName\"}},\"racing\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RacingSelectionName\"}},\"forum\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumSelectionName\"}},\"key\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/KeySelectionName\"}}},\"type\":\"object\"},\"user\":{\"required\":[\"id\",\"faction_id\",\"company_id\"],\"properties\":{\"faction_id\":{\"description\":\"Null only if the user is not in a faction.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/FactionId\"},{\"type\":\"null\"}]},\"company_id\":{\"description\":\"Null only if the user is not in a company.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/CompanyId\"},{\"type\":\"null\"}]},\"id\":{\"$ref\":\"#/components/schemas/UserId\"}},\"type\":\"object\"},\"access\":{\"required\":[\"level\",\"type\",\"faction\",\"company\",\"log\"],\"properties\":{\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"type\":{\"$ref\":\"#/components/schemas/ApiKeyAccessTypeEnum\"},\"faction\":{\"type\":\"boolean\"},\"company\":{\"type\":\"boolean\"},\"log\":{\"required\":[\"custom_permissions\",\"available\"],\"properties\":{\"custom_permissions\":{\"description\":\"Shows if key has custom log permissions enabled.\",\"type\":\"boolean\"},\"available\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/KeyInfoAvailableLog\"}}},\"type\":\"object\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+        }) = .absent,
+        log: model.Presence([]const struct {
+            timestamp: i64,
+            type: []const u8,
+            selections: []const u8,
+            id: union(enum) {
+                v0: i64,
+                v1: []const u8,
+                v2: void,
+            },
+            comment: model.Presence(?[]const u8) = .absent,
+            ip: []const u8,
+            pub const json_schema = "{\"required\":[\"timestamp\",\"type\",\"selections\",\"id\",\"ip\"],\"properties\":{\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"},\"type\":{\"type\":\"string\"},\"selections\":{\"type\":\"string\"},\"id\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int64\"},{\"type\":\"string\"},{\"type\":\"null\"}]},\"comment\":{\"oneOf\":[{\"type\":\"string\"},{\"type\":\"null\"}]},\"ip\":{\"type\":\"string\"}},\"type\":\"object\"}";
+        }) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"info\":{\"required\":[\"selections\",\"access\",\"user\"],\"properties\":{\"selections\":{\"required\":[\"company\",\"faction\",\"market\",\"property\",\"torn\",\"user\",\"racing\",\"forum\",\"key\"],\"properties\":{\"company\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"faction\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionSelectionName\"}},\"market\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/MarketSelectionName\"}},\"property\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"torn\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornSelectionName\"}},\"user\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserSelectionName\"}},\"racing\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RacingSelectionName\"}},\"forum\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ForumSelectionName\"}},\"key\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/KeySelectionName\"}}},\"type\":\"object\"},\"user\":{\"required\":[\"id\",\"faction_id\",\"company_id\"],\"properties\":{\"faction_id\":{\"description\":\"Null only if the user is not in a faction.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/FactionId\"},{\"type\":\"null\"}]},\"company_id\":{\"description\":\"Null only if the user is not in a company.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/CompanyId\"},{\"type\":\"null\"}]},\"id\":{\"$ref\":\"#/components/schemas/UserId\"}},\"type\":\"object\"},\"access\":{\"required\":[\"level\",\"type\",\"faction\",\"company\",\"log\"],\"properties\":{\"level\":{\"type\":\"integer\",\"format\":\"int32\"},\"type\":{\"$ref\":\"#/components/schemas/ApiKeyAccessTypeEnum\"},\"faction\":{\"type\":\"boolean\"},\"company\":{\"type\":\"boolean\"},\"log\":{\"required\":[\"custom_permissions\",\"available\"],\"properties\":{\"custom_permissions\":{\"description\":\"Shows if key has custom log permissions enabled.\",\"type\":\"boolean\"},\"available\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/KeyInfoAvailableLog\"}}},\"type\":\"object\"}},\"type\":\"object\"}},\"type\":\"object\"},\"log\":{\"type\":\"array\",\"items\":{\"required\":[\"timestamp\",\"type\",\"selections\",\"id\",\"ip\"],\"properties\":{\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"},\"type\":{\"type\":\"string\"},\"selections\":{\"type\":\"string\"},\"id\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int64\"},{\"type\":\"string\"},{\"type\":\"null\"}]},\"comment\":{\"oneOf\":[{\"type\":\"string\"},{\"type\":\"null\"}]},\"ip\":{\"type\":\"string\"}},\"type\":\"object\"}}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"Key\"],\"summary\":\"Get any Key selection\",\"operationId\":\"getKeyGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/KeySelectionName\"}}},{\"$ref\":\"#/components/parameters/ApiLimit100\"},{\"$ref\":\"#/components/parameters/ApiOffsetNoDefault\"},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/KeyInfoResponse\"},{\"$ref\":\"#/components/schemas/KeyLogResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";
@@ -4506,17 +5703,37 @@ pub const getMarketGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: BazaarResponse,
-        v1: BazaarResponseSpecialized,
-        v2: MarketItemMarketResponse,
-        v3: MarketRentalsResponse,
-        v4: AuctionHouseResponse,
-        v5: AuctionHouseListingResponse,
-        v6: PointsMarketResponse,
-        v7: MarketPropertiesResponse,
-        v8: MarketLookupResponse,
-        v9: TimestampResponse,
+    pub const Response = struct {
+        bazaar: model.Presence(union(enum) {
+            v0: union(enum) {
+                v0: BazaarWeekly,
+                v1: BazaarSpecialized,
+            },
+            v1: BazaarSpecialized,
+        }) = .absent,
+        itemmarket: model.Presence(ItemMarket) = .absent,
+        _metadata: model.Presence(union(enum) {
+            v0: RequestMetadataWithLinksAndTotal,
+            v1: RequestMetadataWithLinks,
+        }) = .absent,
+        rentals: model.Presence(MarketRentalDetails) = .absent,
+        rentals_timestamp: model.Presence(i64) = .absent,
+        rentals_delay: model.Presence(i64) = .absent,
+        auctionhouse: model.Presence([]const AuctionHouseListing) = .absent,
+        auctionhouselisting: model.Presence(AuctionHouseListing) = .absent,
+        pointsmarket: model.Presence([]const struct {
+            id: i64,
+            quantity: i64,
+            cost: i64,
+            total_cost: i64,
+            pub const json_schema = "{\"required\":[\"id\",\"quantity\",\"cost\",\"total_cost\"],\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int32\"},\"quantity\":{\"type\":\"integer\",\"format\":\"int32\"},\"cost\":{\"type\":\"integer\",\"format\":\"int32\"},\"total_cost\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+        }) = .absent,
+        properties: model.Presence(MarketPropertyDetails) = .absent,
+        properties_timestamp: model.Presence(i64) = .absent,
+        properties_delay: model.Presence(i64) = .absent,
+        selections: model.Presence([]const MarketSelectionName) = .absent,
+        timestamp: model.Presence(i64) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"bazaar\":{\"anyOf\":[{\"description\":\"If there's a specific item ID passed or a category chosen, the response will be of type 'BazaarSpecialized', otherwise it will be 'BazaarWeekly'.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/BazaarWeekly\"},{\"$ref\":\"#/components/schemas/BazaarSpecialized\"}]},{\"$ref\":\"#/components/schemas/BazaarSpecialized\"}]},\"itemmarket\":{\"$ref\":\"#/components/schemas/ItemMarket\"},\"_metadata\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/RequestMetadataWithLinksAndTotal\"},{\"$ref\":\"#/components/schemas/RequestMetadataWithLinks\"}]},\"rentals\":{\"$ref\":\"#/components/schemas/MarketRentalDetails\"},\"rentals_timestamp\":{\"type\":\"integer\",\"format\":\"int32\"},\"rentals_delay\":{\"description\":\"The minimum amount of time needed before the cache timestamp can change.\",\"type\":\"integer\",\"format\":\"int32\"},\"auctionhouse\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/AuctionHouseListing\"}},\"auctionhouselisting\":{\"$ref\":\"#/components/schemas/AuctionHouseListing\"},\"pointsmarket\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"quantity\",\"cost\",\"total_cost\"],\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int32\"},\"quantity\":{\"type\":\"integer\",\"format\":\"int32\"},\"cost\":{\"type\":\"integer\",\"format\":\"int32\"},\"total_cost\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"properties\":{\"$ref\":\"#/components/schemas/MarketPropertyDetails\"},\"properties_timestamp\":{\"type\":\"integer\",\"format\":\"int32\"},\"properties_delay\":{\"description\":\"The minimum amount of time needed before the cache timestamp can change.\",\"type\":\"integer\",\"format\":\"int32\"},\"selections\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/MarketSelectionName\"}},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"Market\"],\"summary\":\"Get any Market selection\",\"description\":\"Requires public access key. <br>Choose one or more selections (comma separated).\",\"operationId\":\"getMarketGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/MarketSelectionName\"}}},{\"name\":\"id\",\"in\":\"query\",\"description\":\"selection id\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/ItemId\"},{\"$ref\":\"#/components/schemas/AuctionListingId\"},{\"$ref\":\"#/components/schemas/PropertyTypeId\"}]}},{\"name\":\"legacy\",\"in\":\"query\",\"description\":\"Legacy selection names for which you want or expect API v1 response\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/MarketSelectionName\"}}},{\"name\":\"cat\",\"in\":\"query\",\"description\":\"Category of specialized bazaars returned\",\"required\":false,\"schema\":{\"$ref\":\"#/components/schemas/MarketSpecializedBazaarCategoryEnum\"}},{\"name\":\"bonus\",\"in\":\"query\",\"description\":\"Used to filter weapons with a specific bonus\",\"required\":false,\"schema\":{\"$ref\":\"#/components/schemas/WeaponBonusEnum\"}},{\"name\":\"sort\",\"in\":\"query\",\"description\":\"Direction to sort rows in\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"$ref\":\"#/components/parameters/ApiOffsetNoDefault\"},{\"$ref\":\"#/components/parameters/ApiLimit100Default20\"},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/BazaarResponse\"},{\"$ref\":\"#/components/schemas/BazaarResponseSpecialized\"},{\"$ref\":\"#/components/schemas/MarketItemMarketResponse\"},{\"$ref\":\"#/components/schemas/MarketRentalsResponse\"},{\"$ref\":\"#/components/schemas/AuctionHouseResponse\"},{\"$ref\":\"#/components/schemas/AuctionHouseListingResponse\"},{\"$ref\":\"#/components/schemas/PointsMarketResponse\"},{\"$ref\":\"#/components/schemas/MarketPropertiesResponse\"},{\"$ref\":\"#/components/schemas/MarketLookupResponse\"},{\"$ref\":\"#/components/schemas/TimestampResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";
@@ -4698,15 +5915,17 @@ pub const getRacingGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: RacingRacesResponse,
-        v1: RacingTrackRecordsResponse,
-        v2: RacingRaceDetailsResponse,
-        v3: RacingCarsResponse,
-        v4: RacingTracksResponse,
-        v5: RacingCarUpgradesResponse,
-        v6: RacingLookupResponse,
-        v7: TimestampResponse,
+    pub const Response = struct {
+        races: model.Presence([]const Race) = .absent,
+        _metadata: model.Presence(RequestMetadataWithLinks) = .absent,
+        records: model.Presence([]const RaceRecord) = .absent,
+        race: model.Presence(RacingRaceDetails) = .absent,
+        cars: model.Presence([]const RaceCar) = .absent,
+        tracks: model.Presence([]const RaceTrack) = .absent,
+        carupgrades: model.Presence([]const RaceCarUpgrade) = .absent,
+        selections: model.Presence([]const RacingSelectionName) = .absent,
+        timestamp: model.Presence(i64) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"races\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Race\"}},\"_metadata\":{\"$ref\":\"#/components/schemas/RequestMetadataWithLinks\"},\"records\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RaceRecord\"}},\"race\":{\"$ref\":\"#/components/schemas/RacingRaceDetails\"},\"cars\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RaceCar\"}},\"tracks\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RaceTrack\"}},\"carupgrades\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RaceCarUpgrade\"}},\"selections\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RacingSelectionName\"}},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"Racing\"],\"summary\":\"Get any Racing selection\",\"description\":\"Requires public access key. <br>Choose one or more selections (comma separated).\",\"operationId\":\"getRacingGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/RacingSelectionName\"}}},{\"name\":\"id\",\"in\":\"query\",\"description\":\"selection id\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/RaceId\"},{\"$ref\":\"#/components/schemas/RaceTrackId\"}]}},{\"$ref\":\"#/components/parameters/ApiLimit\"},{\"$ref\":\"#/components/parameters/ApiSort\"},{\"$ref\":\"#/components/parameters/ApiTo\"},{\"$ref\":\"#/components/parameters/ApiFrom\"},{\"name\":\"cat\",\"in\":\"query\",\"description\":\"Selection category\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/RacingRaceTypeEnum\"},{\"$ref\":\"#/components/schemas/RaceClassEnum\"}]}},{\"$ref\":\"#/components/parameters/ApiOffsetNoDefault\"},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/RacingRacesResponse\"},{\"$ref\":\"#/components/schemas/RacingTrackRecordsResponse\"},{\"$ref\":\"#/components/schemas/RacingRaceDetailsResponse\"},{\"$ref\":\"#/components/schemas/RacingCarsResponse\"},{\"$ref\":\"#/components/schemas/RacingTracksResponse\"},{\"$ref\":\"#/components/schemas/RacingCarUpgradesResponse\"},{\"$ref\":\"#/components/schemas/RacingLookupResponse\"},{\"$ref\":\"#/components/schemas/TimestampResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";
@@ -4778,10 +5997,11 @@ pub const getPropertyGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: UserPropertyResponse,
-        v1: PropertyLookupResponse,
-        v2: TimestampResponse,
+    pub const Response = struct {
+        property: model.Presence(UserPropertyDetails) = .absent,
+        selections: model.Presence([]const PropertySelectionName) = .absent,
+        timestamp: model.Presence(i64) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"property\":{\"$ref\":\"#/components/schemas/UserPropertyDetails\"},\"selections\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PropertySelectionName\"}},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"Property\"],\"summary\":\"Get any property selection\",\"description\":\"Requires public access key. <br>Choose one or more selections (comma separated).\",\"operationId\":\"getPropertyGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PropertySelectionName\"}}},{\"name\":\"id\",\"in\":\"query\",\"description\":\"Property id\",\"required\":true,\"schema\":{\"$ref\":\"#/components/schemas/PropertyId\"}},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/UserPropertyResponse\"},{\"$ref\":\"#/components/schemas/PropertyLookupResponse\"},{\"$ref\":\"#/components/schemas/TimestampResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";
@@ -5644,44 +6864,217 @@ pub const getTornGeneric = struct {
         comment: model.Presence([]const u8) = .absent,
         key: model.Presence([]const u8) = .absent,
     };
-    pub const Response = union(enum) {
-        v0: TornSubcrimesResponse,
-        v1: TornCrimesResponse,
-        v2: TornCalendarResponse,
-        v3: TornHofResponse,
-        v4: TornFactionHofResponse,
-        v5: TornLogTypesResponse,
-        v6: TornCardsResponse,
-        v7: TornItemsResponse,
-        v8: TornRockPaperScissorsResponse,
-        v9: TornCityStatsResponse,
-        v10: TornLogCategoriesResponse,
-        v11: TornEducationResponse,
-        v12: TornMeritsResponse,
-        v13: TornOrganizedCrimeResponse,
-        v14: TornItemStatsResponse,
-        v15: TornHonorsResponse,
-        v16: TornItemDetailsResponse,
-        v17: TornEliminationTeamsResponse,
-        v18: TornCityShopsResponse,
-        v19: TornEliminationTeamPlayersResponse,
-        v20: TornMedalsResponse,
-        v21: TornBankResponse,
-        v22: TornBountiesResponse,
-        v23: TornGymsResponse,
-        v24: TornPokerTablesResponse,
-        v25: TornItemAmmoResponse,
-        v26: TornProperties,
-        v27: TornFactionTreeResponse,
-        v28: AttackLogResponse,
-        v29: TornMuseumResponse,
-        v30: TornStockDetailedResponse,
-        v31: TornStocksResponse,
-        v32: TornTerritoriesResponse,
-        v33: TornTerritoriesNoLinksResponse,
-        v34: TornItemModsResponse,
-        v35: TornLookupResponse,
-        v36: TimestampResponse,
+    pub const Response = struct {
+        subcrimes: model.Presence([]const TornSubcrime) = .absent,
+        crimes: model.Presence([]const TornCrime) = .absent,
+        calendar: model.Presence(struct {
+            competitions: []const TornCalendarActivity,
+            events: []const TornCalendarActivity,
+            pub const json_schema = "{\"required\":[\"competitions\",\"events\"],\"properties\":{\"competitions\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornCalendarActivity\"}},\"events\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornCalendarActivity\"}}},\"type\":\"object\"}";
+        }) = .absent,
+        hof: model.Presence([]const TornHof) = .absent,
+        _metadata: model.Presence(union(enum) {
+            v0: RequestMetadataWithLinks,
+            v1: RequestMetadataWithLinksAndTotal,
+        }) = .absent,
+        factionhof: model.Presence([]const TornFactionHof) = .absent,
+        logtypes: model.Presence([]const TornLog) = .absent,
+        cards: model.Presence([]const TornCard) = .absent,
+        items: model.Presence([]const TornItem) = .absent,
+        rockpaperscissors: model.Presence([]const struct {
+            type: enum {
+                rock,
+                paper,
+                scissors,
+            },
+            count: i64,
+            pub const json_schema = "{\"required\":[\"type\",\"count\"],\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"rock\",\"paper\",\"scissors\"]},\"count\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+        }) = .absent,
+        stats: model.Presence(struct {
+            users: struct {
+                total: i64,
+                male: i64,
+                female: i64,
+                enby: i64,
+                married: i64,
+                pub const json_schema = "{\"required\":[\"total\",\"male\",\"female\",\"enby\",\"married\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"male\":{\"type\":\"integer\",\"format\":\"int64\"},\"female\":{\"type\":\"integer\",\"format\":\"int64\"},\"enby\":{\"type\":\"integer\",\"format\":\"int64\"},\"married\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            items: struct {
+                found_in_city: i64,
+                found_in_dump: i64,
+                trashed: i64,
+                total: i64,
+                pub const json_schema = "{\"required\":[\"found_in_city\",\"found_in_dump\",\"trashed\",\"total\"],\"properties\":{\"found_in_city\":{\"type\":\"integer\",\"format\":\"int64\"},\"found_in_dump\":{\"type\":\"integer\",\"format\":\"int64\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int64\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            trading: struct {
+                sold_on_market: i64,
+                sold_in_bazaar: i64,
+                sold_points: i64,
+                bazaar_profit: i64,
+                auctions: i64,
+                trades: i64,
+                items_sent: i64,
+                pub const json_schema = "{\"required\":[\"sold_on_market\",\"sold_in_bazaar\",\"sold_points\",\"bazaar_profit\",\"auctions\",\"trades\",\"items_sent\"],\"properties\":{\"sold_on_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"sold_in_bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"sold_points\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar_profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"auctions\":{\"type\":\"integer\",\"format\":\"int64\"},\"trades\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_sent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            currency: struct {
+                money_on_hand: i64,
+                money_on_hand_average: i64,
+                money_in_bank: i64,
+                points_total: i64,
+                points_players: i64,
+                points_factions: i64,
+                points_market: i64,
+                points_used: i64,
+                pub const json_schema = "{\"required\":[\"money_on_hand\",\"money_on_hand_average\",\"money_in_bank\",\"points_total\",\"points_players\",\"points_factions\",\"points_market\",\"points_used\"],\"properties\":{\"money_on_hand\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_on_hand_average\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_in_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_total\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_players\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_factions\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_used\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            attacking: struct {
+                attacks_won: i64,
+                attacks_lost: i64,
+                attacks_stalemated: i64,
+                attacks_stealthed: i64,
+                escapes: i64,
+                hits: i64,
+                misses: i64,
+                critical_hits: i64,
+                rounds_fired: i64,
+                money_mugged: i64,
+                respect_gained: i64,
+                pub const json_schema = "{\"required\":[\"attacks_won\",\"attacks_lost\",\"attacks_stalemated\",\"attacks_stealthed\",\"escapes\",\"hits\",\"misses\",\"critical_hits\",\"rounds_fired\",\"money_mugged\",\"respect_gained\"],\"properties\":{\"attacks_won\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_lost\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_stalemated\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_stealthed\":{\"type\":\"integer\",\"format\":\"int64\"},\"escapes\":{\"type\":\"integer\",\"format\":\"int64\"},\"hits\":{\"type\":\"integer\",\"format\":\"int64\"},\"misses\":{\"type\":\"integer\",\"format\":\"int64\"},\"critical_hits\":{\"type\":\"integer\",\"format\":\"int64\"},\"rounds_fired\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"respect_gained\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            jobs: struct {
+                army: i64,
+                grocer: i64,
+                casino: i64,
+                education: i64,
+                medical: i64,
+                law: i64,
+                company: i64,
+                unemployed: i64,
+                pub const json_schema = "{\"required\":[\"army\",\"grocer\",\"casino\",\"education\",\"medical\",\"law\",\"company\",\"unemployed\"],\"properties\":{\"army\":{\"type\":\"integer\",\"format\":\"int64\"},\"grocer\":{\"type\":\"integer\",\"format\":\"int64\"},\"casino\":{\"type\":\"integer\",\"format\":\"int64\"},\"education\":{\"type\":\"integer\",\"format\":\"int64\"},\"medical\":{\"type\":\"integer\",\"format\":\"int64\"},\"law\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"},\"unemployed\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            jail: struct {
+                jailings: i64,
+                busts: i64,
+                busts_failed: i64,
+                bails: i64,
+                bails_spent: i64,
+                pub const json_schema = "{\"required\":[\"jailings\",\"busts\",\"busts_failed\",\"bails\",\"bails_spent\"],\"properties\":{\"jailings\":{\"type\":\"integer\",\"format\":\"int64\"},\"busts\":{\"type\":\"integer\",\"format\":\"int64\"},\"busts_failed\":{\"type\":\"integer\",\"format\":\"int64\"},\"bails\":{\"type\":\"integer\",\"format\":\"int64\"},\"bails_spent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            hospital: struct {
+                trips: i64,
+                medical_items_used: i64,
+                revives: i64,
+                pub const json_schema = "{\"required\":[\"trips\",\"medical_items_used\",\"revives\"],\"properties\":{\"trips\":{\"type\":\"integer\",\"format\":\"int64\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int64\"},\"revives\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            drugs: struct {
+                total_used: i64,
+                overdoses: i64,
+                cannabis: i64,
+                ecstasy: i64,
+                ketamine: i64,
+                lsd: i64,
+                opium: i64,
+                shrooms: i64,
+                speed: i64,
+                pcp: i64,
+                xanax: i64,
+                vicodin: i64,
+                pub const json_schema = "{\"required\":[\"total_used\",\"overdoses\",\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"shrooms\",\"speed\",\"pcp\",\"xanax\",\"vicodin\"],\"properties\":{\"total_used\":{\"type\":\"integer\",\"format\":\"int64\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int64\"},\"cannabis\":{\"type\":\"integer\",\"format\":\"int64\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int64\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int64\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int64\"},\"opium\":{\"type\":\"integer\",\"format\":\"int64\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int64\"},\"speed\":{\"type\":\"integer\",\"format\":\"int64\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int64\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int64\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            traveling: struct {
+                items_bought_abroad: i64,
+                total_trips: i64,
+                argentina: i64,
+                mexico: i64,
+                united_arab_emirates: i64,
+                hawaii: i64,
+                japan: i64,
+                united_kingdom: i64,
+                south_africa: i64,
+                switzerland: i64,
+                china: i64,
+                cayman_islands: i64,
+                pub const json_schema = "{\"required\":[\"items_bought_abroad\",\"total_trips\",\"argentina\",\"mexico\",\"united_arab_emirates\",\"hawaii\",\"japan\",\"united_kingdom\",\"south_africa\",\"switzerland\",\"china\",\"cayman_islands\"],\"properties\":{\"items_bought_abroad\":{\"type\":\"integer\",\"format\":\"int64\"},\"total_trips\":{\"type\":\"integer\",\"format\":\"int64\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int64\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int64\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int64\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int64\"},\"japan\":{\"type\":\"integer\",\"format\":\"int64\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int64\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int64\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int64\"},\"china\":{\"type\":\"integer\",\"format\":\"int64\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            bounties: struct {
+                placed: i64,
+                money_spent: i64,
+                pub const json_schema = "{\"required\":[\"placed\",\"money_spent\"],\"properties\":{\"placed\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_spent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            crimes: struct {
+                total: i64,
+                jail_sentences: i64,
+                pub const json_schema = "{\"required\":[\"total\",\"jail_sentences\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"jail_sentences\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            communication: struct {
+                total_messages: i64,
+                friends: i64,
+                coworkers: i64,
+                spouses: i64,
+                classified_ads_placed: i64,
+                personals_placed: i64,
+                pub const json_schema = "{\"required\":[\"total_messages\",\"friends\",\"coworkers\",\"spouses\",\"classified_ads_placed\",\"personals_placed\"],\"properties\":{\"total_messages\":{\"type\":\"integer\",\"format\":\"int64\"},\"friends\":{\"type\":\"integer\",\"format\":\"int64\"},\"coworkers\":{\"type\":\"integer\",\"format\":\"int64\"},\"spouses\":{\"type\":\"integer\",\"format\":\"int64\"},\"classified_ads_placed\":{\"type\":\"integer\",\"format\":\"int64\"},\"personals_placed\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            other: struct {
+                logins: i64,
+                years_played: i64,
+                merits_bought: i64,
+                energy_refills: i64,
+                company_trains: i64,
+                stat_enhancers_used: i64,
+                pub const json_schema = "{\"required\":[\"logins\",\"years_played\",\"merits_bought\",\"energy_refills\",\"company_trains\",\"stat_enhancers_used\"],\"properties\":{\"logins\":{\"type\":\"integer\",\"format\":\"int64\"},\"years_played\":{\"type\":\"integer\",\"format\":\"int64\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int64\"},\"energy_refills\":{\"type\":\"integer\",\"format\":\"int64\"},\"company_trains\":{\"type\":\"integer\",\"format\":\"int64\"},\"stat_enhancers_used\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
+            },
+            pub const json_schema = "{\"required\":[\"users\",\"items\",\"trading\",\"currency\",\"attacking\",\"jobs\",\"jail\",\"hospital\",\"drugs\",\"traveling\",\"bounties\",\"crimes\",\"communication\",\"other\"],\"properties\":{\"users\":{\"required\":[\"total\",\"male\",\"female\",\"enby\",\"married\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"male\":{\"type\":\"integer\",\"format\":\"int64\"},\"female\":{\"type\":\"integer\",\"format\":\"int64\"},\"enby\":{\"type\":\"integer\",\"format\":\"int64\"},\"married\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"items\":{\"required\":[\"found_in_city\",\"found_in_dump\",\"trashed\",\"total\"],\"properties\":{\"found_in_city\":{\"type\":\"integer\",\"format\":\"int64\"},\"found_in_dump\":{\"type\":\"integer\",\"format\":\"int64\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int64\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"trading\":{\"required\":[\"sold_on_market\",\"sold_in_bazaar\",\"sold_points\",\"bazaar_profit\",\"auctions\",\"trades\",\"items_sent\"],\"properties\":{\"sold_on_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"sold_in_bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"sold_points\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar_profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"auctions\":{\"type\":\"integer\",\"format\":\"int64\"},\"trades\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_sent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"currency\":{\"required\":[\"money_on_hand\",\"money_on_hand_average\",\"money_in_bank\",\"points_total\",\"points_players\",\"points_factions\",\"points_market\",\"points_used\"],\"properties\":{\"money_on_hand\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_on_hand_average\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_in_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_total\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_players\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_factions\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_used\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"attacking\":{\"required\":[\"attacks_won\",\"attacks_lost\",\"attacks_stalemated\",\"attacks_stealthed\",\"escapes\",\"hits\",\"misses\",\"critical_hits\",\"rounds_fired\",\"money_mugged\",\"respect_gained\"],\"properties\":{\"attacks_won\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_lost\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_stalemated\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_stealthed\":{\"type\":\"integer\",\"format\":\"int64\"},\"escapes\":{\"type\":\"integer\",\"format\":\"int64\"},\"hits\":{\"type\":\"integer\",\"format\":\"int64\"},\"misses\":{\"type\":\"integer\",\"format\":\"int64\"},\"critical_hits\":{\"type\":\"integer\",\"format\":\"int64\"},\"rounds_fired\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"respect_gained\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"jobs\":{\"required\":[\"army\",\"grocer\",\"casino\",\"education\",\"medical\",\"law\",\"company\",\"unemployed\"],\"properties\":{\"army\":{\"type\":\"integer\",\"format\":\"int64\"},\"grocer\":{\"type\":\"integer\",\"format\":\"int64\"},\"casino\":{\"type\":\"integer\",\"format\":\"int64\"},\"education\":{\"type\":\"integer\",\"format\":\"int64\"},\"medical\":{\"type\":\"integer\",\"format\":\"int64\"},\"law\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"},\"unemployed\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"jail\":{\"required\":[\"jailings\",\"busts\",\"busts_failed\",\"bails\",\"bails_spent\"],\"properties\":{\"jailings\":{\"type\":\"integer\",\"format\":\"int64\"},\"busts\":{\"type\":\"integer\",\"format\":\"int64\"},\"busts_failed\":{\"type\":\"integer\",\"format\":\"int64\"},\"bails\":{\"type\":\"integer\",\"format\":\"int64\"},\"bails_spent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"hospital\":{\"required\":[\"trips\",\"medical_items_used\",\"revives\"],\"properties\":{\"trips\":{\"type\":\"integer\",\"format\":\"int64\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int64\"},\"revives\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"drugs\":{\"required\":[\"total_used\",\"overdoses\",\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"shrooms\",\"speed\",\"pcp\",\"xanax\",\"vicodin\"],\"properties\":{\"total_used\":{\"type\":\"integer\",\"format\":\"int64\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int64\"},\"cannabis\":{\"type\":\"integer\",\"format\":\"int64\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int64\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int64\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int64\"},\"opium\":{\"type\":\"integer\",\"format\":\"int64\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int64\"},\"speed\":{\"type\":\"integer\",\"format\":\"int64\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int64\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int64\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"traveling\":{\"required\":[\"items_bought_abroad\",\"total_trips\",\"argentina\",\"mexico\",\"united_arab_emirates\",\"hawaii\",\"japan\",\"united_kingdom\",\"south_africa\",\"switzerland\",\"china\",\"cayman_islands\"],\"properties\":{\"items_bought_abroad\":{\"type\":\"integer\",\"format\":\"int64\"},\"total_trips\":{\"type\":\"integer\",\"format\":\"int64\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int64\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int64\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int64\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int64\"},\"japan\":{\"type\":\"integer\",\"format\":\"int64\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int64\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int64\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int64\"},\"china\":{\"type\":\"integer\",\"format\":\"int64\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"bounties\":{\"required\":[\"placed\",\"money_spent\"],\"properties\":{\"placed\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_spent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"crimes\":{\"required\":[\"total\",\"jail_sentences\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"jail_sentences\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"communication\":{\"required\":[\"total_messages\",\"friends\",\"coworkers\",\"spouses\",\"classified_ads_placed\",\"personals_placed\"],\"properties\":{\"total_messages\":{\"type\":\"integer\",\"format\":\"int64\"},\"friends\":{\"type\":\"integer\",\"format\":\"int64\"},\"coworkers\":{\"type\":\"integer\",\"format\":\"int64\"},\"spouses\":{\"type\":\"integer\",\"format\":\"int64\"},\"classified_ads_placed\":{\"type\":\"integer\",\"format\":\"int64\"},\"personals_placed\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"other\":{\"required\":[\"logins\",\"years_played\",\"merits_bought\",\"energy_refills\",\"company_trains\",\"stat_enhancers_used\"],\"properties\":{\"logins\":{\"type\":\"integer\",\"format\":\"int64\"},\"years_played\":{\"type\":\"integer\",\"format\":\"int64\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int64\"},\"energy_refills\":{\"type\":\"integer\",\"format\":\"int64\"},\"company_trains\":{\"type\":\"integer\",\"format\":\"int64\"},\"stat_enhancers_used\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"}";
+        }) = .absent,
+        logcategories: model.Presence([]const TornLogCategory) = .absent,
+        education: model.Presence([]const TornEducation) = .absent,
+        merits: model.Presence([]const TornMerit) = .absent,
+        organizedcrimes: model.Presence([]const TornOrganizedCrime) = .absent,
+        itemdetails: model.Presence(union(enum) {
+            v0: []const TornItemStats,
+            v1: union(enum) {
+                v0: []const TornItemDetails,
+                v1: TornItemDetailsDeprecated,
+            },
+        }) = .absent,
+        honors: model.Presence([]const TornHonor) = .absent,
+        elimination: model.Presence([]const TornEliminationTeam) = .absent,
+        cityshops: model.Presence([]const TornCityShop) = .absent,
+        eliminationteam: model.Presence([]const TornEliminationTeamPlayer) = .absent,
+        medals: model.Presence([]const TornMedal) = .absent,
+        bank: model.Presence([]const TornBank) = .absent,
+        bounties: model.Presence([]const Bounty) = .absent,
+        bounties_timestamp: model.Presence(i64) = .absent,
+        bounties_delay: model.Presence(i64) = .absent,
+        gyms: model.Presence([]const TornGym) = .absent,
+        pokertables: model.Presence([]const TornPokerTable) = .absent,
+        itemammo: model.Presence([]const TornItemAmmo) = .absent,
+        properties: model.Presence([]const struct {
+            id: PropertyTypeId,
+            name: []const u8,
+            cost: i64,
+            happy: i64,
+            upkeep: i64,
+            modifications: []const PropertyModificationEnum,
+            staff: []const PropertyStaffEnum,
+            pub const json_schema = "{\"required\":[\"id\",\"name\",\"cost\",\"happy\",\"upkeep\",\"modifications\",\"staff\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/PropertyTypeId\"},\"name\":{\"type\":\"string\"},\"cost\":{\"type\":\"integer\",\"format\":\"int32\"},\"happy\":{\"type\":\"integer\",\"format\":\"int32\"},\"upkeep\":{\"type\":\"integer\",\"format\":\"int32\"},\"modifications\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PropertyModificationEnum\"}},\"staff\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PropertyStaffEnum\"}}},\"type\":\"object\"}";
+        }) = .absent,
+        factionTree: model.Presence([]const TornFactionTree) = .absent,
+        attacklog: model.Presence(struct {
+            log: []const AttackLog,
+            summary: []const AttackLogSummary,
+            pub const json_schema = "{\"required\":[\"log\",\"summary\"],\"properties\":{\"log\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/AttackLog\"}},\"summary\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/AttackLogSummary\"}}},\"type\":\"object\"}";
+        }) = .absent,
+        museum: model.Presence([]const TornMuseumSet) = .absent,
+        stocks: model.Presence(union(enum) {
+            v0: TornStockDetailed,
+            v1: []const TornStock,
+        }) = .absent,
+        territory: model.Presence([]const TornTerritory) = .absent,
+        itemmods: model.Presence([]const TornItemMods) = .absent,
+        selections: model.Presence([]const TornSelectionName) = .absent,
+        timestamp: model.Presence(i64) = .absent,
+        pub const json_schema = "{\"type\":\"object\",\"properties\":{\"subcrimes\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornSubcrime\"}},\"crimes\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornCrime\"}},\"calendar\":{\"required\":[\"competitions\",\"events\"],\"properties\":{\"competitions\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornCalendarActivity\"}},\"events\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornCalendarActivity\"}}},\"type\":\"object\"},\"hof\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornHof\"}},\"_metadata\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/RequestMetadataWithLinks\"},{\"$ref\":\"#/components/schemas/RequestMetadataWithLinksAndTotal\"}]},\"factionhof\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornFactionHof\"}},\"logtypes\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornLog\"}},\"cards\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornCard\"}},\"items\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornItem\"}},\"rockpaperscissors\":{\"type\":\"array\",\"items\":{\"required\":[\"type\",\"count\"],\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"rock\",\"paper\",\"scissors\"]},\"count\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"stats\":{\"required\":[\"users\",\"items\",\"trading\",\"currency\",\"attacking\",\"jobs\",\"jail\",\"hospital\",\"drugs\",\"traveling\",\"bounties\",\"crimes\",\"communication\",\"other\"],\"properties\":{\"users\":{\"required\":[\"total\",\"male\",\"female\",\"enby\",\"married\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"male\":{\"type\":\"integer\",\"format\":\"int64\"},\"female\":{\"type\":\"integer\",\"format\":\"int64\"},\"enby\":{\"type\":\"integer\",\"format\":\"int64\"},\"married\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"items\":{\"required\":[\"found_in_city\",\"found_in_dump\",\"trashed\",\"total\"],\"properties\":{\"found_in_city\":{\"type\":\"integer\",\"format\":\"int64\"},\"found_in_dump\":{\"type\":\"integer\",\"format\":\"int64\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int64\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"trading\":{\"required\":[\"sold_on_market\",\"sold_in_bazaar\",\"sold_points\",\"bazaar_profit\",\"auctions\",\"trades\",\"items_sent\"],\"properties\":{\"sold_on_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"sold_in_bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"sold_points\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar_profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"auctions\":{\"type\":\"integer\",\"format\":\"int64\"},\"trades\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_sent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"currency\":{\"required\":[\"money_on_hand\",\"money_on_hand_average\",\"money_in_bank\",\"points_total\",\"points_players\",\"points_factions\",\"points_market\",\"points_used\"],\"properties\":{\"money_on_hand\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_on_hand_average\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_in_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_total\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_players\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_factions\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"points_used\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"attacking\":{\"required\":[\"attacks_won\",\"attacks_lost\",\"attacks_stalemated\",\"attacks_stealthed\",\"escapes\",\"hits\",\"misses\",\"critical_hits\",\"rounds_fired\",\"money_mugged\",\"respect_gained\"],\"properties\":{\"attacks_won\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_lost\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_stalemated\":{\"type\":\"integer\",\"format\":\"int64\"},\"attacks_stealthed\":{\"type\":\"integer\",\"format\":\"int64\"},\"escapes\":{\"type\":\"integer\",\"format\":\"int64\"},\"hits\":{\"type\":\"integer\",\"format\":\"int64\"},\"misses\":{\"type\":\"integer\",\"format\":\"int64\"},\"critical_hits\":{\"type\":\"integer\",\"format\":\"int64\"},\"rounds_fired\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"respect_gained\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"jobs\":{\"required\":[\"army\",\"grocer\",\"casino\",\"education\",\"medical\",\"law\",\"company\",\"unemployed\"],\"properties\":{\"army\":{\"type\":\"integer\",\"format\":\"int64\"},\"grocer\":{\"type\":\"integer\",\"format\":\"int64\"},\"casino\":{\"type\":\"integer\",\"format\":\"int64\"},\"education\":{\"type\":\"integer\",\"format\":\"int64\"},\"medical\":{\"type\":\"integer\",\"format\":\"int64\"},\"law\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"},\"unemployed\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"jail\":{\"required\":[\"jailings\",\"busts\",\"busts_failed\",\"bails\",\"bails_spent\"],\"properties\":{\"jailings\":{\"type\":\"integer\",\"format\":\"int64\"},\"busts\":{\"type\":\"integer\",\"format\":\"int64\"},\"busts_failed\":{\"type\":\"integer\",\"format\":\"int64\"},\"bails\":{\"type\":\"integer\",\"format\":\"int64\"},\"bails_spent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"hospital\":{\"required\":[\"trips\",\"medical_items_used\",\"revives\"],\"properties\":{\"trips\":{\"type\":\"integer\",\"format\":\"int64\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int64\"},\"revives\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"drugs\":{\"required\":[\"total_used\",\"overdoses\",\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"shrooms\",\"speed\",\"pcp\",\"xanax\",\"vicodin\"],\"properties\":{\"total_used\":{\"type\":\"integer\",\"format\":\"int64\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int64\"},\"cannabis\":{\"type\":\"integer\",\"format\":\"int64\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int64\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int64\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int64\"},\"opium\":{\"type\":\"integer\",\"format\":\"int64\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int64\"},\"speed\":{\"type\":\"integer\",\"format\":\"int64\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int64\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int64\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"traveling\":{\"required\":[\"items_bought_abroad\",\"total_trips\",\"argentina\",\"mexico\",\"united_arab_emirates\",\"hawaii\",\"japan\",\"united_kingdom\",\"south_africa\",\"switzerland\",\"china\",\"cayman_islands\"],\"properties\":{\"items_bought_abroad\":{\"type\":\"integer\",\"format\":\"int64\"},\"total_trips\":{\"type\":\"integer\",\"format\":\"int64\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int64\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int64\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int64\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int64\"},\"japan\":{\"type\":\"integer\",\"format\":\"int64\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int64\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int64\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int64\"},\"china\":{\"type\":\"integer\",\"format\":\"int64\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"bounties\":{\"required\":[\"placed\",\"money_spent\"],\"properties\":{\"placed\":{\"type\":\"integer\",\"format\":\"int64\"},\"money_spent\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"crimes\":{\"required\":[\"total\",\"jail_sentences\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"jail_sentences\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"communication\":{\"required\":[\"total_messages\",\"friends\",\"coworkers\",\"spouses\",\"classified_ads_placed\",\"personals_placed\"],\"properties\":{\"total_messages\":{\"type\":\"integer\",\"format\":\"int64\"},\"friends\":{\"type\":\"integer\",\"format\":\"int64\"},\"coworkers\":{\"type\":\"integer\",\"format\":\"int64\"},\"spouses\":{\"type\":\"integer\",\"format\":\"int64\"},\"classified_ads_placed\":{\"type\":\"integer\",\"format\":\"int64\"},\"personals_placed\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"other\":{\"required\":[\"logins\",\"years_played\",\"merits_bought\",\"energy_refills\",\"company_trains\",\"stat_enhancers_used\"],\"properties\":{\"logins\":{\"type\":\"integer\",\"format\":\"int64\"},\"years_played\":{\"type\":\"integer\",\"format\":\"int64\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int64\"},\"energy_refills\":{\"type\":\"integer\",\"format\":\"int64\"},\"company_trains\":{\"type\":\"integer\",\"format\":\"int64\"},\"stat_enhancers_used\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"logcategories\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornLogCategory\"}},\"education\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornEducation\"}},\"merits\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornMerit\"}},\"organizedcrimes\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornOrganizedCrime\"}},\"itemdetails\":{\"anyOf\":[{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornItemStats\"}},{\"description\":\"Starting 1st January 2027, this response will return only an array of TornItemDetails.\",\"oneOf\":[{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornItemDetails\"}},{\"$ref\":\"#/components/schemas/TornItemDetailsDeprecated\",\"description\":\"This object is deprecated, and starting on 1st January 2027 it will be replaced with an array of TornItemDetails.\"}]}]},\"honors\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornHonor\"}},\"elimination\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornEliminationTeam\"}},\"cityshops\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornCityShop\"}},\"eliminationteam\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornEliminationTeamPlayer\"}},\"medals\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornMedal\"}},\"bank\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornBank\"}},\"bounties\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Bounty\"}},\"bounties_timestamp\":{\"type\":\"integer\",\"format\":\"int32\"},\"bounties_delay\":{\"description\":\"The minimum amount of time needed before the cache timestamp can change.\",\"type\":\"integer\",\"format\":\"int32\"},\"gyms\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornGym\"}},\"pokertables\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornPokerTable\"}},\"itemammo\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornItemAmmo\"}},\"properties\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"cost\",\"happy\",\"upkeep\",\"modifications\",\"staff\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/PropertyTypeId\"},\"name\":{\"type\":\"string\"},\"cost\":{\"type\":\"integer\",\"format\":\"int32\"},\"happy\":{\"type\":\"integer\",\"format\":\"int32\"},\"upkeep\":{\"type\":\"integer\",\"format\":\"int32\"},\"modifications\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PropertyModificationEnum\"}},\"staff\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PropertyStaffEnum\"}}},\"type\":\"object\"}},\"factionTree\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornFactionTree\"}},\"attacklog\":{\"required\":[\"log\",\"summary\"],\"properties\":{\"log\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/AttackLog\"}},\"summary\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/AttackLogSummary\"}}},\"type\":\"object\"},\"museum\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornMuseumSet\"}},\"stocks\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/TornStockDetailed\"},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornStock\"}}]},\"territory\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornTerritory\"}},\"itemmods\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornItemMods\"}},\"selections\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornSelectionName\"}},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"}}}";
     };
     pub const media_type = "application/json";
     pub const contract_json = "{\"tags\":[\"Torn\"],\"summary\":\"Get any Torn selection\",\"description\":\"Requires public access key. <br> Choose one or more selections (comma separated).\",\"operationId\":\"getTornGeneric\",\"parameters\":[{\"name\":\"selections\",\"in\":\"query\",\"description\":\"Selection names\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornSelectionName\"}}},{\"name\":\"id\",\"in\":\"query\",\"description\":\"selection id\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/LogCategoryId\"},{\"$ref\":\"#/components/schemas/TornCrimeId\"},{\"$ref\":\"#/components/schemas/StockId\"},{\"$ref\":\"#/components/schemas/EliminationTeamId\"},{\"$ref\":\"#/components/schemas/CityShopId\"},{\"$ref\":\"#/components/schemas/ItemUid\"},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ItemId\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/MedalId\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/HonorId\"}},{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/FactionTerritoryEnum\"}}]}},{\"name\":\"legacy\",\"in\":\"query\",\"description\":\"Legacy selection names for which you want or expect API v1 response\",\"required\":false,\"style\":\"form\",\"explode\":false,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/TornSelectionName\"}}},{\"$ref\":\"#/components/parameters/ApiStripTags\"},{\"$ref\":\"#/components/parameters/ApiLimit\"},{\"$ref\":\"#/components/parameters/ApiTo\"},{\"$ref\":\"#/components/parameters/ApiFrom\"},{\"$ref\":\"#/components/parameters/ApiSort\"},{\"name\":\"cat\",\"in\":\"query\",\"description\":\"Selection category\",\"required\":false,\"schema\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/TornFactionHofCategory\"},{\"$ref\":\"#/components/schemas/TornHofCategory\"},{\"$ref\":\"#/components/schemas/TornItemCategory\"}]}},{\"$ref\":\"#/components/parameters/ApiOffsetNoDefault\"},{\"$ref\":\"#/components/parameters/ApiTimestamp\"},{\"$ref\":\"#/components/parameters/ApiComment\"},{\"$ref\":\"#/components/parameters/ApiKeyPublic\"}],\"responses\":{\"200\":{\"description\":\"Successful operation\",\"content\":{\"application/json\":{\"schema\":{\"anyOf\":[{\"$ref\":\"#/components/schemas/TornSubcrimesResponse\"},{\"$ref\":\"#/components/schemas/TornCrimesResponse\"},{\"$ref\":\"#/components/schemas/TornCalendarResponse\"},{\"$ref\":\"#/components/schemas/TornHofResponse\"},{\"$ref\":\"#/components/schemas/TornFactionHofResponse\"},{\"$ref\":\"#/components/schemas/TornLogTypesResponse\"},{\"$ref\":\"#/components/schemas/TornCardsResponse\"},{\"$ref\":\"#/components/schemas/TornItemsResponse\"},{\"$ref\":\"#/components/schemas/TornRockPaperScissorsResponse\"},{\"$ref\":\"#/components/schemas/TornCityStatsResponse\"},{\"$ref\":\"#/components/schemas/TornLogCategoriesResponse\"},{\"$ref\":\"#/components/schemas/TornEducationResponse\"},{\"$ref\":\"#/components/schemas/TornMeritsResponse\"},{\"$ref\":\"#/components/schemas/TornOrganizedCrimeResponse\"},{\"$ref\":\"#/components/schemas/TornItemStatsResponse\"},{\"$ref\":\"#/components/schemas/TornHonorsResponse\"},{\"$ref\":\"#/components/schemas/TornItemDetailsResponse\"},{\"$ref\":\"#/components/schemas/TornEliminationTeamsResponse\"},{\"$ref\":\"#/components/schemas/TornCityShopsResponse\"},{\"$ref\":\"#/components/schemas/TornEliminationTeamPlayersResponse\"},{\"$ref\":\"#/components/schemas/TornMedalsResponse\"},{\"$ref\":\"#/components/schemas/TornBankResponse\"},{\"$ref\":\"#/components/schemas/TornBountiesResponse\"},{\"$ref\":\"#/components/schemas/TornGymsResponse\"},{\"$ref\":\"#/components/schemas/TornPokerTablesResponse\"},{\"$ref\":\"#/components/schemas/TornItemAmmoResponse\"},{\"$ref\":\"#/components/schemas/TornProperties\"},{\"$ref\":\"#/components/schemas/TornFactionTreeResponse\"},{\"$ref\":\"#/components/schemas/AttackLogResponse\"},{\"$ref\":\"#/components/schemas/TornMuseumResponse\"},{\"$ref\":\"#/components/schemas/TornStockDetailedResponse\"},{\"$ref\":\"#/components/schemas/TornStocksResponse\"},{\"$ref\":\"#/components/schemas/TornTerritoriesResponse\"},{\"$ref\":\"#/components/schemas/TornTerritoriesNoLinksResponse\"},{\"$ref\":\"#/components/schemas/TornItemModsResponse\"},{\"$ref\":\"#/components/schemas/TornLookupResponse\"},{\"$ref\":\"#/components/schemas/TimestampResponse\"}]}}}}},\"security\":[{\"api_key\":[]}],\"x-stability\":\"Stable\"}";

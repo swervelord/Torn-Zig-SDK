@@ -47,3 +47,18 @@ test "every generated concrete decoder is instantiated" {
         _ = model.convert(Op.Response, arena.allocator(), .null, &diagnostic) catch {};
     }
 }
+test "exact generic response retains all contributing selection fields concretely" {
+    const T = operations.getUserGeneric.Response;
+    const a = std.testing.allocator;
+    var result = try model.decode(T, a, "{\"job\":null,\"timestamp\":1000}");
+    defer result.deinit();
+    try std.testing.expect(result.value.job == .null);
+    try std.testing.expectEqual(@as(i64, 1000), result.value.timestamp.value);
+    const bytes = try model.stringify(a, result.value);
+    defer a.free(bytes);
+    try std.testing.expectEqualStrings("{\"job\":null,\"timestamp\":1000}", bytes);
+    var triple = try model.decode(T, a, "{\"job\":null,\"faction\":null,\"timestamp\":1000}");
+    defer triple.deinit();
+    try std.testing.expect(triple.value.job == .null and triple.value.faction == .null);
+    try std.testing.expectEqual(@as(i64, 1000), triple.value.timestamp.value);
+}

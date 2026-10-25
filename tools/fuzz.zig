@@ -7,6 +7,7 @@ pub fn main(init: std.process.Init) !void {
     const start = std.Io.Clock.awake.now(io).toMilliseconds();
     const iterations: usize = 100_000;
     var accepted: usize = 0;
+    const Choice = union(enum) { number: u64, text: []const u8, flag: bool };
     var entropy: [64]u8 = undefined;
     for (0..iterations) |iteration| {
         io.random(&entropy);
@@ -18,6 +19,26 @@ pub fn main(init: std.process.Init) !void {
         const signed: i64 = @bitCast(magnitude);
         const negative = try std.fmt.bufPrint(&negative_buf, "{d}0e-1", .{signed});
         if (try torn.model.integer(i64, negative) != signed) return error.SignedNumericPropertyViolation;
+        const union_input = switch (entropy[9] % 3) {
+            0 => number,
+            1 => "\"union-text\"",
+            else => "false",
+        };
+        var selected = try torn.model.decode(Choice, a, union_input);
+        defer selected.deinit();
+        switch (entropy[9] % 3) {
+            0 => if (selected.value != .number or selected.value.number != magnitude) return error.UnionPropertyViolation,
+            1 => if (selected.value != .text or !std.mem.eql(u8, selected.value.text, "union-text")) return error.UnionPropertyViolation,
+            else => if (selected.value != .flag or selected.value.flag) return error.UnionPropertyViolation,
+        }
+        var merge_arena = std.heap.ArenaAllocator.init(a);
+        defer merge_arena.deinit();
+        const ma = merge_arena.allocator();
+        const left_text = try std.fmt.allocPrint(ma, "{{\"keep\":{d},\"nested\":{{\"replace\":[1],\"keep\":true}}}}", .{magnitude});
+        var left = try std.json.parseFromSliceLeaky(torn.model.RawValue, ma, left_text, .{ .parse_numbers = false });
+        const right = try std.json.parseFromSliceLeaky(torn.model.RawValue, ma, "{\"nested\":{\"replace\":null,\"added\":false}}", .{ .parse_numbers = false });
+        try torn.client.merge(ma, &left, right);
+        if (try torn.model.integer(u64, left.object.get("keep").?.number_string) != magnitude or left.object.get("nested").?.object.get("replace").? != .null or !left.object.get("nested").?.object.get("keep").?.bool) return error.MergePropertyViolation;
         const length: usize = entropy[8] % 64;
         const encoded = try torn.planner.percentEncode(a, entropy[0..length]);
         defer a.free(encoded);
@@ -37,7 +58,7 @@ pub fn main(init: std.process.Init) !void {
         } else |err| if (err == error.OutOfMemory) return err;
     }
     const elapsed = std.Io.Clock.awake.now(io).toMilliseconds() - start;
-    const evidence = try std.fmt.allocPrint(a, "{{\"campaign\":\"os-entropy-property-mutations\",\"iterations\":{d},\"numeric_cases\":{d},\"encoding_cases\":{d},\"json_inputs\":{d},\"accepted_json\":{d},\"elapsed_ms\":{d},\"optimization\":\"{s}\",\"zig\":\"0.17.0\"}}\n", .{ iterations, iterations * 2, iterations, iterations, accepted, elapsed, @tagName(@import("builtin").mode) });
+    const evidence = try std.fmt.allocPrint(a, "{{\"campaign\":\"os-entropy-property-mutations\",\"iterations\":{d},\"numeric_cases\":{d},\"encoding_cases\":{d},\"json_inputs\":{d},\"union_cases\":100000,\"merge_cases\":100000,\"accepted_json\":{d},\"elapsed_ms\":{d},\"optimization\":\"{s}\",\"zig\":\"0.17.0\"}}\n", .{ iterations, iterations * 2, iterations, iterations, accepted, elapsed, @tagName(@import("builtin").mode) });
     defer a.free(evidence);
     try std.Io.Dir.cwd().writeFile(io, .{ .sub_path = "docs/fuzz-evidence.json", .data = evidence });
 }

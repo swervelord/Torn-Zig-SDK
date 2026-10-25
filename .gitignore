@@ -5,3 +5,4 @@ zig-out/
 *.obj
 .env
 spec/openapi-candidate.json
+spec/refresh-report.json

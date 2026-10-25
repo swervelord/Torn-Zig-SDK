@@ -35,7 +35,7 @@ pub fn main(init: std.process.Init) !void {
         if (!equal(old, pinned)) return error.HistoricalSemanticMismatch;
     }
 }
-fn equal(a: V, b: V) bool {
+pub fn equal(a: V, b: V) bool {
     if (std.meta.activeTag(a) != std.meta.activeTag(b)) return false;
     return switch (a) {
         .null => true,

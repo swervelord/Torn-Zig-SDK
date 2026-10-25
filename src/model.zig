@@ -1,6 +1,14 @@
 const std = @import("std");
 pub const RawValue = std.json.Value;
 pub const Raw = RawValue;
+pub const ExactNumber = struct { lexeme: []const u8 };
+pub const Checkpoint = struct {
+    context: ?*anyopaque = null,
+    check_fn: *const fn (?*anyopaque) error{ Canceled, Timeout }!void,
+    pub fn check(self: Checkpoint) error{ Canceled, Timeout }!void {
+        try self.check_fn(self.context);
+    }
+};
 pub const CompatField = struct { name: []const u8, key: []const u8, aliases: []const []const u8, has_default: bool, flatten: bool, custom: []const u8 };
 pub fn Presence(comptime T: type) type {
     return union(enum) {
@@ -40,15 +48,23 @@ pub fn Owned(comptime T: type) type {
         }
         /// Serializes current typed fields, retaining unknown original fields.
         pub fn toJson(self: @This(), allocator: std.mem.Allocator) ![]u8 {
+            return self.toJsonChecked(allocator, null);
+        }
+        pub fn toJsonChecked(self: @This(), allocator: std.mem.Allocator, checkpoint: ?Checkpoint) ![]u8 {
             var arena = std.heap.ArenaAllocator.init(allocator);
             defer arena.deinit();
-            const raw = try toRaw(T, arena.allocator(), self.value, self.raw);
-            return std.json.Stringify.valueAlloc(allocator, raw, .{});
+            const raw = try toRaw(T, arena.allocator(), self.value, self.raw, checkpoint);
+            if (checkpoint) |c| try c.check();
+            const output = try std.json.Stringify.valueAlloc(allocator, raw, .{});
+            errdefer allocator.free(output);
+            if (checkpoint) |c| try c.check();
+            return output;
         }
     };
 }
 
 pub const Diagnostic = struct {
+    checkpoint: ?Checkpoint = null,
     path: [512]u8 = @splat(0),
     path_len: usize = 0,
     reason: ?anyerror = null,
@@ -56,20 +72,26 @@ pub const Diagnostic = struct {
         return self.path[0..self.path_len];
     }
 };
-pub const DecodeError = error{ InvalidType, MissingField, AliasCollision, InvalidEnum, InvalidUnion, OutOfRange, NonIntegral, InvalidNumber, OutOfMemory };
+pub const DecodeError = error{ Canceled, Timeout, InvalidType, MissingField, AliasCollision, InvalidEnum, InvalidUnion, OutOfRange, NonIntegral, InvalidNumber, OutOfMemory };
 
 pub fn decode(comptime T: type, allocator: std.mem.Allocator, text: []const u8) !Owned(T) {
     var diagnostic: Diagnostic = .{};
     return decodeDetailed(T, allocator, text, &diagnostic);
 }
+pub fn decodeChecked(comptime T: type, allocator: std.mem.Allocator, text: []const u8, checkpoint: ?Checkpoint) !Owned(T) {
+    var diagnostic: Diagnostic = .{ .checkpoint = checkpoint };
+    return decodeDetailed(T, allocator, text, &diagnostic);
+}
 pub fn decodeDetailed(comptime T: type, allocator: std.mem.Allocator, text: []const u8, diagnostic: *Diagnostic) !Owned(T) {
-    diagnostic.* = .{};
+    diagnostic.* = .{ .checkpoint = diagnostic.checkpoint };
+    if (diagnostic.checkpoint) |c| try c.check();
     const arena = try allocator.create(std.heap.ArenaAllocator);
     errdefer allocator.destroy(arena);
     arena.* = std.heap.ArenaAllocator.init(allocator);
     errdefer arena.deinit();
     const a = arena.allocator();
     const raw = try std.json.parseFromSliceLeaky(RawValue, a, text, .{ .allocate = .alloc_always, .parse_numbers = false, .duplicate_field_behavior = .@"error" });
+    if (diagnostic.checkpoint) |c| try c.check();
     const value = convert(T, a, raw, diagnostic) catch |err| {
         diagnostic.reason = err;
         return err;
@@ -78,8 +100,33 @@ pub fn decodeDetailed(comptime T: type, allocator: std.mem.Allocator, text: []co
 }
 
 /// Exact bounded-space conversion of decimal/exponent JSON notation to integer domains.
+pub fn validNumberSyntax(text: []const u8) bool {
+    if (text.len == 0) return false;
+    var i: usize = if (text[0] == '-') 1 else 0;
+    if (i == text.len or text[i] < '0' or text[i] > '9') return false;
+    if (text[i] == '0') {
+        i += 1;
+        if (i < text.len and text[i] >= '0' and text[i] <= '9') return false;
+    } else {
+        while (i < text.len and text[i] >= '0' and text[i] <= '9') : (i += 1) {}
+    }
+    if (i < text.len and text[i] == '.') {
+        i += 1;
+        const start = i;
+        while (i < text.len and text[i] >= '0' and text[i] <= '9') : (i += 1) {}
+        if (i == start) return false;
+    }
+    if (i < text.len and (text[i] == 'e' or text[i] == 'E')) {
+        i += 1;
+        if (i < text.len and (text[i] == '+' or text[i] == '-')) i += 1;
+        const start = i;
+        while (i < text.len and text[i] >= '0' and text[i] <= '9') : (i += 1) {}
+        if (i == start) return false;
+    }
+    return i == text.len;
+}
 pub fn integer(comptime T: type, text: []const u8) DecodeError!T {
-    if (text.len == 0) return error.InvalidNumber;
+    if (!validNumberSyntax(text)) return error.InvalidNumber;
     const negative = text[0] == '-';
     const start: usize = if (negative) 1 else 0;
     var exponent_at = text.len;
@@ -169,7 +216,14 @@ fn push(d: *Diagnostic, key: []const u8) usize {
     return old;
 }
 pub fn convert(comptime T: type, a: std.mem.Allocator, raw: RawValue, d: *Diagnostic) DecodeError!T {
+    if (d.checkpoint) |c| try c.check();
     if (T == RawValue) return raw;
+    if (T == ExactNumber) return switch (raw) {
+        .number_string => |s| if (validNumberSyntax(s)) .{ .lexeme = s } else error.InvalidNumber,
+        .integer => |i| .{ .lexeme = try std.fmt.allocPrint(a, "{d}", .{i}) },
+        .float => |f| if (std.math.isFinite(f)) .{ .lexeme = try std.fmt.allocPrint(a, "{d}", .{f}) } else error.InvalidNumber,
+        else => error.InvalidType,
+    };
     if (comptime hasDecl(T, "presence_child")) {
         if (raw == .null) return .null;
         return .{ .value = try convert(T.presence_child, a, raw, d) };
@@ -268,14 +322,14 @@ pub fn convert(comptime T: type, a: std.mem.Allocator, raw: RawValue, d: *Diagno
             inline for (info.field_names, info.field_types) |field_name, field_type| {
                 const saved = d.*;
                 if (convert(field_type, a, raw, d)) |v| {
-                    const score = coverage(field_type, raw, 0);
+                    const score = try coverage(field_type, raw, 0, d.checkpoint);
                     if (score > best) {
                         selected = @unionInit(T, field_name, v);
                         best = score;
                     }
                     d.* = saved;
                 } else |err| {
-                    if (err == error.OutOfMemory) return err;
+                    if (err == error.OutOfMemory or err == error.Canceled or err == error.Timeout) return err;
                     d.* = saved;
                 }
             }
@@ -285,33 +339,34 @@ pub fn convert(comptime T: type, a: std.mem.Allocator, raw: RawValue, d: *Diagno
         else => @compileError("Unsupported JSON target type: " ++ @typeName(T)),
     }
 }
-fn coverage(comptime T: type, raw: Raw, depth: usize) i64 {
+fn coverage(comptime T: type, raw: Raw, depth: usize, checkpoint: ?Checkpoint) error{ Canceled, Timeout }!i64 {
+    if (checkpoint) |c| try c.check();
     if (depth > 64) return 0;
     if (T == Raw) return -1;
-    if (comptime hasDecl(T, "presence_child")) return coverage(T.presence_child, raw, depth + 1);
+    if (comptime hasDecl(T, "presence_child")) return coverage(T.presence_child, raw, depth + 1, checkpoint);
     if (comptime hasDecl(T, "map_child")) return 0;
     return switch (@typeInfo(T)) {
-        .optional => |o| if (raw == .null) 1 else coverage(o.child, raw, depth + 1),
+        .optional => |o| if (raw == .null) 1 else try coverage(o.child, raw, depth + 1, checkpoint),
         .pointer => |p| blk: {
-            if (p.size == .one) break :blk coverage(p.child, raw, depth + 1);
+            if (p.size == .one) break :blk try coverage(p.child, raw, depth + 1, checkpoint);
             if (p.child == u8) break :blk 1;
             if (raw != .array) break :blk 0;
             var score: i64 = 1;
-            for (raw.array.items) |value| score += @max(1, coverage(p.child, value, depth + 1));
+            for (raw.array.items) |value| score += @max(1, try coverage(p.child, value, depth + 1, checkpoint));
             break :blk score;
         },
         .@"struct" => |info| blk: {
             if (raw != .object) break :blk 0;
             var score: i64 = 1;
             inline for (info.field_names, info.field_types) |name, F| if (raw.object.get(name)) |value| {
-                score += 1 + @max(0, coverage(F, value, depth + 1));
+                score += 1 + @max(0, try coverage(F, value, depth + 1, checkpoint));
             };
             break :blk score;
         },
         .@"enum" => 3,
         .@"union" => |info| blk: {
             var best: i64 = 0;
-            inline for (info.field_types) |F| best = @max(best, coverage(F, raw, depth + 1));
+            inline for (info.field_types) |F| best = @max(best, try coverage(F, raw, depth + 1, checkpoint));
             break :blk best;
         },
         else => 1,
@@ -478,24 +533,34 @@ fn compatBranch(name: []const u8, raw: Raw) ?usize {
 }
 
 pub fn stringify(a: std.mem.Allocator, value: anytype) ![]u8 {
+    return stringifyChecked(a, value, null);
+}
+pub fn stringifyChecked(a: std.mem.Allocator, value: anytype, checkpoint: ?Checkpoint) ![]u8 {
     var arena = std.heap.ArenaAllocator.init(a);
     defer arena.deinit();
-    return std.json.Stringify.valueAlloc(a, try toRaw(@TypeOf(value), arena.allocator(), value, null), .{});
+    const raw = try toRaw(@TypeOf(value), arena.allocator(), value, null, checkpoint);
+    if (checkpoint) |c| try c.check();
+    const output = try std.json.Stringify.valueAlloc(a, raw, .{});
+    errdefer a.free(output);
+    if (checkpoint) |c| try c.check();
+    return output;
 }
 fn priorField(previous: ?Raw, key: []const u8) ?Raw {
     if (previous) |p| if (p == .object) return p.object.get(key);
     return null;
 }
-fn toRaw(comptime T: type, a: std.mem.Allocator, value: T, previous: ?Raw) anyerror!Raw {
+fn toRaw(comptime T: type, a: std.mem.Allocator, value: T, previous: ?Raw, checkpoint: ?Checkpoint) anyerror!Raw {
+    if (checkpoint) |c| try c.check();
     if (T == Raw) return value;
+    if (T == ExactNumber) return if (validNumberSyntax(value.lexeme)) .{ .number_string = value.lexeme } else error.InvalidNumber;
     if (comptime hasDecl(T, "presence_child")) return switch (value) {
         .absent => .null,
         .null => .null,
-        .value => |v| toRaw(T.presence_child, a, v, previous),
+        .value => |v| toRaw(T.presence_child, a, v, previous, checkpoint),
     };
     if (comptime hasDecl(T, "map_child")) {
         var object: std.json.ObjectMap = .{};
-        for (value.entries) |entry| try object.put(a, entry.key, try toRaw(T.map_child, a, entry.value, priorField(previous, entry.key)));
+        for (value.entries) |entry| try object.put(a, entry.key, try toRaw(T.map_child, a, entry.value, priorField(previous, entry.key), checkpoint));
         return .{ .object = object };
     }
     return switch (@typeInfo(T)) {
@@ -503,22 +568,22 @@ fn toRaw(comptime T: type, a: std.mem.Allocator, value: T, previous: ?Raw) anyer
         .int => .{ .number_string = try std.fmt.allocPrint(a, "{d}", .{value}) },
         .float => if (std.math.isFinite(value)) .{ .number_string = try std.fmt.allocPrint(a, "{d}", .{value}) } else error.InvalidNumber,
         .void => .null,
-        .optional => |info| if (value) |v| toRaw(info.child, a, v, previous) else .null,
+        .optional => |info| if (value) |v| toRaw(info.child, a, v, previous, checkpoint) else .null,
         .pointer => |info| blk: {
-            if (info.size == .one) break :blk try toRaw(info.child, a, value.*, previous);
+            if (info.size == .one) break :blk try toRaw(info.child, a, value.*, previous, checkpoint);
             if (info.size != .slice) return error.InvalidType;
             if (info.child == u8) break :blk .{ .string = value };
             var items = std.array_list.Managed(Raw).init(a);
             for (value, 0..) |v, i| {
                 const prior = if (previous) |p| if (p == .array and i < p.array.items.len) p.array.items[i] else null else null;
-                try items.append(try toRaw(info.child, a, v, prior));
+                try items.append(try toRaw(info.child, a, v, prior, checkpoint));
             }
             break :blk .{ .array = items };
         },
         .@"enum" => if (comptime hasDecl(T, "json_numeric")) .{ .number_string = @tagName(value) } else .{ .string = @tagName(value) },
         .@"union" => |info| blk: {
             inline for (info.field_names, info.field_types, 0..) |name, F, index| if (std.meta.activeTag(value) == @field(info.tag_type.?, name)) {
-                const payload = try toRaw(F, a, @field(value, name), previous);
+                const payload = try toRaw(F, a, @field(value, name), previous, checkpoint);
                 if (comptime hasDecl(T, "compatibility_name")) break :blk try unionSerialized(a, T.compatibility_name, index, payload);
                 break :blk payload;
             };
@@ -538,7 +603,7 @@ fn toRaw(comptime T: type, a: std.mem.Allocator, value: T, previous: ?Raw) anyer
                 }
                 inline for (info.field_names, info.field_types, T.compatibility_fields) |name, F, meta| {
                     if (comptime meta.flatten) {
-                        const extra = try toRaw(F, a, @field(value, name), null);
+                        const extra = try toRaw(F, a, @field(value, name), null, checkpoint);
                         var it = extra.object.iterator();
                         while (it.next()) |entry| {
                             try object.put(a, entry.key_ptr.*, entry.value_ptr.*);
@@ -548,14 +613,14 @@ fn toRaw(comptime T: type, a: std.mem.Allocator, value: T, previous: ?Raw) anyer
                         inline for (meta.aliases) |alias| {
                             if (prior == null) prior = priorField(previous, alias);
                         }
-                        try object.put(a, meta.key, try toRaw(F, a, @field(value, name), prior));
+                        try object.put(a, meta.key, try toRaw(F, a, @field(value, name), prior, checkpoint));
                     }
                 }
             } else {
                 inline for (info.field_names, info.field_types) |name, F| {
                     if (comptime hasDecl(F, "presence_child")) {
-                        if (@field(value, name) != .absent) try object.put(a, name, try toRaw(F, a, @field(value, name), priorField(previous, name)));
-                    } else try object.put(a, name, try toRaw(F, a, @field(value, name), priorField(previous, name)));
+                        if (@field(value, name) != .absent) try object.put(a, name, try toRaw(F, a, @field(value, name), priorField(previous, name), checkpoint));
+                    } else try object.put(a, name, try toRaw(F, a, @field(value, name), priorField(previous, name), checkpoint));
                 }
             }
             break :blk .{ .object = object };
@@ -619,4 +684,44 @@ fn allocationScenario(a: std.mem.Allocator) !void {
 }
 test "systematic allocation failures clean up owned decoding" {
     try std.testing.checkAllAllocationFailures(std.testing.allocator, allocationScenario, .{});
+}
+
+test "integer helper enforces JSON number grammar before range interpretation" {
+    const malformed = [_][]const u8{ "", "-", "+1", "01", "-01", "00", "1.", ".0", "-.0", "1e", "1e+", "1e-", "1e_3", "1e1_0", "1e--1", "1e+-1", " 1", "1 ", "1.0.0", "1ee2" };
+    for (malformed) |text| try std.testing.expectError(error.InvalidNumber, integer(i64, text));
+    const valid = .{ .{ "0", @as(i64, 0) }, .{ "-0", @as(i64, 0) }, .{ "1e+3", @as(i64, 1000) }, .{ "1E3", @as(i64, 1000) }, .{ "100e-2", @as(i64, 1) }, .{ "1.000e3", @as(i64, 1000) } };
+    inline for (valid) |case| try std.testing.expectEqual(case[1], try integer(i64, case[0]));
+    try std.testing.expectEqual(@as(i64, 0), try integer(i64, "0e999999999999999999999999999999999999999999999999999999999999999999"));
+    try std.testing.expectError(error.OutOfRange, integer(i64, "1e999999999999999999999999999999999999999999999999999999999999999999"));
+}
+const TestCheckpoint = struct {
+    calls: usize = 0,
+    fail_at: usize,
+    timeout: bool = false,
+    fn check(context: ?*anyopaque) error{ Canceled, Timeout }!void {
+        const self: *TestCheckpoint = @ptrCast(@alignCast(context.?));
+        self.calls += 1;
+        if (self.calls >= self.fail_at) return if (self.timeout) error.Timeout else error.Canceled;
+    }
+    fn checkpoint(self: *TestCheckpoint) Checkpoint {
+        return .{ .context = self, .check_fn = check };
+    }
+};
+test "decoding and serialization checkpoint cancellation clean up partial work" {
+    const T = struct { items: []const struct { id: u64 } };
+    const text = "{\"items\":[{\"id\":1},{\"id\":2},{\"id\":3}]}";
+    var canceled: TestCheckpoint = .{ .fail_at = 6 };
+    try std.testing.expectError(error.Canceled, decodeChecked(T, std.testing.allocator, text, canceled.checkpoint()));
+    var deadline: TestCheckpoint = .{ .fail_at = 6, .timeout = true };
+    try std.testing.expectError(error.Timeout, decodeChecked(T, std.testing.allocator, text, deadline.checkpoint()));
+    var result = try decode(T, std.testing.allocator, text);
+    defer result.deinit();
+    var serialize: TestCheckpoint = .{ .fail_at = 4 };
+    try std.testing.expectError(error.Canceled, result.toJsonChecked(std.testing.allocator, serialize.checkpoint()));
+    var standalone: TestCheckpoint = .{ .fail_at = 4, .timeout = true };
+    try std.testing.expectError(error.Timeout, stringifyChecked(std.testing.allocator, result.value, standalone.checkpoint()));
+    try std.testing.expectEqual(@as(u64, 3), result.value.items[2].id);
+    const bytes = try result.toJson(std.testing.allocator);
+    defer std.testing.allocator.free(bytes);
+    try std.testing.expectEqualStrings(text, bytes);
 }

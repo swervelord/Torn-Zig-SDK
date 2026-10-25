@@ -60,7 +60,8 @@ unknown variants also retain raw values. Current elimination requires
 the authoritative snapshots. Its fixture producer is separate from the
 generator and decoder and never derives goldens from implementation output.
 It checks three boundary variants for every component, then every root
-union alternative: 2,214 current and 2,210 frozen acceptance/typed-roundtrip
+union alternative and every literal of all 86 named enum components:
+7,423 current and 7,419 frozen acceptance/typed-roundtrip
 samples. Cases include missing optional fields, nullable alternatives,
 empty/nonempty arrays, named enums, exact integers above 2^53, and required
 unconstrained properties. The tests compare serialized concrete typed values
@@ -78,3 +79,19 @@ possible game state, or 100% branch coverage. Singleton schemas naturally
 have fewer than three distinct valid values. The structural oracle is
 contract-derived, while compatibility input/expected scenarios are
 handwritten; both evidence sources are retained separately.
+
+`typing-report.json` lists all 1,938 recorded raw-value locations: 788
+current, 787 frozen, and 363 maintained compatibility locations. These
+include permissive unknown fields retained by the owned raw tree, not just
+explicit raw-valued fields. Explicit open objects use `Map(Raw)` so their
+object domain is concrete. Maintained exact-number branches use
+`model.ExactNumber { lexeme }`, which accepts only valid JSON numbers and
+preserves their notation without conversion through floating point.
+
+Checked decode, validation, and serialization APIs accept an optional
+`model.Checkpoint` callback that can return `Canceled` or `Timeout`. It runs
+before/after synchronous JSON scanning/emission and between recursive
+conversion/validation/serialization nodes. Partial arenas and output
+buffers are cleaned up on cancellation. The standard library scanner and
+emitter perform synchronous spans between checkpoints; there is no
+instruction-level interruption guarantee inside those spans.

@@ -9,6 +9,30 @@
     "Company companies is conservatively direct because the current /company 200 schema omits CompanyCompaniesResponse, despite enum membership. Other company selections with generic response branches can combine.",
     "Generic batching requires both enum membership and an associated response branch; exact paths take precedence over stale legacy descriptions."
   ],
+  "reviewed_additions": {
+    "evidence": "Official 6.13.8 exact required query parameters and ID component schemas; compare /torn generic id and parameter allowlists with /torn/attacklog.",
+    "notes": [
+      "attacklog requires log, which the generic /torn allowlist does not accept; use the exact endpoint rather than omitting its required input.",
+      "The same placeholder name ids does not make item, honor and medal domains interchangeable. The same placeholder id does not make market auction-listing IDs and item IDs interchangeable.",
+      "Torn territory uses generic id and exact query ids. Neutral lookup/timestamp selections do not consume a specialized ID."
+    ]
+  },
+  "force_direct": ["torn/attacklog"],
+  "id_domains": {
+    "user/factionbalance": {"domain":"id","parameter":"id","query":false},
+    "user/itemmod": {"domain":"id","parameter":"id","query":false},
+    "faction/dirtbombs": {"domain":"id","parameter":"id","query":false},
+    "torn/items": {"domain":"itemIds","parameter":"ids","query":false},
+    "torn/itemdetails": {"domain":"itemIds","parameter":"ids","query":false},
+    "torn/itemstats": {"domain":"itemIds","parameter":"ids","query":false},
+    "torn/honors": {"domain":"honorIds","parameter":"ids","query":false},
+    "torn/medals": {"domain":"medalIds","parameter":"ids","query":false},
+    "torn/territory": {"domain":"territoryIds","parameter":"ids","query":true},
+    "market/auctionhouselisting": {"domain":"auctionListingId","parameter":"id","query":false},
+    "market/auctionhouse": {"domain":"itemId","parameter":"id","query":false},
+    "market/bazaar": {"domain":"itemId","parameter":"id","query":false},
+    "market/itemmarket": {"domain":"itemId","parameter":"id","query":false}
+  },
   "generic_only_responses": {
     "user/factionbalance": "UserFactionBalanceResponse",
     "user/itemmod": "UserItemModsResponse",

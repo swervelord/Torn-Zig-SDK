@@ -154,6 +154,38 @@ fn genericOperation(resource: Resource) []const u8 {
     };
 }
 const Domain = struct { name: []const u8, required: bool };
+fn pathDomain(cap: Value, name: []const u8) Domain {
+    var d = domain(cap, name);
+    if (domainOverride(cap, name)) |entry| d.name = entry.name;
+    return d;
+}
+fn domainOverride(cap: Value, name: []const u8) ?data.IdDomain {
+    for (data.id_domains) |entry| if (same(entry.resource, string(field(cap, "resource"))) and same(entry.selection, name)) return entry;
+    return null;
+}
+fn domainParameter(cap: Value, name: []const u8) []const u8 {
+    return if (domainOverride(cap, name)) |entry| entry.parameter else domain(cap, name).name;
+}
+fn directOverride(resource: Resource, name: []const u8) bool {
+    for (data.force_direct) |entry| {
+        const slash = std.mem.indexOfScalar(u8, entry, '/').?;
+        if (same(entry[0..slash], @tagName(resource)) and same(entry[slash + 1 ..], name)) return true;
+    }
+    return false;
+}
+fn queryRequirements(input: Input, selection: []const u8) !bool {
+    var compatible_generic = true;
+    for (data.required_queries) |required| {
+        if (!same(required.resource, @tagName(input.resource)) or !same(required.selection, selection)) continue;
+        const value = findArg(input.filters, required.parameter) orelse {
+            if (required.required) return error.MissingRequiredParameter;
+            continue;
+        };
+        if (required.choices.len > 0 and !inStrings(required.choices, value)) return error.InvalidParameterValue;
+        if (!inStrings(genericParameters(input.resource), required.parameter)) compatible_generic = false;
+    }
+    return compatible_generic;
+}
 fn domain(cap: Value, name: []const u8) Domain {
     if (flag(cap, "legacy")) return .{ .name = "id", .required = false };
     if (same(name, "timestamp") or same(name, "lookup")) return .{ .name = "neutral", .required = false };
@@ -169,8 +201,6 @@ fn domain(cap: Value, name: []const u8) Domain {
             result = "id";
         };
     }
-    // The explicit generic-only overrides use generic ID interpretation.
-    if (same(name, "factionbalance") or same(name, "itemmod") or same(name, "dirtbombs")) result = "id";
     return .{ .name = result, .required = !optional };
 }
 fn hasOptionalEndpoint(cap: Value) bool {
@@ -316,7 +346,7 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
     for (names.items) |name| {
         try checkpoint(input);
         if (capability(manifest.value, input.resource, name)) |cap| {
-            const d = domain(cap, name);
+            const d = pathDomain(cap, name);
             if (d.required and input.target.len == 0) return error.MissingOrConflictingTarget;
             if (input.target.len > 0 and !same(d.name, "neutral")) {
                 if (same(d.name, "self")) return error.MissingOrConflictingTarget;
@@ -324,7 +354,7 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
                     if (!same(previous, d.name)) return error.ConflictingTargetDomains;
                 } else shared_domain = d.name;
                 const arg = input.target[0];
-                if (!same(arg.name, "id") and !same(arg.name, d.name)) return error.MissingOrConflictingTarget;
+                if (!same(arg.name, "id") and !same(arg.name, d.name) and !same(arg.name, domainParameter(cap, name))) return error.MissingOrConflictingTarget;
             }
         }
     }
@@ -339,7 +369,8 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
             try legacy.append(a, name);
             continue;
         }
-        if (flag(cap, "generic") and !flag(cap, "standalone") and !input.force_direct) {
+        const compatible_generic = try queryRequirements(input, name);
+        if (flag(cap, "generic") and !flag(cap, "standalone") and !input.force_direct and compatible_generic and !directOverride(input.resource, name)) {
             try generic.append(a, name);
         } else {
             if (input.target.len > 0 and (same(name, "timestamp") or same(name, "lookup"))) {
@@ -349,8 +380,15 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
             } else {
                 var direct = input;
                 var translated: [1]Argument = undefined;
-                if (input.target.len == 1 and same(input.target[0].name, "id")) {
-                    translated[0] = .{ .name = domain(cap, name).name, .value = input.target[0].value };
+                const override = domainOverride(cap, name);
+                if (override != null and override.?.query and input.target.len == 1) {
+                    direct.target = &.{};
+                    const extended = try a.alloc(Argument, input.filters.len + 1);
+                    @memcpy(extended[0..input.filters.len], input.filters);
+                    extended[input.filters.len] = .{ .name = override.?.parameter, .value = input.target[0].value };
+                    direct.filters = extended;
+                } else if (input.target.len == 1 and (same(input.target[0].name, "id") or same(input.target[0].name, pathDomain(cap, name).name))) {
+                    translated[0] = .{ .name = domainParameter(cap, name), .value = input.target[0].value };
                     direct.target = &translated;
                 }
                 try calls.append(a, try directCall(a, direct, cap, name));
@@ -597,5 +635,49 @@ test "cancellation at every serialization checkpoint releases partial plans" {
     for (0..checkpoints) |at| {
         state = .{ .cancel_at = at };
         try std.testing.expectError(error.Canceled, build(std.testing.allocator, input));
+    }
+}
+
+test "required query parameters are not silently omitted by selection helpers" {
+    const cases = .{
+        .{ Resource.user, "list" },             .{ Resource.faction, "contributors" },
+        .{ Resource.faction, "inventory" },     .{ Resource.faction, "news" },
+        .{ Resource.faction, "warfarechains" }, .{ Resource.faction, "warfare" },
+        .{ Resource.company, "news" },          .{ Resource.torn, "attacklog" },
+        .{ Resource.torn, "factionhof" },       .{ Resource.torn, "hof" },
+    };
+    inline for (cases) |c| try std.testing.expectError(error.MissingRequiredParameter, build(std.testing.allocator, .{ .resource = c[0], .selections = &.{c[1]} }));
+    try std.testing.expectError(error.MissingRequiredParameter, build(std.testing.allocator, .{ .resource = .racing, .selections = &.{"records"}, .target = &.{.{ .name = "trackId", .value = "1" }} }));
+}
+
+test "incompatible shared categories fail against each selection contract" {
+    try std.testing.expectError(error.InvalidParameterValue, build(std.testing.allocator, .{ .resource = .faction, .selections = &.{ "news", "warfarechains" }, .filters = &.{.{ .name = "cat", .value = "main" }} }));
+    try std.testing.expectError(error.InvalidParameterValue, build(std.testing.allocator, .{ .resource = .faction, .selections = &.{ "news", "crimes" }, .filters = &.{.{ .name = "cat", .value = "main" }} }));
+    try std.testing.expectError(error.InvalidParameterValue, build(std.testing.allocator, .{ .resource = .company, .selections = &.{"news"}, .filters = &.{.{ .name = "cat", .value = "MAIN" }} }));
+}
+
+test "attack log required query routes to exact operation" {
+    var plan = try build(std.testing.allocator, .{ .resource = .torn, .selections = &.{"attacklog"}, .filters = &.{.{ .name = "log", .value = "d51ad4fe6be884b309b142e2d1d4f807" }} });
+    defer plan.deinit();
+    try std.testing.expectEqualStrings("/torn/attacklog", plan.calls[0].path);
+    try std.testing.expectEqualStrings("log=d51ad4fe6be884b309b142e2d1d4f807", plan.calls[0].query);
+}
+
+test "item honor medal and auction listing IDs remain separate domains" {
+    try std.testing.expectError(error.ConflictingTargetDomains, build(std.testing.allocator, .{ .resource = .torn, .selections = &.{ "items", "honors" }, .target = &.{.{ .name = "ids", .value = "1,2" }} }));
+    try std.testing.expectError(error.ConflictingTargetDomains, build(std.testing.allocator, .{ .resource = .torn, .selections = &.{ "honors", "medals" }, .target = &.{.{ .name = "ids", .value = "1,2" }} }));
+    try std.testing.expectError(error.ConflictingTargetDomains, build(std.testing.allocator, .{ .resource = .market, .selections = &.{ "auctionhouselisting", "itemmarket" }, .target = &.{.{ .name = "id", .value = "1" }} }));
+    var plan = try build(std.testing.allocator, .{ .resource = .torn, .selections = &.{ "items", "itemdetails", "itemstats" }, .target = &.{.{ .name = "itemIds", .value = "1,2" }} });
+    defer plan.deinit();
+    try std.testing.expectEqual(@as(usize, 1), plan.calls.len);
+    try std.testing.expectEqualStrings("selections=itemdetails%2Citems%2Citemstats&id=1%2C2", plan.calls[0].query);
+}
+
+test "territory ID list maps generic id and direct query ids correctly" {
+    inline for (.{ false, true }) |direct| {
+        var plan = try build(std.testing.allocator, .{ .resource = .torn, .selections = &.{"territory"}, .target = &.{.{ .name = "territoryIds", .value = "AAA,AAB" }}, .force_direct = direct });
+        defer plan.deinit();
+        try std.testing.expectEqualStrings(if (direct) "/torn/territory" else "/torn", plan.calls[0].path);
+        try std.testing.expectEqualStrings(if (direct) "ids=AAA%2CAAB" else "selections=territory&id=AAA%2CAAB", plan.calls[0].query);
     }
 }

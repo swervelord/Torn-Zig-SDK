@@ -6642,8 +6642,8 @@ pub const UserLog = struct {
         category: []const u8,
         pub const json_schema = "{\"required\":[\"id\",\"title\",\"category\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/LogId\"},\"title\":{\"type\":\"string\"},\"category\":{\"type\":\"string\"}},\"type\":\"object\"}";
     },
-    data: model.Raw,
-    params: model.Raw,
+    data: model.Map(model.Raw),
+    params: model.Map(model.Raw),
     pub const json_schema = "{\"required\":[\"id\",\"timestamp\",\"details\",\"data\",\"params\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserLogId\"},\"timestamp\":{\"type\":\"integer\",\"format\":\"int32\"},\"details\":{\"required\":[\"id\",\"title\",\"category\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/LogId\"},\"title\":{\"type\":\"string\"},\"category\":{\"type\":\"string\"}},\"type\":\"object\"},\"data\":{\"description\":\"Dynamic key-value pairs related to the log.\",\"type\":\"object\"},\"params\":{\"description\":\"Dynamic key-value pairs related to the log.\",\"type\":\"object\"}},\"type\":\"object\"}";
 };
 pub const UserLogsResponse = struct {

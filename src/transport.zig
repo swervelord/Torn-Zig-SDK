@@ -63,6 +63,7 @@ pub fn nativeSend(_: ?*anyopaque, allocator: std.mem.Allocator, io: std.Io, requ
         const proxy_uri = try std.Uri.parse(url);
         if (std.ascii.eqlIgnoreCase(uri.scheme, "https")) return secureProxySend(&client, allocator, scratch.allocator(), io, request, uri, proxy_uri);
         const protocol = std.http.Client.Protocol.fromUri(proxy_uri) orelse return error.UnsupportedProxyScheme;
+        if (protocol == .tls) return error.SecureProxyUnsupported;
         const proxy_auth: ?[]const u8 = if (proxy_uri.user != null or proxy_uri.password != null) auth: {
             const user_component: std.Uri.Component = proxy_uri.user orelse .empty;
             const password_component: std.Uri.Component = proxy_uri.password orelse .empty;
@@ -411,6 +412,11 @@ test "native HTTPS rejects a malformed TLS peer before sending authentication" {
 test "nested TLS proxy rejects unsupported upgrade before any network access" {
     try std.testing.expectError(error.SecureProxyUnsupported, nativeSend(null, std.testing.allocator, std.testing.io, .{
         .url = "https://does-not-resolve.invalid/user",
+        .api_key = "test-key",
+        .proxy_url = "https://127.0.0.1:1",
+    }));
+    try std.testing.expectError(error.SecureProxyUnsupported, nativeSend(null, std.testing.allocator, std.testing.io, .{
+        .url = "http://does-not-resolve.invalid/user",
         .api_key = "test-key",
         .proxy_url = "https://127.0.0.1:1",
     }));

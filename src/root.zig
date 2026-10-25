@@ -35,4 +35,6 @@ test {
     _ = @import("exact_checks.zig");
     _ = @import("operation_tests.zig");
     _ = @import("model_contract_tests.zig");
+    _ = @import("helper_tests.zig");
+    _ = @import("execution_tests.zig");
 }

@@ -401,5 +401,137 @@
     {"resource":"user","selection":"virus","public_api":"planner.build(allocator, Input with mode=v1)","membership_api":"planner.v1Contains","result":"model.RawValue"},
     {"resource":"user","selection":"weaponexp","public_api":"planner.build(allocator, Input with mode=v1)","membership_api":"planner.v1Contains","result":"model.RawValue"},
     {"resource":"user","selection":"workstats","public_api":"planner.build(allocator, Input with mode=v1)","membership_api":"planner.v1Contains","result":"model.RawValue"}
-  ]
+  ],
+  "reviewed_routing_overrides": {
+  "sources": [
+    "https://www.torn.com/swagger/openapi.json",
+    "https://github.com/swervelord/Torn-API/blob/main/Torn%20API/01%20Combining%20Selections.md"
+  ],
+  "notes": [
+    "Generic-only response associations join enum names to generic anyOf branches where no exact endpoint exists.",
+    "These legacy selections are explicitly named unavailable in v2 in the official selection schema descriptions. They use v1 raw payloads because no authoritative complete v1 payload schemas are supplied.",
+    "Company companies is conservatively direct because the current /company 200 schema omits CompanyCompaniesResponse, despite enum membership. Other company selections with generic response branches can combine.",
+    "Generic batching requires both enum membership and an associated response branch; exact paths take precedence over stale legacy descriptions."
+  ],
+  "reviewed_additions": {
+    "evidence": "Official 6.13.8 exact required query parameters and ID component schemas; compare /torn generic id and parameter allowlists with /torn/attacklog.",
+    "notes": [
+      "attacklog requires log, which the generic /torn allowlist does not accept; use the exact endpoint rather than omitting its required input.",
+      "The same placeholder name ids does not make item, honor and medal domains interchangeable. The same placeholder id does not make market auction-listing IDs and item IDs interchangeable.",
+      "Torn territory uses generic id and exact query ids. Neutral lookup/timestamp selections do not consume a specialized ID."
+    ]
+  },
+  "force_direct": [
+    "torn/attacklog"
+  ],
+  "id_domains": {
+    "user/factionbalance": {
+      "domain": "id",
+      "parameter": "id",
+      "query": false
+    },
+    "user/itemmod": {
+      "domain": "id",
+      "parameter": "id",
+      "query": false
+    },
+    "faction/dirtbombs": {
+      "domain": "id",
+      "parameter": "id",
+      "query": false
+    },
+    "torn/items": {
+      "domain": "itemIds",
+      "parameter": "ids",
+      "query": false
+    },
+    "torn/itemdetails": {
+      "domain": "itemIds",
+      "parameter": "ids",
+      "query": false
+    },
+    "torn/itemstats": {
+      "domain": "itemIds",
+      "parameter": "ids",
+      "query": false
+    },
+    "torn/honors": {
+      "domain": "honorIds",
+      "parameter": "ids",
+      "query": false
+    },
+    "torn/medals": {
+      "domain": "medalIds",
+      "parameter": "ids",
+      "query": false
+    },
+    "torn/territory": {
+      "domain": "territoryIds",
+      "parameter": "ids",
+      "query": true
+    },
+    "market/auctionhouselisting": {
+      "domain": "auctionListingId",
+      "parameter": "id",
+      "query": false
+    },
+    "market/auctionhouse": {
+      "domain": "itemId",
+      "parameter": "id",
+      "query": false
+    },
+    "market/bazaar": {
+      "domain": "itemId",
+      "parameter": "id",
+      "query": false
+    },
+    "market/itemmarket": {
+      "domain": "itemId",
+      "parameter": "id",
+      "query": false
+    }
+  },
+  "generic_only_responses": {
+    "user/factionbalance": "UserFactionBalanceResponse",
+    "user/itemmod": "UserItemModsResponse",
+    "faction/dirtbombs": "FactionWarfareDirtyBombsResponse"
+  },
+  "legacy_selections": {
+    "faction": [
+      "armor",
+      "boosters",
+      "caches",
+      "cesium",
+      "drugs",
+      "medical",
+      "temporary",
+      "utilities",
+      "weapons"
+    ],
+    "torn": [
+      "pawnshop"
+    ]
+  },
+  "compatibility_types": {
+    "company/employees": "CompanyEmployeesBundle",
+    "company/profile": "CompanyProfileBundle",
+    "market/bazaar": "MarketBazaarBundle",
+    "torn/stocks": "TornStocksBundle",
+    "faction/armor": "FactionArmorBundle",
+    "faction/boosters": "FactionBoostersBundle",
+    "faction/caches": "FactionCachesBundle",
+    "faction/cesium": "FactionCesiumBundle",
+    "faction/drugs": "FactionDrugsBundle",
+    "faction/medical": "FactionMedicalBundle",
+    "faction/temporary": "FactionTemporaryBundle",
+    "faction/utilities": "FactionUtilitiesBundle",
+    "faction/weapons": "FactionWeaponsBundle",
+    "torn/competition": "TornCompetitionBundle",
+    "torn/organisedcrimes": "TornOrganisedCrimesBundle",
+    "torn/pawnshop": "TornPawnshopBundle",
+    "user/bazaar": "UserBazaarBundle",
+    "user/criminalrecord": "UserCriminalRecordBundle",
+    "user/display": "UserDisplayBundle"
+  }
+}
 }

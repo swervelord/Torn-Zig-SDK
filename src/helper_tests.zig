@@ -64,7 +64,20 @@ fn resolveParameter(doc: V, p: V) V {
 fn pathCount(path: []const u8) usize {
     return std.mem.count(u8, path, "{");
 }
-const Expected = struct { url: []const u8, target: []const planner.Argument, response: V, csv: bool, version: u8 };
+const Expected = struct { url: []const u8, target: []const planner.Argument, filters: []const planner.Argument = &.{}, response: V, csv: bool, version: u8 };
+fn scalarText(a: std.mem.Allocator, v: V) ![]const u8 {
+    return switch (v) {
+        .string => v.string,
+        .number_string => v.number_string,
+        .integer => try std.fmt.allocPrint(a, "{d}", .{v.integer}),
+        else => error.InvalidFilterFixture,
+    };
+}
+fn parameterAllowed(doc: V, operation: V, name: []const u8) bool {
+    const parameters = get(operation, "parameters") orelse return false;
+    for (parameters.array.items) |p| if (eq(resolveParameter(doc, p).object.get("name").?.string, name)) return true;
+    return false;
+}
 
 fn expected(comptime Token: type, a: std.mem.Allocator, doc: V) !Expected {
     const resource = @tagName(Token.resource);
@@ -82,7 +95,7 @@ fn expected(comptime Token: type, a: std.mem.Allocator, doc: V) !Expected {
         const path = entry.key_ptr.*;
         if (!std.mem.startsWith(u8, path, base) or path.len <= base.len or path[base.len] != '/') continue;
         const slash = std.mem.lastIndexOfScalar(u8, path, '/').?;
-        if (!eq(path[slash + 1 ..], match_name)) continue;
+        if (!std.ascii.eqlIgnoreCase(path[slash + 1 ..], match_name)) continue;
         if (comptime @hasDecl(Token, "required_target")) {
             const placeholder = "{" ++ Token.required_target ++ "}";
             if (std.mem.indexOf(u8, path, placeholder) == null) continue;
@@ -107,12 +120,19 @@ fn expected(comptime Token: type, a: std.mem.Allocator, doc: V) !Expected {
         return error.MissingIndependentSelectionEndpoint;
     }
     var target: std.ArrayList(planner.Argument) = .empty;
+    var filters: std.ArrayList(planner.Argument) = .empty;
     if (selected_path != null) if (get(operation, "parameters")) |parameters| for (parameters.array.items) |p| {
         const parameter = resolveParameter(doc, p);
         if (eq(parameter.object.get("in").?.string, "path")) {
             const parameter_name = parameter.object.get("name").?.string;
             const value = if (eq(parameter_name, "ids") or eq(parameter_name, "categoryIds")) "1,2" else "1";
             try target.append(a, .{ .name = parameter_name, .value = value });
+        } else if (get(parameter, "required")) |required| {
+            const parameter_name = parameter.object.get("name").?.string;
+            if (required.bool and !eq(parameter_name, "key")) {
+                const value = try producer.sample(a, doc, parameter.object.get("schema").?, 1, 0);
+                try filters.append(a, .{ .name = parameter_name, .value = try scalarText(a, value) });
+            }
         }
     };
     const generic = doc.object.get("paths").?.object.get(base).?.object.get("get").?;
@@ -120,7 +140,9 @@ fn expected(comptime Token: type, a: std.mem.Allocator, doc: V) !Expected {
     const standalone = if (selected_path != null) if (get(operation, "description")) |description| std.mem.indexOf(u8, description.string, "standalone") != null else false else false;
     const associated = if (!csv) if (get(schema, "$ref")) |reference| hasBranch(generic_schema, reference.string) else false else false;
     const force_direct = if (comptime @hasDecl(Token, "force_direct")) Token.force_direct else false;
-    const use_generic = enumContains(doc, resource, name) and associated and !standalone and !force_direct;
+    var generic_filters = true;
+    for (filters.items) |filter| generic_filters = generic_filters and parameterAllowed(doc, generic, filter.name);
+    const use_generic = enumContains(doc, resource, name) and associated and !standalone and !force_direct and generic_filters;
     const url = if (use_generic) try std.fmt.allocPrint(a, "https://example.invalid/v2{s}?selections={s}{s}{s}", .{ base, name, if (target.items.len > 0) "&id=" else "", if (target.items.len > 0) try encode(a, target.items[0].value) else "" }) else blk: {
         var path = selected_path orelse return error.MissingDirectEndpoint;
         for (target.items) |arg| {
@@ -130,12 +152,20 @@ fn expected(comptime Token: type, a: std.mem.Allocator, doc: V) !Expected {
         }
         break :blk try std.mem.concat(a, u8, &.{ "https://example.invalid/v2", path });
     };
+    std.mem.sort(planner.Argument, filters.items, {}, struct {
+        fn less(_: void, x: planner.Argument, y: planner.Argument) bool {
+            return std.mem.lessThan(u8, x.name, y.name);
+        }
+    }.less);
+    var filter_parts: std.ArrayList([]const u8) = .empty;
+    for (filters.items) |filter| try filter_parts.append(a, try std.fmt.allocPrint(a, "{s}={s}", .{ try encode(a, filter.name), try encode(a, filter.value) }));
+    const full_url = if (filters.items.len > 0) try std.fmt.allocPrint(a, "{s}{s}{s}", .{ url, if (std.mem.indexOfScalar(u8, url, '?') != null) "&" else "?", try std.mem.join(a, "&", filter_parts.items) }) else url;
     var response = if (csv) V{ .string = "id,name\n1,fixture\n" } else try producer.sample(a, doc, schema, 0, 0);
     // Maintained compatibility models intentionally allow defaults and aliases.
     // These literal fixtures exercise each associated compatibility projection.
     const maintained: ?[]const u8 = if (eq(resource, "company") and eq(name, "employees")) "{\"employees\":[]}" else if (eq(resource, "company") and eq(name, "profile")) "{\"company\":{\"id\":1,\"name\":\"fixture\"}}" else if (eq(resource, "market") and eq(name, "bazaar")) "{\"bazaar\":{\"bargain\":[]}}" else if (eq(resource, "torn") and eq(name, "stocks")) if (force_direct) "{\"stocks\":{\"id\":1,\"name\":\"fixture\"}}" else "{\"stocks\":[]}" else null;
     if (maintained) |payload| response = try std.json.parseFromSliceLeaky(V, a, payload, .{ .parse_numbers = false });
-    return .{ .url = url, .target = try target.toOwnedSlice(a), .response = response, .csv = csv, .version = 2 };
+    return .{ .url = full_url, .target = try target.toOwnedSlice(a), .filters = try filters.toOwnedSlice(a), .response = response, .csv = csv, .version = 2 };
 }
 
 const Wire = struct {
@@ -182,18 +212,20 @@ fn exercise(comptime Token: type, doc: V, raw: bool) !bool {
     defer engine.deinit();
     const c: client.Client = .{ .engine = &engine };
     if (raw) {
-        var result = try c.raw(Token, fixture.target, &.{}, .{});
+        var result = try c.raw(Token, fixture.target, fixture.filters, .{});
         defer result.deinit();
         try std.testing.expect(result.failure == null);
+        try std.testing.expectEqual(fixture.version, result.reports[0].api_version);
         try std.testing.expect(subset(fixture.response, result.raw));
     } else {
-        var result = try c.select(Token, fixture.target, &.{}, .{});
+        var result = try c.select(Token, fixture.target, fixture.filters, .{});
         defer result.deinit();
         if (result.execution.failure) |failure| {
             std.debug.print("helper failed {s}/{s}: {s}\n", .{ @tagName(Token.resource), Token.name, if (failure.cause) |err| @errorName(err) else "failure" });
             return error.TypedHelperFailed;
         }
         try std.testing.expect(result.value != null);
+        try std.testing.expectEqual(fixture.version, result.execution.reports[0].api_version);
         const serialized = try model.stringify(a, result.value.?);
         const observed = try std.json.parseFromSliceLeaky(V, a, serialized, .{ .parse_numbers = false });
         if (!subset(fixture.response, observed)) {

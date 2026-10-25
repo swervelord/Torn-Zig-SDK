@@ -8,6 +8,7 @@ const Gen = struct {
     document: V = .null,
     compatibility_names: V = .null,
     source_path: []const u8 = "",
+    raw_count: usize = 0,
     fn add(g: *Gen, s: []const u8) !void {
         try g.out.appendSlice(g.a, s);
     }
@@ -30,6 +31,60 @@ const Gen = struct {
     fn ident(g: *Gen, s: []const u8) !void {
         try g.add("@");
         try g.quote(s);
+    }
+    fn rawLocation(g: *Gen, namespace: []const u8, path: []const u8, reason: []const u8) !void {
+        if (g.raw_count != 0) try g.add(",\n");
+        g.raw_count += 1;
+        try g.add("{\"namespace\":");
+        try g.quote(namespace);
+        try g.add(",\"location\":");
+        try g.quote(path);
+        try g.add(",\"reason\":");
+        try g.quote(reason);
+        try g.add("}");
+    }
+    fn typing(g: *Gen, namespace: []const u8, path: []const u8, v: V, depth: usize) anyerror!void {
+        if (depth > 128) return error.SchemaDepth;
+        if (get(v, "$ref") != null) return;
+        var described = false;
+        inline for (.{ "allOf", "oneOf", "anyOf" }) |key| if (get(v, key)) |branches| {
+            described = true;
+            for (branches.array.items, 0..) |branch, i| try g.typing(namespace, try std.fmt.allocPrint(g.a, "{s}/{s}/{d}", .{ path, key, i }), branch, depth + 1);
+        };
+        const props = get(v, "properties");
+        if (props) |p| {
+            described = true;
+            var it = p.object.iterator();
+            while (it.next()) |entry| try g.typing(namespace, try std.fmt.allocPrint(g.a, "{s}/properties/{s}", .{ path, entry.key_ptr.* }), entry.value_ptr.*, depth + 1);
+        }
+        if (get(v, "required")) |required| {
+            described = true;
+            for (required.array.items) |name| {
+                if (props == null or !props.?.object.contains(name.string)) try g.rawLocation(namespace, try std.fmt.allocPrint(g.a, "{s}/properties/{s}", .{ path, name.string }), "required property without a narrower value schema");
+            }
+        }
+        if (get(v, "items")) |items| {
+            described = true;
+            try g.typing(namespace, try std.fmt.allocPrint(g.a, "{s}/items", .{path}), items, depth + 1);
+        }
+        if (get(v, "type")) |ty| {
+            described = true;
+            if (ty == .string and std.mem.eql(u8, ty.string, "object")) {
+                const additional = get(v, "additionalProperties");
+                if (additional == null or additional.? == .bool and additional.?.bool) try g.rawLocation(namespace, try std.fmt.allocPrint(g.a, "{s}/*", .{path}), if (props == null) "open object values represented by Map(Raw)" else "unknown object fields retained by Owned raw tree");
+            }
+            if (ty == .string and std.mem.eql(u8, ty.string, "array") and get(v, "items") == null) try g.rawLocation(namespace, try std.fmt.allocPrint(g.a, "{s}/items", .{path}), "array item value schema unspecified");
+        }
+        if (get(v, "additionalProperties")) |additional| if (additional == .object) {
+            described = true;
+            try g.typing(namespace, try std.fmt.allocPrint(g.a, "{s}/additionalProperties", .{path}), additional, depth + 1);
+        };
+        if (get(v, "enum") != null or get(v, "const") != null) described = true;
+        if (!described) try g.rawLocation(namespace, path, "unconstrained value schema");
+    }
+    fn compatibilityTyping(g: *Gen, path: []const u8, v: V) anyerror!void {
+        if (get(v, "name")) |name| if (name == .string and std.mem.eql(u8, name.string, "raw")) try g.rawLocation("compatibility", path, "explicit maintained raw/unknown value contract");
+        if (get(v, "arguments")) |args| for (args.array.items, 0..) |arg, i| try g.compatibilityTyping(try std.fmt.allocPrint(g.a, "{s}/arguments/{d}", .{ path, i }), arg);
     }
     fn ref(g: *Gen, s: []const u8) !void {
         const p = std.mem.lastIndexOfScalar(u8, s, '/') orelse return error.InvalidReference;
@@ -148,6 +203,7 @@ const Gen = struct {
             try g.add("}");
             return;
         }
+        if (get(v, "type")) |ty| if (ty == .string and std.mem.eql(u8, ty.string, "object")) return g.add("model.Map(model.Raw)");
         try g.add("model.Raw");
     }
     fn official(g: *Gen, doc: V) !void {
@@ -202,7 +258,7 @@ const Gen = struct {
             try g.add(")");
             return;
         }
-        const pairs = .{ .{ "string", "[]const u8" }, .{ "bool", "bool" }, .{ "int64", "i64" }, .{ "uint64", "u64" }, .{ "uint32", "u32" }, .{ "float64", "f64" }, .{ "float32", "f32" }, .{ "raw", "model.Raw" }, .{ "exact_number", "model.Raw" }, .{ "null", "void" } };
+        const pairs = .{ .{ "string", "[]const u8" }, .{ "bool", "bool" }, .{ "int64", "i64" }, .{ "uint64", "u64" }, .{ "uint32", "u32" }, .{ "float64", "f64" }, .{ "float32", "f32" }, .{ "raw", "model.Raw" }, .{ "exact_number", "model.ExactNumber" }, .{ "null", "void" } };
         inline for (pairs) |p| if (std.mem.eql(u8, n, p[0])) return g.add(p[1]);
         if (g.compatibility_names == .object and !g.compatibility_names.object.contains(n)) try g.add("current.");
         try g.ident(n);
@@ -319,7 +375,8 @@ const Gen = struct {
             try g.add("};\npub const Response = ");
             const response = get(get(get(op, "responses").?, "200").?, "content").?;
             if (get(response, "application/json")) |json| {
-                try g.schema(get(json, "schema").?, 0);
+                const response_schema = get(json, "schema").?;
+                if (try g.compositeResponse(response_schema)) |composite| try g.schema(composite, 0) else try g.schema(response_schema, 0);
                 try g.add(";\npub const media_type = \"application/json\";\n");
             } else {
                 try g.add("[]const u8;\npub const media_type = \"text/csv\";\n");
@@ -336,7 +393,61 @@ const Gen = struct {
         try g.add("};\n");
         try g.fmt("pub const operation_count = {d};\n", .{names.items.len});
     }
+    /// Generic anyOf response branches are contributing object selections, not
+    /// mutually exclusive result variants. Preserve every contributing key.
+    fn compositeResponse(g: *Gen, v: V) !?V {
+        const alternatives = get(v, "anyOf") orelse return null;
+        for (alternatives.array.items) |branch| if (!objectSchema(g.document, branch)) return null;
+        var properties: std.json.ObjectMap = .{};
+        for (alternatives.array.items) |branch| try g.contributingProperties(branch, &properties);
+        var composite: std.json.ObjectMap = .{};
+        try composite.put(g.a, "type", .{ .string = "object" });
+        try composite.put(g.a, "properties", .{ .object = properties });
+        return .{ .object = composite };
+    }
+    fn contributingProperties(g: *Gen, v: V, properties: *std.json.ObjectMap) anyerror!void {
+        if (get(v, "$ref")) |reference| {
+            const slash = std.mem.lastIndexOfScalar(u8, reference.string, '/').?;
+            return g.contributingProperties(get(get(get(g.document, "components").?, "schemas").?, reference.string[slash + 1 ..]).?, properties);
+        }
+        inline for (.{ "allOf", "anyOf", "oneOf" }) |key| if (get(v, key)) |branches| for (branches.array.items) |branch| try g.contributingProperties(branch, properties);
+        if (get(v, "properties")) |props| {
+            var it = props.object.iterator();
+            while (it.next()) |entry| try g.mergeProperty(properties, entry.key_ptr.*, entry.value_ptr.*);
+        }
+    }
+    fn mergeProperty(g: *Gen, properties: *std.json.ObjectMap, key: []const u8, value: V) !void {
+        const previous = properties.get(key) orelse return properties.put(g.a, key, value);
+        const candidate = try std.json.Stringify.valueAlloc(g.a, value, .{});
+        var branches = std.array_list.Managed(V).init(g.a);
+        if (previous == .object and previous.object.count() == 1 and get(previous, "anyOf") != null) {
+            for (get(previous, "anyOf").?.array.items) |branch| {
+                if (std.mem.eql(u8, candidate, try std.json.Stringify.valueAlloc(g.a, branch, .{}))) return;
+                try branches.append(branch);
+            }
+        } else {
+            if (std.mem.eql(u8, candidate, try std.json.Stringify.valueAlloc(g.a, previous, .{}))) return;
+            try branches.append(previous);
+        }
+        try branches.append(value);
+        var combined: std.json.ObjectMap = .{};
+        try combined.put(g.a, "anyOf", .{ .array = branches });
+        try properties.put(g.a, key, .{ .object = combined });
+    }
 };
+fn objectSchema(doc: V, v: V) bool {
+    if (get(v, "$ref")) |ref| {
+        const slash = std.mem.lastIndexOfScalar(u8, ref.string, '/') orelse return false;
+        const child = get(get(get(doc, "components") orelse return false, "schemas") orelse return false, ref.string[slash + 1 ..]) orelse return false;
+        return objectSchema(doc, child);
+    }
+    if (get(v, "allOf") orelse get(v, "anyOf") orelse get(v, "oneOf")) |branches| {
+        for (branches.array.items) |branch| if (!objectSchema(doc, branch)) return false;
+        return true;
+    }
+    if (get(v, "type")) |ty| return ty == .string and std.mem.eql(u8, ty.string, "object");
+    return get(v, "properties") != null or get(v, "required") != null;
+}
 fn get(v: V, key: []const u8) ?V {
     return if (v == .object) v.object.get(key) else null;
 }
@@ -387,6 +498,8 @@ pub fn main(init: std.process.Init) !void {
     const inputs = .{ "spec/openapi-6.13.8.json", "spec/openapi-6.13.6.json", "spec/compatibility-models.json", "spec/openapi-6.13.8.json" };
     const outputs = .{ "src/generated/current.zig", "src/generated/frozen.zig", "src/generated/compatibility.zig", "src/generated/operations.zig" };
     var manifest: Gen = .{ .a = a };
+    var typing: Gen = .{ .a = a };
+    try typing.add("{\n\"policy\":\"Raw values are retained only at unconstrained value locations, open object extras, and explicit maintained unknown contracts. Numeric exact_number uses ExactNumber.\",\n\"locations\":[\n");
     try manifest.add("{\n\"generator\":\"tools/generate.zig\",\n\"alias_identity\":\"Zig scalar aliases may share type identity; use explicit schema names to retain domain constraints.\",\n\"models\":[\n");
     inline for (inputs, outputs, 0..) |input, output, i| {
         const bytes = try cwd.readFileAlloc(io, input, a, .limited(32 * 1024 * 1024));
@@ -396,6 +509,12 @@ pub fn main(init: std.process.Init) !void {
             const schemas = if (i == 2) doc.value else get(get(doc.value, "components").?, "schemas").?;
             var sit = schemas.object.iterator();
             while (sit.next()) |entry| {
+                const path = try std.fmt.allocPrint(a, "#/components/schemas/{s}", .{entry.key_ptr.*});
+                if (i != 2) try typing.typing(namespace, path, entry.value_ptr.*, 0) else {
+                    if (get(entry.value_ptr.*, "Fields")) |fields| if (fields == .array) for (fields.array.items) |field| try typing.compatibilityTyping(try std.fmt.allocPrint(a, "{s}/fields/{s}", .{ path, get(field, "Name").?.string }), get(field, "Type").?);
+                    if (get(entry.value_ptr.*, "Variants")) |variants| if (variants == .array) for (variants.array.items, 0..) |variant, j| try typing.compatibilityTyping(try std.fmt.allocPrint(a, "{s}/variants/{d}", .{ path, j }), variant);
+                    if (get(entry.value_ptr.*, "Type")) |alias| try typing.compatibilityTyping(try std.fmt.allocPrint(a, "{s}/alias", .{path}), alias);
+                }
                 if (i != 0 or sit.index != 1) try manifest.add(",\n");
                 try manifest.add("{\"namespace\":");
                 try manifest.quote(namespace);
@@ -458,4 +577,11 @@ pub fn main(init: std.process.Init) !void {
         const existing = try cwd.readFileAlloc(io, manifest_path, a, .limited(16 * 1024 * 1024));
         if (!std.mem.eql(u8, existing, manifest.out.items)) return error.GeneratedFilesStale;
     } else try cwd.writeFile(io, .{ .sub_path = manifest_path, .data = manifest.out.items });
+    try typing.add("\n],\n\"location_count\":");
+    try typing.fmt("{d}\n}}\n", .{typing.raw_count});
+    const typing_path = "docs/typing-report.json";
+    if (check) {
+        const existing = try cwd.readFileAlloc(io, typing_path, a, .limited(16 * 1024 * 1024));
+        if (!std.mem.eql(u8, existing, typing.out.items)) return error.GeneratedFilesStale;
+    } else try cwd.writeFile(io, .{ .sub_path = typing_path, .data = typing.out.items });
 }

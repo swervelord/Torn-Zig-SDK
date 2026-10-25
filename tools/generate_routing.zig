@@ -22,6 +22,46 @@ pub fn main(init: std.process.Init) !void {
         try w.print("    .{{ .resource = \"{f}\", .name = \"{f}\" }},\n", .{ std.zig.fmtString(entry.object.get("resource").?.string), std.zig.fmtString(entry.object.get("name").?.string) });
     }
     try w.writeAll("};\n");
+    try w.writeAll("pub const IdDomain = struct { resource: []const u8, selection: []const u8, name: []const u8, parameter: []const u8, query: bool };\npub const id_domains = [_]IdDomain{\n");
+    if (overrides_parsed.value.object.get("id_domains")) |domains| {
+        var domain_it = domains.object.iterator();
+        while (domain_it.next()) |entry| {
+            const slash = std.mem.indexOfScalar(u8, entry.key_ptr.*, '/').?;
+            const v = entry.value_ptr.*;
+            try w.print("    .{{ .resource=\"{f}\", .selection=\"{f}\", .name=\"{f}\", .parameter=\"{f}\", .query={s} }},\n", .{ std.zig.fmtString(entry.key_ptr.*[0..slash]), std.zig.fmtString(entry.key_ptr.*[slash + 1 ..]), std.zig.fmtString(v.object.get("domain").?.string), std.zig.fmtString(v.object.get("parameter").?.string), if (v.object.get("query").?.bool) "true" else "false" });
+        }
+    }
+    try w.writeAll("};\npub const force_direct = [_][]const u8{\n");
+    if (overrides_parsed.value.object.get("force_direct")) |entries| for (entries.array.items) |entry| try w.print("    \"{f}\",\n", .{std.zig.fmtString(entry.string)});
+    try w.writeAll("};\n");
+    const official_bytes = try dir.readFileAlloc(io, "spec/openapi-6.13.8.json", a, .limited(8 * 1024 * 1024));
+    const official = try std.json.parseFromSlice(std.json.Value, a, official_bytes, .{});
+    try w.writeAll("pub const RequiredQuery = struct { resource: []const u8, selection: []const u8, parameter: []const u8, required: bool, choices: []const []const u8 };\npub const required_queries = [_]RequiredQuery{\n");
+    var path_it = official.value.object.get("paths").?.object.iterator();
+    while (path_it.next()) |path_entry| {
+        var parts = std.mem.tokenizeScalar(u8, path_entry.key_ptr.*, '/');
+        const resource = parts.next().?;
+        if (parts.next() == null) continue;
+        const last_slash = std.mem.lastIndexOfScalar(u8, path_entry.key_ptr.*, '/').?;
+        const selection = try std.ascii.allocLowerString(a, path_entry.key_ptr.*[last_slash + 1 ..]);
+        const op = path_entry.value_ptr.object.get("get") orelse continue;
+        const params = op.object.get("parameters") orelse continue;
+        for (params.array.items) |p| {
+            const resolved = if (p.object.get("$ref")) |r| official.value.object.get("components").?.object.get("parameters").?.object.get(r.string[24..]).? else p;
+            if (!std.mem.eql(u8, resolved.object.get("in").?.string, "query")) continue;
+            const required_value = resolved.object.get("required");
+            const required = if (required_value) |v| v.bool else false;
+            const parameter = resolved.object.get("name").?.string;
+            if (std.mem.eql(u8, parameter, "key")) continue;
+            var schema = resolved.object.get("schema").?;
+            if (schema.object.get("$ref")) |r| schema = official.value.object.get("components").?.object.get("schemas").?.object.get(r.string[21..]).?;
+            if (!required and schema.object.get("enum") == null) continue;
+            try w.print("    .{{ .resource = \"{f}\", .selection = \"{f}\", .parameter = \"{f}\", .required={s}, .choices = &.{{", .{ std.zig.fmtString(resource), std.zig.fmtString(selection), std.zig.fmtString(parameter), if (required) "true" else "false" });
+            if (schema.object.get("enum")) |choices| for (choices.array.items) |choice| try w.print("\"{f}\",", .{std.zig.fmtString(choice.string)});
+            try w.writeAll("} },\n");
+        }
+    }
+    try w.writeAll("};\n");
     try save(a, io, "src/generated/routing.zig", try output.toOwnedSlice(), check);
     var selections: std.Io.Writer.Allocating = .init(a);
     const s = &selections.writer;
@@ -78,7 +118,9 @@ pub fn main(init: std.process.Init) !void {
     for (v1entries, 0..) |entry, i| {
         try cw.print("    {{\"resource\":\"{s}\",\"selection\":\"{s}\",\"public_api\":\"planner.build(allocator, Input with mode=v1)\",\"membership_api\":\"planner.v1Contains\",\"result\":\"model.RawValue\"}}{s}\n", .{ entry.object.get("resource").?.string, entry.object.get("name").?.string, if (i + 1 < v1entries.len) "," else "" });
     }
-    try cw.writeAll("  ]\n}\n");
+    try cw.writeAll("  ],\n  \"reviewed_routing_overrides\": ");
+    try std.json.Stringify.value(overrides_parsed.value, .{ .whitespace = .indent_2 }, cw);
+    try cw.writeAll("\n}\n");
     try saveBytes(a, io, "docs/routing-coverage.json", try coverage.toOwnedSlice(), check);
 }
 

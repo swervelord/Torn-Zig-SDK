@@ -1,6 +1,7 @@
 # Torn-Zig-SDK
 
 An allocator-explicit Zig SDK for the official Torn API. Import the module as `torn`.
+[CI verification](https://github.com/swervelord/Torn-Zig-SDK/actions/workflows/ci.yml).
 The pinned and minimum supported compiler is **Zig 0.17.0**, the stable release
 verified against the official index on October 25, 2026. There are no package or
 native library dependencies beyond Zig's standard library and operating-system
@@ -11,7 +12,7 @@ facilities.
 Use a published commit to obtain a content-addressed package:
 
 ```sh
-zig fetch --save=torn https://github.com/swervelord/Torn-Zig-SDK/archive/COMMIT.tar.gz
+zig fetch --save=torn https://github.com/swervelord/Torn-Zig-SDK/archive/refs/tags/v0.1.0.tar.gz
 ```
 
 In your `build.zig`, call `b.dependency("torn", .{ .target = target, .optimize = optimize })`
@@ -72,7 +73,11 @@ Exact parameter values are checked against their official schemas before sending
 Use the client key configuration for authentication; setting an operation's `key`
 parameter is rejected. CSV operations return owned text through the exact API or
 selection tokens. All text and JSON bodies enforce the same configurable byte cap.
-For custom projections, use `Execution.raw` with the allocator from its arena;
+Mixed CSV/JSON batches retain separate text channels in `Execution.csv`; each
+typed tuple field receives its own channel. JSON error envelopes from CSV paths
+remain structured API failures. Exact generic responses expose every contributing
+field through `Presence(T)`, preserving combined response data.
+For custom projections, use `Execution.project(T, context, decoder)` or `Execution.raw`;
 keep projected slices within the execution's lifetime. Explicit plans are built by
 `torn.planner.build`; `client.executePlan` executes them.
 
@@ -95,9 +100,12 @@ for quotas, retries, routes, cancellation, configuration, and tested limits.
 
 Execution reports describe successful contributing requests, including operation,
 route, path, selections, API version, and fallback. They omit failed attempts and
-are not an attempt counter. A later failure retains earlier successful data and
+are not an attempt counter. Typed validation occurs before a contribution is
+accepted. A later failure retains earlier successful data and
 reports. Split recovery is enabled by default; runtime v1 recovery requires
 `.legacy_fallback = true` and a catalog-supported selection.
+The report's fallback flag records runtime recovery; initially planned v1 routes
+report their version without claiming runtime recovery.
 
 ## Contracts and generation
 
@@ -107,6 +115,8 @@ The maintained compatibility namespace has 549 declarations. Routing covers 205
 capabilities, 207 typed selection/alias tokens, 202 JSON selections, three CSV
 channels, and an explicit 184-entry v1 catalog. Detailed mappings are generated in
 `docs/routing-coverage.json` and the generated declaration inventories.
+`docs/model-coverage.json` maps all models and operations to public APIs;
+`docs/typing-report.json` identifies every intentionally raw location.
 
 `current`, `frozen`, and `compatibility` are separate namespaces. Current elimination
 teams require `captains`; historical teams require `leaders`. Use
@@ -136,14 +146,22 @@ zig build generate-check
 zig build audit
 zig build examples
 zig build fuzz -Doptimize=safe
+zig build compile-fail
 ```
 
 Zig 0.17 uses optimization names `debug`, `safe`, `fast`, and `small`. `safe`
 corresponds to ReleaseSafe. Generation and ordinary tests are offline and require
 no credential. Explicit `zig build refresh-spec` fetches a candidate with a custom
 user agent into `spec/openapi-candidate.json`; review changes before replacing a
-pinned contract and its provenance. The generator is Zig-native and verifies
+pinned contract and its provenance. `spec/refresh-report.json` records the byte
+hash and added/removed/changed paths and schemas. `zig build verify-proxy` explicitly
+checks HTTPS through a local CONNECT relay using the public specification;
+`zig build live-test` is opt-in and reads only `TORN_LIVE_TEST_API_KEY`.
+The generator is Zig-native and verifies
 deterministic formatted outputs. See [provenance](docs/provenance.md) and
 [verification scope](docs/verification.md) for evidence and remaining limits.
+HTTP proxies support both plain HTTP and verified HTTPS CONNECT. HTTPS-scheme
+proxies are explicitly unsupported. The v1 catalog and compatibility models do
+not imply an authoritative specification for every historical payload.
 
 MIT License. Copyright (c) 2026 swervelord.

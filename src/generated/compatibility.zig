@@ -443,7 +443,7 @@ pub const DynamicValue = union(enum) {
     v0: void,
     v1: bool,
     v2: i64,
-    v3: model.Raw,
+    v3: model.ExactNumber,
     v4: []const u8,
     v5: []const DynamicValue,
     v6: model.Map(DynamicValue),
