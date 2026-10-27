@@ -47,12 +47,12 @@ measure declared surface coverage, not every possible combination of game states
 The audit found and fixed five practical gaps: Torn code 5 cooldown, route-specific
 quotas, HTTPS proxy support, rate-limit exhaustion and message-based recovery.
 Rust and TypeScript mark a rate-limited key (and an IP-limited route) exhausted
-for the rest of the minute; Zig now does the same for Torn code 5. Go retries
-code 5 at the minute boundary but does not mark exhaustion. Rust/TypeScript match
+for the rest of the minute; Zig now does the same for Torn code 5, and Go was
+brought to the same behavior in its 6.14.0 branch. Rust/TypeScript match
 the IP by substring; Zig requires the whole word so "multiple" does not spend a
 route. Rust also spends a key on HTTP 429; Zig instead honors 429's Retry-After.
 Rust and TypeScript also split or fall back on Torn messages, independent of the
-error code; Zig now recognizes the same message forms.
+error code; Zig and Go now recognize the same message forms.
 
 The HTTPS-proxy implementation includes an explicit
 nested TLS flush adapter because flushing Zig's TLS writer alone does not flush
