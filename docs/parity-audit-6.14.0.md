@@ -91,8 +91,16 @@ proxy credentials for both HTTP and HTTPS origins.
 
 `zig build verify-proxy` completed HTTP 200/API 6.14.0 through a local HTTP CONNECT
 relay with verified target TLS, without a private API key. Its evidence is in
-`docs/proxy-verification.json`. A complete successful nested TLS transaction
-through an HTTPS-scheme proxy has not been recorded in this run; unit tests and
-certificate rejection are narrower evidence. The live account test remains
+`docs/proxy-verification.json`. A controlled local interoperability test additionally
+returned HTTP 200 for both HTTPS and plain HTTP targets through an HTTPS proxy.
+Both TLS verification layers stayed enabled. A test-only copy of the production
+transport appended an ephemeral fixture CA after normal system-root initialization;
+the machine trust store and production sources stayed unchanged. The peer checked
+proxy authentication, target authentication and absence of the origin credential
+in CONNECT. Source hashes, exact trust injection and results are recorded in
+`docs/https-proxy-verification.json`; the optional Go/Python fixture and reproduction
+instructions are in `docs/interop/`. This is injected-fixture-trust evidence,
+rather than a public HTTPS-proxy service test with only system roots.
+The live account test remains
 credential-gated. Local checks do not establish native Linux/macOS behavior,
 race freedom, service-wide distributed rate limits, or every undocumented v1 shape.

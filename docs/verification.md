@@ -64,9 +64,12 @@ Windows ThreadSanitizer is unavailable in this pinned distribution, confirmed by
 actual compiler diagnostics. Linux TSAN compilation succeeds and native CI runs
 the instrumented runtime tests; execution is evidence only when that step passes.
 Ordinary tests do not prove race freedom. Client shutdown requires cancellation
-and joining callers first. HTTP and HTTPS proxies support verified HTTPS CONNECT. The new nested TLS
-flush adapter has focused unit coverage; a complete successful HTTPS-proxy
-transaction has not been recorded in this run.
+and joining callers first. HTTP and HTTPS proxies support verified HTTPS CONNECT.
+The nested TLS flush adapter has focused unit coverage. A controlled local
+HTTPS-proxy test passed both HTTP and HTTPS origins using a test-only injected
+fixture CA, with certificate verification enabled and no system trust change.
+See `https-proxy-verification.json` and the optional `interop/` reproduction fixture
+for its exact scope.
 
 The v1 catalog is maintained routing coverage with explicitly limited historical
 response evidence. It is not a complete authoritative v1 payload specification.
