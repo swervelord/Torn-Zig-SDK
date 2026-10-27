@@ -50,7 +50,13 @@ Quota sleepers release the semaphore, so an exhausted pinned route cannot occupy
 
 Retries cover transport failures, HTTP 408/429/500/502/503/504, and Torn codes 5/8/9 within the attempt budget. Allocation failure, cancelation, and an oversized response are terminal. The delay is the larger of the linear backoff and `Retry-After`; both delta-seconds and preferred IMF-fixdate are supported. Malformed retry dates are ignored. Torn code 5 additionally waits until at least the next absolute minute boundary,
 respecting a longer Retry-After or backoff. This wait releases the permit and
-remains subject to cancellation and the outer deadline.
+remains subject to cancellation and the outer deadline. Code 5 also spends the
+rest of that minute's local budget for the key that received it, so concurrent
+and later calls rotate to other credentials instead of repeating the rejection.
+When the message names the IP as a whole word, the route's budget is spent too
+and calls spill over to other routes. HTTP 429 is retried using its Retry-After
+and backoff without spending budgets, because it is not Torn's documented
+per-key minute quota.
 
 Per-request options override attempts, timeout, pinned route, and an absolute outer `deadline_ms`. The outer deadline includes quota waits, semaphore waits, retries, and network I/O. Caller-side serialization can use the public `Client.check(options)` to observe cancelation and that deadline.
 

@@ -12,6 +12,11 @@
   These are server cache lifetimes; no client response cache is introduced.
 - Respect the next minute boundary when retrying Torn error code 5, with longer
   Retry-After/backoff, cancellation and outer deadlines still respected.
+- Spend the key's remaining minute budget after Torn code 5, and the route's
+  budget when the message attributes the limit to the IP, so other calls rotate.
+- Recognize Torn combination-rejection and v1-migration messages for split
+  recovery and opt-in v1 fallback, in addition to code 4 and HTTP 400/404/501.
+- Make routing generation independent of checkout line endings; CI rejects CRLF.
 - Add optional per-route `per_minute` quotas with global inheritance.
 - Support HTTPS proxies, independently verifying proxy TLS and target TLS;
   recursively flush nested TLS through TCP. Initialize proxy trust explicitly

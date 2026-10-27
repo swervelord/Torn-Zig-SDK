@@ -103,7 +103,10 @@ route, path, selections, API version, and fallback. They omit failed attempts an
 are not an attempt counter. Typed validation occurs before a contribution is
 accepted. A later failure retains earlier successful data and
 reports. Split recovery is enabled by default; runtime v1 recovery requires
-`.legacy_fallback = true` and a catalog-supported selection.
+`.legacy_fallback = true` and a catalog-supported selection. Both trigger on Torn
+code 4 or HTTP 400/404/501, and also on Torn messages that reject a selection
+combination (split) or direct a selection to API v1 (fallback), as in the Rust
+and TypeScript SDKs.
 The report's fallback flag records runtime recovery; initially planned v1 routes
 report their version without claiming runtime recovery.
 

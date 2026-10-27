@@ -30,10 +30,10 @@ measure declared surface coverage, not every possible combination of game states
 | Exact typed endpoints | `operations`, `Client.exact`; schema-checked parameters/responses |
 | Resource selection conveniences | `selections` and `Client.select`; typed response fields |
 | Inferred typed batching | `Client.batch` returns a concrete tuple; cross-resource/empty tuples rejected at compile time |
-| Planner inspection and explicit execution | `planner.build`, `Client.executePlan`; target-domain validation, generic/direct routes, split recovery and opt-in supported v1 recovery |
+| Planner inspection and explicit execution | `planner.build`, `Client.executePlan`; target-domain validation, generic/direct routes, split recovery and opt-in supported v1 recovery, triggered by code 4, HTTP 400/404/501, or Torn's combination/v1-migration messages |
 | Raw and custom decoding | `Client.raw`, `Execution.raw`, `Execution.project` |
 | Pagination | Typed official links/metadata; explicit parameters. No sibling currently provides a universal automatic page iterator |
-| Retries | Transport, selected HTTP statuses and Torn codes 5/8/9; Retry-After seconds/date support; code 5 minute-boundary cooldown |
+| Retries | Transport, selected HTTP statuses and Torn codes 5/8/9; Retry-After seconds/date support; code 5 minute-boundary cooldown that also spends the key's (and, for IP-attributed limits, the route's) remaining minute budget |
 | Quotas and rotation | Deduplicated keys, shared key/route budgets, route spillover/pinning, independent `Route.per_minute` overrides |
 | Concurrency and cancellation | Shared semaphore; cancelable Io operations; attempt and outer deadlines; waits release permits |
 | Egress/proxies | HTTP or HTTPS proxy; proxy authentication; verified target TLS through CONNECT; verified proxy TLS for HTTPS proxies |
@@ -44,8 +44,17 @@ measure declared surface coverage, not every possible combination of game states
 | Credential protection | Authorization header, redacted custom formatting/serialization, no redirect forwarding |
 | Upstream policy metadata | Verbatim operation stability; known inventory cache TTL seconds |
 
-The audit found and fixed three practical gaps: Torn code 5 cooldown, route-specific
-quotas and HTTPS proxy support. The HTTPS-proxy implementation includes an explicit
+The audit found and fixed five practical gaps: Torn code 5 cooldown, route-specific
+quotas, HTTPS proxy support, rate-limit exhaustion and message-based recovery.
+Rust and TypeScript mark a rate-limited key (and an IP-limited route) exhausted
+for the rest of the minute; Zig now does the same for Torn code 5. Go retries
+code 5 at the minute boundary but does not mark exhaustion. Rust/TypeScript match
+the IP by substring; Zig requires the whole word so "multiple" does not spend a
+route. Rust also spends a key on HTTP 429; Zig instead honors 429's Retry-After.
+Rust and TypeScript also split or fall back on Torn messages, independent of the
+error code; Zig now recognizes the same message forms.
+
+The HTTPS-proxy implementation includes an explicit
 nested TLS flush adapter because flushing Zig's TLS writer alone does not flush
 its backing writer. Both proxy and target authentication wait for the relevant TLS
 verification. An additional test caught and fixed the standard HTTP client's
@@ -66,11 +75,14 @@ would exceed the upstream contract:
 - Maintained historical/v1 unknown variants remain explicit raw values where the
   available contract does not define a complete shape.
 - Zig scalar aliases may share identity. `decodeNamed` preserves the selected
-  schema's domain when an independently decoded scalar would be ambiguous.
+  schema's domain when an independently decoded scalar would be ambiguous. Rust
+  (`pub type AmmoId = i64`) and TypeScript (`type AttackCode = string`) aliases
+  also share identity; Go alone generates distinct named types (`type AmmoId int64`).
 - Official `number` fields use `f64`; retained original JSON preserves the source
-  lexeme. Go uses `json.Number` on its typed surface, so decimal representation is
-  not identical. Integer conversion never goes through floating point and honors
-  the official integer width and bounds.
+  lexeme. Rust uses `f64` and TypeScript `number` without lexeme retention. Go's
+  current typed models use `json.Number` (its compatibility models use `float64`),
+  so decimal representation is not identical across SDKs. Integer conversion never
+  goes through floating point and honors the official integer width and bounds.
 - Upstream `/user/halloween` has `x-stability: "Untable"`. It is exposed verbatim;
   callers should treat an unrecognized stability value conservatively.
 
@@ -80,6 +92,11 @@ in calling conventions and concurrency primitives; the comparison is behavioral
 and contract coverage, not identical language-level APIs.
 
 ## Verification and remaining limits
+
+Generated sources are byte-reproducible regardless of checkout newline settings.
+An earlier routing module embedded a CRLF working copy of the manifest and failed
+the LF-based CI freshness check. Embedded inputs are now normalized to LF, and CI
+rejects CRLF in the index or checkout before any other step.
 
 The refreshed checks cover all operations, models and helpers, the compatible pair
 matrix, required Halloween fields and raw retention, inventory metadata, route
