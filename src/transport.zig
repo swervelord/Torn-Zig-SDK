@@ -4,7 +4,7 @@ const std = @import("std");
 pub const Request = struct {
     url: []const u8,
     api_key: []const u8,
-    user_agent: []const u8 = "Torn-Zig-SDK/0.1.0",
+    user_agent: []const u8 = "Torn-Zig-SDK/0.2.0",
     max_body_bytes: usize = 64 * 1024 * 1024,
     proxy_url: ?[]const u8 = null,
 
@@ -63,7 +63,13 @@ pub fn nativeSend(_: ?*anyopaque, allocator: std.mem.Allocator, io: std.Io, requ
         const proxy_uri = try std.Uri.parse(url);
         if (std.ascii.eqlIgnoreCase(uri.scheme, "https")) return secureProxySend(&client, allocator, scratch.allocator(), io, request, uri, proxy_uri);
         const protocol = std.http.Client.Protocol.fromUri(proxy_uri) orelse return error.UnsupportedProxyScheme;
-        if (protocol == .tls) return error.SecureProxyUnsupported;
+        if (protocol == .tls) {
+            // std.http.Client initializes trust from the origin scheme, so an
+            // HTTP origin through a TLS proxy needs explicit proxy trust setup.
+            const now = std.Io.Clock.real.now(io);
+            try client.ca_bundle.rescan(allocator, io, now);
+            client.now = now;
+        }
         const proxy_auth: ?[]const u8 = if (proxy_uri.user != null or proxy_uri.password != null) auth: {
             const user_component: std.Uri.Component = proxy_uri.user orelse .empty;
             const password_component: std.Uri.Component = proxy_uri.password orelse .empty;
@@ -131,11 +137,45 @@ fn proxyAuthorization(arena: std.mem.Allocator, uri: std.Uri) !?[]const u8 {
     return try std.fmt.allocPrint(arena, "Basic {b64}", .{credentials});
 }
 
+/// TLS writers flush plaintext into their backing writer without recursively
+/// flushing it. An inner TLS handshake must flush both proxy TLS and TCP before
+/// waiting for the server, including when every record fits in the buffers.
+const TunnelWriter = struct {
+    output: *std.Io.Writer,
+    flush_context: ?*anyopaque,
+    flush_fn: *const fn (?*anyopaque) std.Io.Writer.Error!void,
+    interface: std.Io.Writer,
+
+    fn flushConnection(context: ?*anyopaque) std.Io.Writer.Error!void {
+        const connection: *std.http.Client.Connection = @ptrCast(@alignCast(context.?));
+        try connection.flush();
+    }
+
+    fn drain(w: *std.Io.Writer, data: []const []const u8, splat: usize) std.Io.Writer.Error!usize {
+        const self: *TunnelWriter = @fieldParentPtr("interface", w);
+        const out = self.output;
+        try out.writeAll(w.buffer[0..w.end]);
+        w.end = 0;
+        var consumed: usize = 0;
+        for (data[0 .. data.len - 1]) |part| {
+            try out.writeAll(part);
+            consumed += part.len;
+        }
+        for (0..splat) |_| try out.writeAll(data[data.len - 1]);
+        return consumed + data[data.len - 1].len * splat;
+    }
+
+    fn flush(w: *std.Io.Writer) std.Io.Writer.Error!void {
+        const self: *TunnelWriter = @fieldParentPtr("interface", w);
+        _ = try drain(w, &.{""}, 0);
+        try self.flush_fn(self.flush_context);
+    }
+};
+
 /// std.http.Client's CONNECT helper does not upgrade the returned tunnel to
 /// target TLS in 0.17.0. Perform that upgrade explicitly before origin auth.
 fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena: std.mem.Allocator, io: std.Io, request: Request, target: std.Uri, proxy: std.Uri) !Response {
-    // Nested TLS to an HTTPS proxy needs a separately verified flush adapter.
-    if (!std.ascii.eqlIgnoreCase(proxy.scheme, "http")) return error.SecureProxyUnsupported;
+    const proxy_protocol = std.http.Client.Protocol.fromUri(proxy) orelse return error.UnsupportedProxyScheme;
     var target_name_buffer: [std.Io.net.HostName.max_len]u8 = undefined;
     var proxy_name_buffer: [std.Io.net.HostName.max_len]u8 = undefined;
     const target_name = try std.Io.net.HostName.fromUri(target, &target_name_buffer);
@@ -147,7 +187,7 @@ fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena
     client.now = now;
     client.read_buffer_size = @max(client.read_buffer_size, std.crypto.tls.Client.min_buffer_len);
     client.write_buffer_size = @max(client.write_buffer_size, std.crypto.tls.Client.min_buffer_len);
-    const connection = try client.connectTcp(proxy_name, proxy.port orelse 80, .plain);
+    const connection = try client.connectTcp(proxy_name, proxy.port orelse if (proxy_protocol == .tls) @as(u16, 443) else @as(u16, 80), proxy_protocol);
     const proxy_headers: []const std.http.Header = if (proxy_auth) |authorization| &.{.{ .name = "Proxy-Authorization", .value = authorization }} else &.{};
     var connect = client.request(.CONNECT, .{ .scheme = "http", .host = .{ .raw = target_name.bytes }, .port = target_port }, .{
         .connection = connection,
@@ -173,7 +213,13 @@ fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena
     };
     var entropy: [std.crypto.tls.Client.Options.entropy_len]u8 = undefined;
     io.random(&entropy);
-    var tls = std.crypto.tls.Client.init(connection.reader(), connection.writer(), .{
+    var tunnel_writer: TunnelWriter = .{
+        .output = connection.writer(),
+        .flush_context = connection,
+        .flush_fn = TunnelWriter.flushConnection,
+        .interface = .{ .vtable = &.{ .drain = TunnelWriter.drain, .flush = TunnelWriter.flush }, .buffer = try arena.alloc(u8, std.crypto.tls.Client.min_buffer_len) },
+    };
+    var tls = std.crypto.tls.Client.init(connection.reader(), &tunnel_writer.interface, .{
         .host = .{ .explicit = target_name.bytes },
         .ca = .{ .bundle = .{ .gpa = allocator, .io = io, .lock = &client.ca_bundle_lock, .bundle = &client.ca_bundle } },
         .read_buffer = try arena.alloc(u8, std.crypto.tls.Client.min_buffer_len + 8192),
@@ -195,7 +241,7 @@ fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena
     }
     try tls.writer.print(" HTTP/1.1\r\nHost: {s}:{d}\r\nAuthorization: ApiKey {s}\r\nUser-Agent: {s}\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n", .{ target_name.bytes, target_port, request.api_key, request.user_agent });
     try tls.writer.flush();
-    try connection.flush();
+    try tunnel_writer.interface.flush();
     var http: std.http.Reader = .{ .in = &tls.reader, .interface = undefined, .state = .ready, .max_head_len = 8192 };
     var head = try std.http.Client.Response.Head.parse(try http.receiveHead());
     while (head.status.class() == .informational) {
@@ -259,6 +305,75 @@ pub fn parseRetryAfter(raw: []const u8, now_ms: i64) u64 {
 
 fn leap(year: usize) bool {
     return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0);
+}
+
+test "tunnel writer drains ordered buffers and splats and recursively flushes all layers" {
+    // These deliberately mimic TLS flush behavior: draining a layer writes to
+    // the next buffered writer, but does not flush that writer recursively.
+    const Buffered = struct {
+        output: *std.Io.Writer,
+        interface: std.Io.Writer,
+        fail: bool = false,
+        fn drain(w: *std.Io.Writer, data: []const []const u8, splat: usize) std.Io.Writer.Error!usize {
+            const self: *@This() = @fieldParentPtr("interface", w);
+            if (self.fail) return error.WriteFailed;
+            try self.output.writeAll(w.buffered());
+            w.end = 0;
+            for (data[0 .. data.len - 1]) |part| try self.output.writeAll(part);
+            for (0..splat) |_| try self.output.writeAll(data[data.len - 1]);
+            return std.Io.Writer.countSplat(data, splat);
+        }
+    };
+    const ConnectionFlush = struct {
+        outer: *std.Io.Writer,
+        network: *std.Io.Writer,
+        count: usize = 0,
+        fn flush(context: ?*anyopaque) std.Io.Writer.Error!void {
+            const self: *@This() = @ptrCast(@alignCast(context.?));
+            self.count += 1;
+            try self.outer.flush();
+            try self.network.flush();
+        }
+    };
+    var collected: std.Io.Writer.Allocating = .init(std.testing.allocator);
+    defer collected.deinit();
+    var network_buffer: [64]u8 = undefined;
+    var outer_buffer: [64]u8 = undefined;
+    var tunnel_buffer: [8]u8 = undefined;
+    var network: Buffered = .{ .output = &collected.writer, .interface = .{ .vtable = &.{ .drain = Buffered.drain }, .buffer = &network_buffer } };
+    var outer: Buffered = .{ .output = &network.interface, .interface = .{ .vtable = &.{ .drain = Buffered.drain }, .buffer = &outer_buffer } };
+    var flush_state: ConnectionFlush = .{ .outer = &outer.interface, .network = &network.interface };
+    var tunnel: TunnelWriter = .{
+        .output = &outer.interface,
+        .flush_context = &flush_state,
+        .flush_fn = ConnectionFlush.flush,
+        .interface = .{ .vtable = &.{ .drain = TunnelWriter.drain, .flush = TunnelWriter.flush }, .buffer = &tunnel_buffer },
+    };
+    try tunnel.interface.writeAll("pre");
+    try std.testing.expectEqual(@as(usize, 0), collected.written().len);
+    // Return counts exclude the previously buffered prefix.
+    try std.testing.expectEqual(@as(usize, 7), try TunnelWriter.drain(&tunnel.interface, &.{ "A", "BC" }, 3));
+    try std.testing.expectEqual(@as(usize, 0), collected.written().len);
+    try tunnel.interface.flush();
+    try std.testing.expectEqualStrings("preABCBCBC", collected.written());
+    try std.testing.expectEqual(@as(usize, 1), flush_state.count);
+    try std.testing.expectEqual(@as(usize, 0), outer.interface.end);
+    try std.testing.expectEqual(@as(usize, 0), network.interface.end);
+    try tunnel.interface.flush();
+    try std.testing.expectEqualStrings("preABCBCBC", collected.written());
+    try std.testing.expectEqual(@as(usize, 2), flush_state.count);
+    // Automatic overflow uses the same ordered path; a zero splat omits the
+    // final slice while preserving every earlier vector.
+    var vectors = [_][]const u8{ "123456789", "omitted" };
+    try tunnel.interface.writeSplatAll(&vectors, 0);
+    try std.testing.expectEqualStrings("preABCBCBC", collected.written());
+    try tunnel.interface.flush();
+    try std.testing.expectEqualStrings("preABCBCBC123456789", collected.written());
+    // Failure at the final buffered sink must reach the inner TLS caller.
+    try tunnel.interface.writeAll("tail");
+    network.fail = true;
+    try std.testing.expectError(error.WriteFailed, tunnel.interface.flush());
+    try std.testing.expectEqualStrings("preABCBCBC123456789", collected.written());
 }
 
 test "Retry-After handles seconds dates and invalid calendar boundaries" {
@@ -409,13 +524,13 @@ test "native HTTPS rejects a malformed TLS peer before sending authentication" {
     try peer.await(io);
 }
 
-test "nested TLS proxy rejects unsupported upgrade before any network access" {
-    try std.testing.expectError(error.SecureProxyUnsupported, nativeSend(null, std.testing.allocator, std.testing.io, .{
+test "HTTPS proxies attempt verified TLS for both HTTP and HTTPS origins" {
+    try std.testing.expectError(error.ConnectionRefused, nativeSend(null, std.testing.allocator, std.testing.io, .{
         .url = "https://does-not-resolve.invalid/user",
         .api_key = "test-key",
         .proxy_url = "https://127.0.0.1:1",
     }));
-    try std.testing.expectError(error.SecureProxyUnsupported, nativeSend(null, std.testing.allocator, std.testing.io, .{
+    try std.testing.expectError(error.ConnectionRefused, nativeSend(null, std.testing.allocator, std.testing.io, .{
         .url = "http://does-not-resolve.invalid/user",
         .api_key = "test-key",
         .proxy_url = "https://127.0.0.1:1",

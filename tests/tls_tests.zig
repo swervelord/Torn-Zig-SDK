@@ -175,3 +175,22 @@ test "SDK native transport rejects a local certificate before origin authenticat
     }));
     try server.await(std.testing.io);
 }
+
+test "HTTPS proxy certificate is verified before CONNECT or proxy authentication" {
+    inline for (.{ "http://origin.invalid/user", "https://origin.invalid/user" }) |origin| {
+        var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+        defer arena.deinit();
+        const der = try certificate(arena.allocator(), self_signed_pem, 0);
+        var peer = try CertificatePeer.init(der);
+        defer peer.listener.deinit(std.testing.io);
+        var server = try std.testing.io.concurrent(CertificatePeer.serve, .{ &peer, std.testing.io });
+        defer server.cancel(std.testing.io) catch {};
+        const proxy_url = try std.fmt.allocPrint(arena.allocator(), "https://fixture-only-auth:password@127.0.0.1:{d}", .{peer.listener.socket.address.getPort()});
+        try std.testing.expectError(error.TlsInitializationFailed, torn.transport.nativeSend(null, std.testing.allocator, std.testing.io, .{
+            .url = origin,
+            .api_key = "fixture-only-auth",
+            .proxy_url = proxy_url,
+        }));
+        try server.await(std.testing.io);
+    }
+}

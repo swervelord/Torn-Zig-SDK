@@ -7,8 +7,9 @@ pub fn main(init: std.process.Init) !void {
     const dir = std.Io.Dir.cwd();
     const args = try init.minimal.args.toSlice(a);
     const check = args.len > 1 and std.mem.eql(u8, args[1], "--check");
-    const manifest = try dir.readFileAlloc(io, "spec/routing-manifest.json", a, .limited(8 * 1024 * 1024));
-    const v1 = try dir.readFileAlloc(io, "spec/v1-catalog.json", a, .limited(1024 * 1024));
+    // Embedded inputs are normalized to LF so output never depends on checkout newline settings.
+    const manifest = try readLf(a, io, "spec/routing-manifest.json", 8 * 1024 * 1024);
+    const v1 = try readLf(a, io, "spec/v1-catalog.json", 1024 * 1024);
     const overrides = try dir.readFileAlloc(io, "spec/routing-overrides.json", a, .limited(1024 * 1024));
     const parsed = try std.json.parseFromSlice(std.json.Value, a, manifest, .{});
     const overrides_parsed = try std.json.parseFromSlice(std.json.Value, a, overrides, .{});
@@ -34,7 +35,7 @@ pub fn main(init: std.process.Init) !void {
     try w.writeAll("};\npub const force_direct = [_][]const u8{\n");
     if (overrides_parsed.value.object.get("force_direct")) |entries| for (entries.array.items) |entry| try w.print("    \"{f}\",\n", .{std.zig.fmtString(entry.string)});
     try w.writeAll("};\n");
-    const official_bytes = try dir.readFileAlloc(io, "spec/openapi-6.13.8.json", a, .limited(8 * 1024 * 1024));
+    const official_bytes = try dir.readFileAlloc(io, "spec/openapi-6.14.0.json", a, .limited(8 * 1024 * 1024));
     const official = try std.json.parseFromSlice(std.json.Value, a, official_bytes, .{});
     try w.writeAll("pub const RequiredQuery = struct { resource: []const u8, selection: []const u8, parameter: []const u8, required: bool, choices: []const []const u8 };\npub const required_queries = [_]RequiredQuery{\n");
     var path_it = official.value.object.get("paths").?.object.iterator();
@@ -99,7 +100,7 @@ pub fn main(init: std.process.Init) !void {
     try save(a, io, "src/generated/selections.zig", try selections.toOwnedSlice(), check);
     var coverage: std.Io.Writer.Allocating = .init(a);
     const cw = &coverage.writer;
-    try cw.writeAll("{\n  \"source\": \"spec/routing-manifest.json and routing-overrides.json\",\n  \"evidence\": \"Official v2 response associations plus explicitly maintained compatibility overrides. v1 catalog membership is not an authoritative v1 payload specification.\",\n  \"typed_helpers\": 207,\n  \"raw_helpers\": 202,\n  \"csv_helpers\": 3,\n  \"v1_entries\": 184,\n  \"helpers\": [\n");
+    try cw.writeAll("{\n  \"source\": \"spec/routing-manifest.json and routing-overrides.json\",\n  \"evidence\": \"Official v2 response associations plus explicitly maintained compatibility overrides. v1 catalog membership is not an authoritative v1 payload specification.\",\n  \"typed_helpers\": 209,\n  \"raw_helpers\": 204,\n  \"csv_helpers\": 3,\n  \"v1_entries\": 184,\n  \"helpers\": [\n");
     for (caps, 0..) |cap, i| {
         const obj = cap.object;
         const resource = obj.get("resource").?.string;
@@ -143,4 +144,15 @@ fn saveBytes(a: std.mem.Allocator, io: std.Io, path: []const u8, result: []const
     } else {
         try dir.writeFile(io, .{ .sub_path = path, .data = result });
     }
+}
+
+fn readLf(a: std.mem.Allocator, io: std.Io, path: []const u8, limit: usize) ![]u8 {
+    const bytes = try std.Io.Dir.cwd().readFileAlloc(io, path, a, .limited(limit));
+    var out: std.ArrayList(u8) = try .initCapacity(a, bytes.len);
+    var i: usize = 0;
+    while (i < bytes.len) : (i += 1) {
+        if (bytes[i] == '\r' and i + 1 < bytes.len and bytes[i + 1] == '\n') continue;
+        out.appendAssumeCapacity(bytes[i]);
+    }
+    return out.items;
 }

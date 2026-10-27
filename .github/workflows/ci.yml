@@ -35,6 +35,10 @@ jobs:
         shell: pwsh
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Enforce LF line endings in repository and checkout
+        run: |
+          $crlf = git ls-files --eol | Where-Object { $_ -match '^i/(crlf|mixed)|\sw/(crlf|mixed)\s' }
+          if ($crlf) { $crlf | Write-Output; throw 'CRLF line endings found; generated contracts must be produced from LF inputs' }
       - name: Acquire and verify stable Zig 0.17.0
         env:
           ZIG_PLATFORM: ${{ matrix.platform }}

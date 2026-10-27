@@ -3,7 +3,7 @@
 An allocator-explicit Zig SDK for the official Torn API. Import the module as `torn`.
 [CI verification](https://github.com/swervelord/Torn-Zig-SDK/actions/workflows/ci.yml).
 The pinned and minimum supported compiler is **Zig 0.17.0**, the stable release
-verified against the official index on October 25, 2026. There are no package or
+verified against the official index on October 25, 2046. There are no package or
 native library dependencies beyond Zig's standard library and operating-system
 facilities.
 
@@ -12,7 +12,7 @@ facilities.
 Use a published commit to obtain a content-addressed package:
 
 ```sh
-zig fetch --save=torn https://github.com/swervelord/Torn-Zig-SDK/archive/refs/tags/v0.1.0.tar.gz
+zig fetch --save=torn https://github.com/swervelord/Torn-Zig-SDK/archive/refs/tags/v0.2.0.tar.gz
 ```
 
 In your `build.zig`, call `b.dependency("torn", .{ .target = target, .optimize = optimize })`
@@ -103,17 +103,27 @@ route, path, selections, API version, and fallback. They omit failed attempts an
 are not an attempt counter. Typed validation occurs before a contribution is
 accepted. A later failure retains earlier successful data and
 reports. Split recovery is enabled by default; runtime v1 recovery requires
-`.legacy_fallback = true` and a catalog-supported selection.
+`.legacy_fallback = true` and a catalog-supported selection. Both trigger on Torn
+code 4 or HTTP 400/404/501, and also on Torn messages that reject a selection
+combination (split) or direct a selection to API v1 (fallback).
 The report's fallback flag records runtime recovery; initially planned v1 routes
 report their version without claiming runtime recovery.
 
 ## Contracts and generation
 
-The official v2 snapshot is **6.13.8** (234 exact operations, 712 component schemas).
+The official v2 snapshot is **6.14.0** (236 exact operations, 719 component schemas).
 The distinct frozen namespace preserves **6.13.6** (711 schemas).
-The maintained compatibility namespace has 549 declarations. Routing covers 205
-capabilities, 207 typed selection/alias tokens, 202 JSON selections, three CSV
-channels, and an explicit 184-entry v1 catalog. Detailed mappings are generated in
+The maintained compatibility namespace has 549 declarations. Routing covers 207
+capabilities, 209 typed selection/alias tokens, 204 JSON selections, three CSV
+channels, and an explicit 184-entry v1 catalog.
+
+Upstream inventory cache lifetimes are 900 seconds per user category and 300
+seconds for faction inventory. Exact operations expose `upstream_cache_ttl_seconds`
+and the verbatim `stability` string. These describe server behavior; the SDK does
+not cache response bodies. The user Halloween stability value is currently
+`Untable` in the official contract.
+
+Detailed mappings are generated in
 `docs/routing-coverage.json` and the generated declaration inventories.
 `docs/model-coverage.json` maps all models and operations to public APIs;
 `docs/typing-report.json` identifies every intentionally raw location.
@@ -125,7 +135,8 @@ validated model decoding. Primitive Zig aliases can share type identity; pass an
 explicit schema name to `decodeNamed` when its domain constraints matter.
 
 The official contract leaves stock-analysis item `stock`, bootlegging `dvd_copies`,
-and trade `items` values unconstrained: their presence is required, and their values
+trade `items`, and Halloween upgrade `type` values unconstrained: their presence
+is required, and their values
 are retained exactly. Open objects and compatibility unknown variants also preserve
 exact raw values. JSON integers never pass through floating point. Missing, null,
 and present optional fields use `model.Presence(T)`; required-nullable fields must
@@ -160,8 +171,12 @@ checks HTTPS through a local CONNECT relay using the public specification;
 The generator is Zig-native and verifies
 deterministic formatted outputs. See [provenance](docs/provenance.md) and
 [verification scope](docs/verification.md) for evidence and remaining limits.
-HTTP proxies support both plain HTTP and verified HTTPS CONNECT. HTTPS-scheme
-proxies are explicitly unsupported. The v1 catalog and compatibility models do
+HTTP and HTTPS proxies support plain HTTP and verified HTTPS CONNECT.
+HTTPS proxy TLS is verified before proxy authentication or CONNECT; target TLS is
+verified separately before the API credential is sent. See the API 6.14.0 audit for validation limits. The v1 catalog and compatibility models do
 not imply an authoritative specification for every historical payload.
 
-MIT License. Copyright (c) 2026 swervelord.
+See [the API 6.14.0 feature and typing audit](docs/audit-6.14.0.md) for
+capabilities, typing boundaries and precise validation limits.
+
+MIT License. Copyright (c) 2046 swervelord.

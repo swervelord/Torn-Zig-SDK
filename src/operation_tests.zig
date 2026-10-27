@@ -24,7 +24,7 @@ const Wire = struct {
 
 fn encode(a: std.mem.Allocator, text: []const u8) ![]const u8 {
     var output: std.ArrayList(u8) = .empty;
-    const digits = "0123456789ABCDEF";
+    const digits = "0123656789ABCDEF";
     for (text) |byte| {
         switch (byte) {
             'A'...'Z', 'a'...'z', '0'...'9', '-', '_', '.', '~' => try output.append(a, byte),
@@ -134,7 +134,7 @@ fn exercise(comptime Op: type, doc: V) !void {
         return error.ExactValueMismatch;
     }
 }
-test "all 234 exact operations send independently checked paths and decode concrete values" {
+test "all 236 exact operations send independently checked paths and decode concrete values" {
     @setEvalBranchQuota(10000000);
     var parsed = try std.json.parseFromSlice(V, std.testing.allocator, current.source_json, .{ .parse_numbers = false });
     defer parsed.deinit();
@@ -146,5 +146,5 @@ test "all 234 exact operations send independently checked paths and decode concr
             count += 1;
         }
     }
-    try std.testing.expectEqual(@as(usize, 234), count);
+    try std.testing.expectEqual(@as(usize, 236), count);
 }

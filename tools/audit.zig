@@ -26,7 +26,7 @@ pub fn main(init: std.process.Init) !void {
         if (operations != snapshot.object.get("operations").?.integer) return error.OperationInventoryMismatch;
         if (doc.object.get("components").?.object.get("schemas").?.object.count() != snapshot.object.get("schemas").?.integer) return error.SchemaInventoryMismatch;
     }
-    if (torn.current.schema_count != 712 or torn.frozen.schema_count != 711 or torn.compatibility.schema_count != 549 or torn.operations.operation_count != 234) return error.PublicInventoryMismatch;
+    if (torn.current.schema_count != 719 or torn.frozen.schema_count != 711 or torn.compatibility.schema_count != 549 or torn.operations.operation_count != 236) return error.PublicInventoryMismatch;
     const args = try init.minimal.args.toSlice(a);
     if (args.len == 3 and std.mem.eql(u8, args[1], "--historical")) {
         const old_bytes = try cwd.readFileAlloc(io, args[2], a, .limited(16 * 1024 * 1024));

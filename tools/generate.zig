@@ -356,6 +356,10 @@ const Gen = struct {
             try g.quote(name);
             try g.add(";\npub const path = ");
             try g.quote(path.key_ptr.*);
+            try g.add(";\npub const stability = ");
+            if (get(op, "x-stability")) |stability| try g.quote(stability.string) else try g.quote("Unknown");
+            try g.add(";\npub const upstream_cache_ttl_seconds: ?u32 = ");
+            if (std.mem.eql(u8, path.key_ptr.*, "/user/inventory")) try g.add("900") else if (std.mem.eql(u8, path.key_ptr.*, "/faction/inventory")) try g.add("300") else try g.add("null");
             try g.add(";\npub const method = \"GET\";\npub const Params = @This().Parameters;\npub const Parameters = struct {\n");
             if (get(op, "parameters")) |ps| for (ps.array.items) |raw| {
                 var p = raw;
@@ -495,7 +499,7 @@ pub fn main(init: std.process.Init) !void {
     const cwd = std.Io.Dir.cwd();
     const args = try init.minimal.args.toSlice(a);
     const check = args.len > 1 and std.mem.eql(u8, args[1], "--check");
-    const inputs = .{ "spec/openapi-6.13.8.json", "spec/openapi-6.13.6.json", "spec/compatibility-models.json", "spec/openapi-6.13.8.json" };
+    const inputs = .{ "spec/openapi-6.14.0.json", "spec/openapi-6.13.6.json", "spec/compatibility-models.json", "spec/openapi-6.14.0.json" };
     const outputs = .{ "src/generated/current.zig", "src/generated/frozen.zig", "src/generated/compatibility.zig", "src/generated/operations.zig" };
     var manifest: Gen = .{ .a = a };
     var typing: Gen = .{ .a = a };

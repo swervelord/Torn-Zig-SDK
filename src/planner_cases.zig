@@ -6,10 +6,10 @@ const planner = @import("planner.zig");
 // the corresponding generic response branches, not the routing manifest.
 // No target, category, time, or permission filters are supplied. All calls use
 // one credential whose permissions must satisfy the complete group.
-// Evidence: official 6.13.8 /user and /faction contracts, and
+// Evidence: official 6.14.0 /user and /faction contracts, and
 // https://github.com/swervelord/Torn-API/blob/main/Torn%20API/01%20Combining%20Selections.md
 pub const user = [_][]const u8{
-    "ammo", "attacks", "attacksfull", "bars", "basic", "battlestats", "bounties", "calendar", "casino", "competition", "cooldowns", "discord", "enlistedcars", "equipment", "events", "faction", "factionbalance", "forumfeed", "forumfriends", "forumposts", "forumsubscribedthreads", "forumthreads", "gym", "hof", "honors", "icons", "inventory", "itemmarket", "itemmod", "job", "jobpoints", "jobranks", "lookup", "medals", "merits", "messages", "missions", "money", "networth", "newevents", "newmessages", "notifications", "organizedcrime", "personalstats", "profile", "properties", "property", "races", "racingrecords", "refills", "reports", "revives", "revivesfull", "skills", "stocks", "trades", "travel", "timestamp", "weaponexp", "workstats", "education", "perks",
+    "ammo", "attacks", "attacksfull", "bars", "basic", "battlestats", "bounties", "calendar", "casino", "competition", "cooldowns", "discord", "enlistedcars", "equipment", "events", "faction", "factionbalance", "forumfeed", "forumfriends", "forumposts", "forumsubscribedthreads", "forumthreads", "gym", "halloween", "hof", "honors", "icons", "inventory", "itemmarket", "itemmod", "job", "jobpoints", "jobranks", "lookup", "medals", "merits", "messages", "missions", "money", "networth", "newevents", "newmessages", "notifications", "organizedcrime", "personalstats", "profile", "properties", "property", "races", "racingrecords", "refills", "reports", "revives", "revivesfull", "skills", "stocks", "trades", "travel", "timestamp", "weaponexp", "workstats", "education", "perks",
 };
 pub const faction = [_][]const u8{
     "applications", "attacks", "attacksfull", "balance", "basic", "chain", "chainreport", "chains", "crimes", "crimeexp", "dirtbombs", "hof", "lookup", "members", "positions", "rackets", "raids", "rankedwars", "revives", "revivesfull", "stats", "territory", "territoryownership", "territorywars", "timestamp", "upgrades", "warfareraids", "warfareranked", "warfareterritory", "wars",
@@ -87,7 +87,7 @@ pub const groups = [_]Groups{
     .{ .resource = .market, .selections = &.{ "auctionhouse", "bazaar", "pointsmarket", "lookup", "timestamp" }, .path = "/market" },
     .{ .resource = .property, .selections = &.{ "lookup", "timestamp" }, .path = "/property" },
     .{ .resource = .racing, .selections = &.{ "cars", "carupgrades", "lookup", "races", "timestamp", "tracks" }, .path = "/racing" },
-    .{ .resource = .torn, .selections = &.{ "bank", "bounties", "calendar", "cards", "cityshops", "crimes", "education", "elimination", "factiontree", "gyms", "honors", "itemammo", "itemmods", "items", "logcategories", "logtypes", "lookup", "medals", "merits", "museum", "organizedcrimes", "pokertables", "properties", "rockpaperscissors", "stats", "stocks", "territory", "timestamp" }, .path = "/torn" },
+    .{ .resource = .torn, .selections = &.{ "bank", "bounties", "calendar", "cards", "cityshops", "crimes", "education", "elimination", "factiontree", "gyms", "halloween", "honors", "itemammo", "itemmods", "items", "logcategories", "logtypes", "lookup", "medals", "merits", "museum", "organizedcrimes", "pokertables", "properties", "rockpaperscissors", "stats", "stocks", "territory", "timestamp" }, .path = "/torn" },
 };
 
 pub fn expectedQuery(a: std.mem.Allocator, left: []const u8, right: []const u8) ![]const u8 {
@@ -117,7 +117,7 @@ test "independent complete compatible pair groups normalize reverse order and du
         }
     }
     try std.testing.expectEqual(compatible_pair_count, count);
-    try std.testing.expectEqual(@as(usize, 3042), count);
+    try std.testing.expectEqual(@as(usize, 3132), count);
 }
 
 test "complete independently specified generic groups have minimum one call" {

@@ -1,8 +1,8 @@
 {
   "source": "spec/routing-manifest.json and routing-overrides.json",
   "evidence": "Official v2 response associations plus explicitly maintained compatibility overrides. v1 catalog membership is not an authoritative v1 payload specification.",
-  "typed_helpers": 207,
-  "raw_helpers": 202,
+  "typed_helpers": 209,
+  "raw_helpers": 204,
   "csv_helpers": 3,
   "v1_entries": 184,
   "helpers": [
@@ -111,6 +111,7 @@
     {"resource":"torn","selection":"factionhof","token":"selections.torn.factionhof","typed_api":"Client.select(selections.torn.factionhof, target, filters, options)","result":"current.TornFactionHofResponse","csv":false,"raw_api":"Client.raw(selections.torn.factionhof, target, filters, options)"},
     {"resource":"torn","selection":"factiontree","token":"selections.torn.factiontree","typed_api":"Client.select(selections.torn.factiontree, target, filters, options)","result":"current.TornFactionTreeResponse","csv":false,"raw_api":"Client.raw(selections.torn.factiontree, target, filters, options)"},
     {"resource":"torn","selection":"gyms","token":"selections.torn.gyms","typed_api":"Client.select(selections.torn.gyms, target, filters, options)","result":"current.TornGymsResponse","csv":false,"raw_api":"Client.raw(selections.torn.gyms, target, filters, options)"},
+    {"resource":"torn","selection":"halloween","token":"selections.torn.halloween","typed_api":"Client.select(selections.torn.halloween, target, filters, options)","result":"current.TornHalloweenResponse","csv":false,"raw_api":"Client.raw(selections.torn.halloween, target, filters, options)"},
     {"resource":"torn","selection":"hof","token":"selections.torn.hof","typed_api":"Client.select(selections.torn.hof, target, filters, options)","result":"current.TornHofResponse","csv":false,"raw_api":"Client.raw(selections.torn.hof, target, filters, options)"},
     {"resource":"torn","selection":"honors","token":"selections.torn.honors","typed_api":"Client.select(selections.torn.honors, target, filters, options)","result":"current.TornHonorsResponse","csv":false,"raw_api":"Client.raw(selections.torn.honors, target, filters, options)"},
     {"resource":"torn","selection":"itemammo","token":"selections.torn.itemammo","typed_api":"Client.select(selections.torn.itemammo, target, filters, options)","result":"current.TornItemAmmoResponse","csv":false,"raw_api":"Client.raw(selections.torn.itemammo, target, filters, options)"},
@@ -165,6 +166,7 @@
     {"resource":"user","selection":"forumsubscribedthreads","token":"selections.user.forumsubscribedthreads","typed_api":"Client.select(selections.user.forumsubscribedthreads, target, filters, options)","result":"current.UserForumSubscribedThreadsResponse","csv":false,"raw_api":"Client.raw(selections.user.forumsubscribedthreads, target, filters, options)"},
     {"resource":"user","selection":"forumthreads","token":"selections.user.forumthreads","typed_api":"Client.select(selections.user.forumthreads, target, filters, options)","result":"current.UserForumThreadsResponse","csv":false,"raw_api":"Client.raw(selections.user.forumthreads, target, filters, options)"},
     {"resource":"user","selection":"gym","token":"selections.user.gym","typed_api":"Client.select(selections.user.gym, target, filters, options)","result":"current.UserGymResponse","csv":false,"raw_api":"Client.raw(selections.user.gym, target, filters, options)"},
+    {"resource":"user","selection":"halloween","token":"selections.user.halloween","typed_api":"Client.select(selections.user.halloween, target, filters, options)","result":"current.UserHalloweenResponse","csv":false,"raw_api":"Client.raw(selections.user.halloween, target, filters, options)"},
     {"resource":"user","selection":"hof","token":"selections.user.hof","typed_api":"Client.select(selections.user.hof, target, filters, options)","result":"current.UserHofResponse","csv":false,"raw_api":"Client.raw(selections.user.hof, target, filters, options)"},
     {"resource":"user","selection":"honors","token":"selections.user.honors","typed_api":"Client.select(selections.user.honors, target, filters, options)","result":"current.UserHonorsResponse","csv":false,"raw_api":"Client.raw(selections.user.honors, target, filters, options)"},
     {"resource":"user","selection":"icons","token":"selections.user.icons","typed_api":"Client.select(selections.user.icons, target, filters, options)","result":"current.UserIconsResponse","csv":false,"raw_api":"Client.raw(selections.user.icons, target, filters, options)"},

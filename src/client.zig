@@ -171,6 +171,7 @@ pub const Client = struct {
             break :blk .null;
         } else payload;
         var api_code: ?u32 = null;
+        var api_message: []const u8 = "";
         if (envelope == .object) if (envelope.object.get("error")) |failure| {
             if (failure == .object) if (failure.object.get("code")) |code| {
                 api_code = switch (code) {
@@ -179,10 +180,13 @@ pub const Client = struct {
                     else => null,
                 };
             };
+            if (failure == .object) if (failure.object.get("error")) |message| if (message == .string) {
+                api_message = message.string;
+            };
         };
         if (response.status >= 300 or response.status < 200 or api_code != null) {
             const unsupported = api_code == 4 or response.status == 400 or response.status == 404 or response.status == 501;
-            if (unsupported and options.split_recovery and call.version == 2 and call.selections.len > 1) {
+            if ((unsupported or rejectsCombination(api_message)) and options.split_recovery and call.version == 2 and call.selections.len > 1) {
                 const resource = resourceFromPath(call.path) orelse return error.InvalidPlan;
                 for (call.selections) |selection| {
                     // Reuse all encoded filters and target IDs from the rejected combined call.
@@ -198,7 +202,7 @@ pub const Client = struct {
                 }
                 return;
             }
-            if (unsupported and options.legacy_fallback and call.version == 2 and call.fallback_supported) {
+            if ((unsupported or requestsV1(api_message)) and options.legacy_fallback and call.version == 2 and call.fallback_supported) {
                 const resource = resourceFromPath(call.path) orelse return error.InvalidPlan;
                 for (call.selections) |selection| if (!planner.v1Contains(resource, selection)) return error.UnsupportedFallback;
                 var plan = planner.build(a, .{ .resource = resource, .selections = call.selections, .target = call.target, .filters = call.filters, .mode = .v1 }) catch |err| {
@@ -423,6 +427,28 @@ pub fn ExactResult(comptime Op: type) type {
             self.* = undefined;
         }
     };
+}
+
+/// Torn rejects some combinations by message rather than code 4; the split retries
+/// each selection on its own.
+fn rejectsCombination(message: []const u8) bool {
+    const has = std.ascii.findIgnoreCase;
+    return (has(message, "selection") != null and has(message, "cannot") != null) or has(message, "cannot be used together") != null or has(message, "standalone") != null;
+}
+
+/// Messages that direct a v2 selection to API v1 make opt-in legacy fallback eligible.
+fn requestsV1(message: []const u8) bool {
+    const has = std.ascii.findIgnoreCase;
+    return has(message, "not available in api v2") != null or has(message, "fallback to api v1") != null or has(message, "fall back to api v1") != null or (has(message, "api v1") != null and has(message, "selection") != null);
+}
+
+test "message-classified combination and migration errors" {
+    try std.testing.expect(rejectsCombination("Selection cannot be used together with another selection"));
+    try std.testing.expect(rejectsCombination("This selection is standalone"));
+    try std.testing.expect(!rejectsCombination("Incorrect ID"));
+    try std.testing.expect(requestsV1("The following selections are not available in API v2: 'networth'"));
+    try std.testing.expect(requestsV1("Selection is only available in API v1"));
+    try std.testing.expect(!requestsV1("Key is invalid"));
 }
 
 fn resourceFromPath(path: []const u8) ?planner.Resource {
