@@ -429,8 +429,8 @@ pub fn ExactResult(comptime Op: type) type {
     };
 }
 
-/// Torn rejects some combinations by message rather than code 4 (as recognized by
-/// the Rust and TypeScript SDKs); the split retries each selection on its own.
+/// Torn rejects some combinations by message rather than code 4; the split retries
+/// each selection on its own.
 fn rejectsCombination(message: []const u8) bool {
     const has = std.ascii.findIgnoreCase;
     return (has(message, "selection") != null and has(message, "cannot") != null) or has(message, "cannot be used together") != null or has(message, "standalone") != null;

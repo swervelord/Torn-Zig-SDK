@@ -27,4 +27,4 @@
 The official `/user/halloween` stability is currently spelled `Untable`.
 `TornHalloweenUpgrade.type` is required but has no declared value schema.
 Both are preserved rather than corrected speculatively. See
-[the feature and typing audit](docs/parity-audit-6.14.0.md) for evidence and limits.
+[the feature and typing audit](docs/audit-6.14.0.md) for evidence and limits.

@@ -105,8 +105,7 @@ accepted. A later failure retains earlier successful data and
 reports. Split recovery is enabled by default; runtime v1 recovery requires
 `.legacy_fallback = true` and a catalog-supported selection. Both trigger on Torn
 code 4 or HTTP 400/404/501, and also on Torn messages that reject a selection
-combination (split) or direct a selection to API v1 (fallback), as in the Rust
-and TypeScript SDKs.
+combination (split) or direct a selection to API v1 (fallback).
 The report's fallback flag records runtime recovery; initially planned v1 routes
 report their version without claiming runtime recovery.
 
@@ -174,10 +173,10 @@ deterministic formatted outputs. See [provenance](docs/provenance.md) and
 [verification scope](docs/verification.md) for evidence and remaining limits.
 HTTP and HTTPS proxies support plain HTTP and verified HTTPS CONNECT.
 HTTPS proxy TLS is verified before proxy authentication or CONNECT; target TLS is
-verified separately before the API credential is sent. See the parity audit for validation limits. The v1 catalog and compatibility models do
+verified separately before the API credential is sent. See the API 6.14.0 audit for validation limits. The v1 catalog and compatibility models do
 not imply an authoritative specification for every historical payload.
 
-See [the API 6.14.0 feature and typing audit](docs/parity-audit-6.14.0.md) for
-comparison with the Rust, Go, and TypeScript SDKs and precise validation limits.
+See [the API 6.14.0 feature and typing audit](docs/audit-6.14.0.md) for
+capabilities, typing boundaries and precise validation limits.
 
 MIT License. Copyright (c) 2046 swervelord.

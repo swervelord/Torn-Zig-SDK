@@ -1,7 +1,7 @@
 # API 6.14.0 feature and typing audit
 
-Reviewed on October 27, 2026 against the current Rust, Go and TypeScript SDK
-sources and the official [Torn OpenAPI contract](https://www.torn.com/swagger/openapi.json).
+Reviewed on October 27, 2026 against the official
+[Torn OpenAPI contract](https://www.torn.com/swagger/openapi.json).
 The pinned input's exact hash, version and counts are in `spec/provenance.json`.
 
 ## Contract coverage
@@ -25,14 +25,14 @@ measure declared surface coverage, not every possible combination of game states
 
 ## Developer capabilities
 
-| Capability in the sibling SDKs | Zig public surface / behavior |
+| Capability | Public surface / behavior |
 | --- | --- |
 | Exact typed endpoints | `operations`, `Client.exact`; schema-checked parameters/responses |
 | Resource selection conveniences | `selections` and `Client.select`; typed response fields |
 | Inferred typed batching | `Client.batch` returns a concrete tuple; cross-resource/empty tuples rejected at compile time |
 | Planner inspection and explicit execution | `planner.build`, `Client.executePlan`; target-domain validation, generic/direct routes, split recovery and opt-in supported v1 recovery, triggered by code 4, HTTP 400/404/501, or Torn's combination/v1-migration messages |
 | Raw and custom decoding | `Client.raw`, `Execution.raw`, `Execution.project` |
-| Pagination | Typed official links/metadata; explicit parameters. No sibling currently provides a universal automatic page iterator |
+| Pagination | Typed official links/metadata; explicit parameters. No automatic page iterator is provided |
 | Retries | Transport, selected HTTP statuses and Torn codes 5/8/9; Retry-After seconds/date support; code 5 minute-boundary cooldown that also spends the key's (and, for IP-attributed limits, the route's) remaining minute budget |
 | Quotas and rotation | Deduplicated keys, shared key/route budgets, route spillover/pinning, independent `Route.per_minute` overrides |
 | Concurrency and cancellation | Shared semaphore; cancelable Io operations; attempt and outer deadlines; waits release permits |
@@ -46,13 +46,12 @@ measure declared surface coverage, not every possible combination of game states
 
 The audit found and fixed five practical gaps: Torn code 5 cooldown, route-specific
 quotas, HTTPS proxy support, rate-limit exhaustion and message-based recovery.
-Rust and TypeScript mark a rate-limited key (and an IP-limited route) exhausted
-for the rest of the minute; Zig now does the same for Torn code 5, and Go was
-brought to the same behavior in its 6.14.0 branch. Rust/TypeScript match
-the IP by substring; Zig requires the whole word so "multiple" does not spend a
-route. Rust also spends a key on HTTP 429; Zig instead honors 429's Retry-After.
-Rust and TypeScript also split or fall back on Torn messages, independent of the
-error code; Zig and Go now recognize the same message forms.
+After Torn code 5, the key's remaining minute budget is spent so other calls rotate
+instead of repeating the rejection; when the message names the IP as a whole word
+(so "multiple" does not match), the route's budget is spent too. HTTP 429 honors
+its Retry-After without spending budgets. Split recovery and opt-in v1 fallback
+recognize Torn's combination-rejection and v1-migration messages independent of
+the error code.
 
 The HTTPS-proxy implementation includes an explicit
 nested TLS flush adapter because flushing Zig's TLS writer alone does not flush
@@ -75,21 +74,16 @@ would exceed the upstream contract:
 - Maintained historical/v1 unknown variants remain explicit raw values where the
   available contract does not define a complete shape.
 - Zig scalar aliases may share identity. `decodeNamed` preserves the selected
-  schema's domain when an independently decoded scalar would be ambiguous. Rust
-  (`pub type AmmoId = i64`) and TypeScript (`type AttackCode = string`) aliases
-  also share identity; Go alone generates distinct named types (`type AmmoId int64`).
-- Official `number` fields use `f64`; retained original JSON preserves the source
-  lexeme. Rust uses `f64` and TypeScript `number` without lexeme retention. Go's
-  current typed models use `json.Number` (its compatibility models use `float64`),
-  so decimal representation is not identical across SDKs. Integer conversion never
-  goes through floating point and honors the official integer width and bounds.
+  schema's domain when an independently decoded scalar would be ambiguous.
+- Official `number` fields use `f64`, so decimal values are subject to binary
+  floating-point representation; retained original JSON preserves the exact source
+  lexeme for callers that need it. Integer conversion never goes through floating
+  point and honors the official integer width and bounds.
 - Upstream `/user/halloween` has `x-stability: "Untable"`. It is exposed verbatim;
   callers should treat an unrecognized stability value conservatively.
 
-All four SDKs preserve the official contract rather than claiming authoritative
-types for undocumented server behavior. Rust/Go/TypeScript APIs naturally differ
-in calling conventions and concurrency primitives; the comparison is behavioral
-and contract coverage, not identical language-level APIs.
+The SDK preserves the official contract rather than claiming authoritative types
+for undocumented server behavior.
 
 ## Verification and remaining limits
 
@@ -115,9 +109,11 @@ transport appended an ephemeral fixture CA after normal system-root initializati
 the machine trust store and production sources stayed unchanged. The peer checked
 proxy authentication, target authentication and absence of the origin credential
 in CONNECT. Source hashes, exact trust injection and results are recorded in
-`docs/https-proxy-verification.json`; the optional Go/Python fixture and reproduction
+`docs/https-proxy-verification.json`; the optional fixture peer and reproduction
 instructions are in `docs/interop/`. This is injected-fixture-trust evidence,
 rather than a public HTTPS-proxy service test with only system roots.
-The live account test remains
-credential-gated. Local checks do not establish native Linux/macOS behavior,
-race freedom, service-wide distributed rate limits, or every undocumented v1 shape.
+The live account test remains credential-gated. CI runs natively on Linux, Windows
+and macOS; the checks do not establish race freedom beyond the Linux thread-sanitizer
+runtime tests, service-wide distributed rate limits, or every undocumented v1 shape.
+v1 fallback calls also authenticate with the `Authorization` header; the official
+contract documents that header for v2 only, and no live test covers v1 acceptance.
