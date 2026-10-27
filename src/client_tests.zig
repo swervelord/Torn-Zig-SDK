@@ -135,6 +135,33 @@ test "legacy recovery retains target in the explicit v1 path" {
     try std.testing.expect(result.reports[0].fallback);
 }
 
+test "combination and v1-migration messages recover without code 4" {
+    var split: Wire = .{ .steps = &.{
+        .{ .url = "https://example.invalid/v2/user?selections=job%2Cprofile", .body = "{\"error\":{\"code\":17,\"error\":\"Selection cannot be used together with another selection\"}}" },
+        .{ .url = "https://example.invalid/v2/user?selections=job", .body = "{\"job\":{}}" },
+        .{ .url = "https://example.invalid/v2/user?selections=profile", .body = "{\"profile\":{}}" },
+    } };
+    var split_engine = try split.engine();
+    defer split_engine.deinit();
+    var split_result = try (client.Client{ .engine = &split_engine }).execute(.{ .resource = .user, .selections = &.{ "profile", "job" } }, .{});
+    defer split_result.deinit();
+    try std.testing.expect(split_result.failure == null);
+    try std.testing.expectEqual(@as(usize, 3), split.count);
+    try std.testing.expectEqual(@as(usize, 2), split_result.reports.len);
+
+    var legacy: Wire = .{ .steps = &.{
+        .{ .url = "https://example.invalid/v2/user?selections=profile&id=123", .body = "{\"error\":{\"code\":22,\"error\":\"The following selections are not available in API v2: 'profile'\"}}" },
+        .{ .url = "https://example.invalid/user/123?selections=profile", .body = "{\"profile\":{}}" },
+    } };
+    var legacy_engine = try legacy.engine();
+    defer legacy_engine.deinit();
+    var legacy_result = try (client.Client{ .engine = &legacy_engine }).execute(.{ .resource = .user, .selections = &.{"profile"}, .target = &.{.{ .name = "id", .value = "123" }} }, .{ .legacy_fallback = true });
+    defer legacy_result.deinit();
+    try std.testing.expect(legacy_result.failure == null);
+    try std.testing.expectEqual(@as(usize, 2), legacy.count);
+    try std.testing.expect(legacy_result.reports[0].fallback);
+}
+
 test "fallback disabled and uncatalogued resources each stop after one send" {
     const scenarios = .{
         .{ planner.Resource.user, "profile", "https://example.invalid/v2/user?selections=profile", false },

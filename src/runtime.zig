@@ -316,10 +316,15 @@ pub const Client = struct {
                 response.deinit();
                 return error.ResponseTooLarge;
             }
-            const retry = retryPolicyAlloc(self.allocator, response.status, response.body) catch |err| {
+            const classified = classifyAlloc(self.allocator, response.status, response.body) catch |err| {
                 response.deinit();
                 return err;
             };
+            if (classified.exhausts_key) self.exhaust(selected, classified.exhausts_route) catch |err| {
+                response.deinit();
+                return err;
+            };
+            const retry = classified.policy;
             if (attempt + 1 == attempts or retry == .none) {
                 errdefer response.deinit();
                 if (response.route_name_owned) response.allocator.free(response.route_name);
@@ -340,28 +345,45 @@ pub const Client = struct {
         }
         unreachable;
     }
+
+    /// A server-side rate limit spends the rest of this minute's budget for the
+    /// key (and for the route when Torn attributes it to the IP), so concurrent
+    /// and later calls rotate to other credentials/routes instead of repeating it.
+    fn exhaust(self: *Client, selected: Reservation, route: bool) !void {
+        try self.mutex.lock(self.io);
+        defer self.mutex.unlock(self.io);
+        const minute = @divFloor(self.scheduler.now_fn(self.scheduler.context, self.io), 60_000);
+        self.key_usage[selected.key] = .{ .minute = minute, .calls = self.config.per_key_per_minute };
+        if (route) self.route_usage[selected.route] = .{ .minute = minute, .calls = self.routes[selected.route].per_minute orelse self.config.per_route_per_minute };
+    }
 };
 
 pub fn shouldRetry(status: u16, body: []const u8) bool {
-    return (retryPolicyAlloc(std.heap.page_allocator, status, body) catch return false) != .none;
+    return (classifyAlloc(std.heap.page_allocator, status, body) catch return false).policy != .none;
 }
 
 const RetryPolicy = enum { none, backoff, minute_boundary };
-fn retryPolicyAlloc(allocator: std.mem.Allocator, status: u16, body: []const u8) !RetryPolicy {
-    const http_retry: RetryPolicy = switch (status) {
-        408, 429, 500, 502, 503, 504 => .backoff,
-        else => .none,
+const Classification = struct { policy: RetryPolicy, exhausts_key: bool = false, exhausts_route: bool = false };
+fn classifyAlloc(allocator: std.mem.Allocator, status: u16, body: []const u8) !Classification {
+    const http_retry: Classification = switch (status) {
+        // HTTP 429 carries its own Retry-After; only Torn code 5 is the documented
+        // per-key minute quota, so only that spends the remaining minute.
+        408, 429, 500, 502, 503, 504 => .{ .policy = .backoff },
+        else => .{ .policy = .none },
     };
-    const parsed = std.json.parseFromSlice(struct { @"error": ?struct { code: u32 } = null }, allocator, body, .{ .ignore_unknown_fields = true }) catch |err| switch (err) {
+    const parsed = std.json.parseFromSlice(struct { @"error": ?struct { code: u32, @"error": ?[]const u8 = null } = null }, allocator, body, .{ .ignore_unknown_fields = true }) catch |err| switch (err) {
         error.OutOfMemory => return err,
         else => return http_retry,
     };
     defer parsed.deinit();
-    if (parsed.value.@"error") |failure| return switch (failure.code) {
-        5 => .minute_boundary,
-        8, 9 => .backoff,
-        else => http_retry,
-    };
+    if (parsed.value.@"error") |failure| {
+        const ip = if (failure.@"error") |message| mentionsIp(message) else false;
+        return switch (failure.code) {
+            5 => .{ .policy = .minute_boundary, .exhausts_key = true, .exhausts_route = ip },
+            8, 9 => .{ .policy = .backoff },
+            else => http_retry,
+        };
+    }
     return http_retry;
 }
 
@@ -450,6 +472,71 @@ test "retry policy includes HTTP and Torn error envelopes" {
     try std.testing.expect(shouldRetry(503, ""));
     try std.testing.expect(shouldRetry(200, "{\"error\":{\"code\":5}}"));
     try std.testing.expect(!shouldRetry(400, "{\"error\":{\"code\":4}}"));
+}
+
+/// Whole-word match so messages such as "multiple" do not spend a route.
+fn mentionsIp(message: []const u8) bool {
+    var words = std.mem.tokenizeAny(u8, message, " \t.,;:!?()[]'\"-/");
+    while (words.next()) |word| if (std.ascii.eqlIgnoreCase(word, "ip")) return true;
+    return false;
+}
+
+test "rate-limited key and IP-attributed route are spent for the rest of the minute" {
+    const State = struct {
+        calls: usize = 0,
+        fn nowFn(_: ?*anyopaque, _: std.Io) i64 {
+            return 1_000;
+        }
+        fn waitFn(_: ?*anyopaque, _: std.Io, _: u64) !void {
+            return error.UnexpectedWait;
+        }
+        fn sendFn(ctx: ?*anyopaque, allocator: std.mem.Allocator, _: std.Io, request: transport.Request) !transport.Response {
+            const self: *@This() = @ptrCast(@alignCast(ctx.?));
+            defer self.calls += 1;
+            const body = switch (self.calls) {
+                0 => blk: {
+                    try std.testing.expectEqualStrings("a", request.api_key);
+                    break :blk "{\"error\":{\"code\":5,\"error\":\"Too many requests\"}}";
+                },
+                1 => blk: {
+                    // Key "a" stays spent although its counted budget was not used.
+                    try std.testing.expectEqualStrings("b", request.api_key);
+                    try std.testing.expect(request.proxy_url == null);
+                    break :blk "{\"error\":{\"code\":5,\"error\":\"Too many requests from this IP\"}}";
+                },
+                2 => blk: {
+                    // Both spent keys and the IP-limited first route are skipped.
+                    try std.testing.expectEqualStrings("c", request.api_key);
+                    try std.testing.expectEqualStrings("http://second", request.proxy_url orelse "");
+                    break :blk "{}";
+                },
+                else => unreachable,
+            };
+            return .{ .allocator = allocator, .status = 200, .body = try allocator.dupe(u8, body) };
+        }
+    };
+    var state: State = .{};
+    var client = try Client.init(std.testing.allocator, std.testing.io, .{ .keys = &.{ "a", "b", "c" }, .per_key_per_minute = 10, .routes = &.{ .{ .name = "first" }, .{ .name = "second", .proxy_url = "http://second" } } }, .{ .context = &state, .send_fn = State.sendFn });
+    defer client.deinit();
+    client.scheduler = .{ .context = &state, .now_fn = State.nowFn, .wait_fn = State.waitFn };
+    for (0..3) |_| {
+        var response = try client.execute("http://mock", .{ .attempts = 1 });
+        response.deinit();
+    }
+    try std.testing.expectEqual(@as(usize, 3), state.calls);
+    try std.testing.expectEqual(@as(u32, 10), client.key_usage[0].calls);
+    try std.testing.expectEqual(@as(u32, 10), client.key_usage[1].calls);
+    try std.testing.expectEqual(@as(u32, 1), client.key_usage[2].calls);
+    try std.testing.expectEqual(client.config.per_route_per_minute, client.route_usage[0].calls);
+}
+
+test "only Torn code 5 spends the key and IP attribution is a whole word" {
+    const a = std.testing.allocator;
+    try std.testing.expectEqual(Classification{ .policy = .minute_boundary, .exhausts_key = true, .exhausts_route = true }, try classifyAlloc(a, 200, "{\"error\":{\"code\":5,\"error\":\"Too many requests (IP)\"}}"));
+    try std.testing.expectEqual(Classification{ .policy = .backoff }, try classifyAlloc(a, 429, ""));
+    try std.testing.expectEqual(Classification{ .policy = .minute_boundary, .exhausts_key = true }, try classifyAlloc(a, 200, "{\"error\":{\"code\":5,\"error\":\"Multiple requests\"}}"));
+    try std.testing.expectEqual(Classification{ .policy = .backoff }, try classifyAlloc(a, 503, ""));
+    try std.testing.expectEqual(Classification{ .policy = .backoff }, try classifyAlloc(a, 200, "{\"error\":{\"code\":8,\"error\":\"IP block\"}}"));
 }
 
 test "credentials are trimmed and deduplicated with owned lifetime" {

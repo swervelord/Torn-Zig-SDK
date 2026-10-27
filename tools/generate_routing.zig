@@ -7,8 +7,9 @@ pub fn main(init: std.process.Init) !void {
     const dir = std.Io.Dir.cwd();
     const args = try init.minimal.args.toSlice(a);
     const check = args.len > 1 and std.mem.eql(u8, args[1], "--check");
-    const manifest = try dir.readFileAlloc(io, "spec/routing-manifest.json", a, .limited(8 * 1024 * 1024));
-    const v1 = try dir.readFileAlloc(io, "spec/v1-catalog.json", a, .limited(1024 * 1024));
+    // Embedded inputs are normalized to LF so output never depends on checkout newline settings.
+    const manifest = try readLf(a, io, "spec/routing-manifest.json", 8 * 1024 * 1024);
+    const v1 = try readLf(a, io, "spec/v1-catalog.json", 1024 * 1024);
     const overrides = try dir.readFileAlloc(io, "spec/routing-overrides.json", a, .limited(1024 * 1024));
     const parsed = try std.json.parseFromSlice(std.json.Value, a, manifest, .{});
     const overrides_parsed = try std.json.parseFromSlice(std.json.Value, a, overrides, .{});
@@ -143,4 +144,15 @@ fn saveBytes(a: std.mem.Allocator, io: std.Io, path: []const u8, result: []const
     } else {
         try dir.writeFile(io, .{ .sub_path = path, .data = result });
     }
+}
+
+fn readLf(a: std.mem.Allocator, io: std.Io, path: []const u8, limit: usize) ![]u8 {
+    const bytes = try std.Io.Dir.cwd().readFileAlloc(io, path, a, .limited(limit));
+    var out: std.ArrayList(u8) = try .initCapacity(a, bytes.len);
+    var i: usize = 0;
+    while (i < bytes.len) : (i += 1) {
+        if (bytes[i] == '\r' and i + 1 < bytes.len and bytes[i + 1] == '\n') continue;
+        out.appendAssumeCapacity(bytes[i]);
+    }
+    return out.items;
 }
