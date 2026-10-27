@@ -1,5 +1,13 @@
 # Contract provenance
 
+On October 27, 2026, the official specification was fetched with the custom user
+agent `Torn-SDK-update/1.0`. The current pinned snapshot is API 6.14.0, containing
+236 GET operations and 719 component schemas. Its 1,417,327 bytes have SHA-256
+`53ead35b2c39eaa22fa294f83fe98dba010149f8a2d97e4f69839ed65548b06b`.
+`zig build audit` verifies this snapshot as well as both retained older inputs.
+The public CONNECT verification separately retrieved API 6.14.0 over verified TLS.
+The following paragraphs record the historical evidence for the older inputs.
+
 On October 25, 2026, the live official specification at
 https://www.torn.com/swagger/openapi.json was fetched with the custom user agent
 `Torn-Zig-SDK-audit/1.0`. Its version is 6.13.8; it contains 234 GET operations and

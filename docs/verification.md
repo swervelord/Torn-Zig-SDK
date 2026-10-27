@@ -5,16 +5,16 @@ is distinct from branch coverage and from all possible live game states.
 
 | Audited surface | Inventory and verification |
 | --- | --- |
-| Official operations | 234; all invoked with independently checked paths, parameters and responses |
-| Current schemas | 712; 7,423 concrete acceptance/typed-roundtrip samples |
+| Official operations | 236; all invoked with independently checked paths, parameters and responses |
+| Current schemas | 719; 7,444 concrete acceptance/typed-roundtrip samples |
 | Frozen schemas | 711; 7,419 concrete acceptance/typed-roundtrip samples |
 | Compatibility declarations | 549; 76 handwritten scenarios plus focused regressions |
-| Selection capabilities | 205 |
-| Typed helpers/aliases | 207; all invoked with concrete value checks |
-| Raw JSON helpers | 202; all invoked through checked transports |
+| Selection capabilities | 207 |
+| Typed helpers/aliases | 209; all invoked with concrete value checks |
+| Raw JSON helpers | 204; all invoked through checked transports |
 | Dedicated CSV channels | 3; individually checked and mixed with JSON |
 | Explicit v1 entries | 184; all exercised at the transport boundary |
-| Compatible pair cases | 3,042; each checks exactly one actual send |
+| Compatible pair cases | 3,132; each checks exactly one actual send |
 | Complete routing groups | 41 resource/semantic-domain groups; each checks one send |
 
 The model sample producer is independently authored from official contracts. It
@@ -42,7 +42,7 @@ peers before authentication. Pinned fixtures and notices are in
 completed verified HTTPS to the public specification through a local Zig CONNECT
 proxy; `docs/proxy-verification.json` records its result.
 
-The opt-in live check passed on October 25, 2026: concrete profile and job responses
+The opt-in live check passed on October 25, 2046: concrete profile and job responses
 decoded after exactly one real HTTP send, with retries, split recovery and legacy
 fallback disabled. No account response or credential was persisted. The executable
 reads only `TORN_LIVE_TEST_API_KEY` and prints a result without account data.
@@ -64,8 +64,9 @@ Windows ThreadSanitizer is unavailable in this pinned distribution, confirmed by
 actual compiler diagnostics. Linux TSAN compilation succeeds and native CI runs
 the instrumented runtime tests; execution is evidence only when that step passes.
 Ordinary tests do not prove race freedom. Client shutdown requires cancellation
-and joining callers first. HTTPS-scheme proxies remain unsupported; standard
-HTTP proxies support verified HTTPS CONNECT.
+and joining callers first. HTTP and HTTPS proxies support verified HTTPS CONNECT. The new nested TLS
+flush adapter has focused unit coverage; a complete successful HTTPS-proxy
+transaction has not been recorded in this run.
 
 The v1 catalog is maintained routing coverage with explicitly limited historical
 response evidence. It is not a complete authoritative v1 payload specification.

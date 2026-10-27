@@ -287,6 +287,10 @@
 {"namespace":"current","location":"#/components/schemas/UserMeritUpgrade/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/UserMerits/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/UserMeritsResponse/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserHalloween/properties/treats/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserHalloween/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserHalloweenBasketUpgrade/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserHalloweenResponse/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/PersonalStatsOther/properties/other/properties/activity/properties/streak/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/PersonalStatsOther/properties/other/properties/activity/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/PersonalStatsOther/properties/other/properties/refills/*","reason":"unknown object fields retained by Owned raw tree"},
@@ -789,6 +793,10 @@
 {"namespace":"current","location":"#/components/schemas/TornFactionTree/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/TornFactionTreeResponse/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/TornLookupResponse/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/TornHalloweenUpgrade/properties/type","reason":"required property without a narrower value schema"},
+{"namespace":"current","location":"#/components/schemas/TornHalloweenUpgrade/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/TornHalloween/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/TornHalloweenResponse/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"frozen","location":"#/components/schemas/RequestLinks/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"frozen","location":"#/components/schemas/RequestMetadata/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"frozen","location":"#/components/schemas/RequestMetadataWithLinks/*","reason":"unknown object fields retained by Owned raw tree"},
@@ -1940,5 +1948,5 @@
 {"namespace":"compatibility","location":"#/components/schemas/UserWeaponExpEntry/fields/extra/arguments/1","reason":"explicit maintained raw/unknown value contract"},
 {"namespace":"compatibility","location":"#/components/schemas/UserWorkStats/fields/extra/arguments/1","reason":"explicit maintained raw/unknown value contract"}
 ],
-"location_count":1938
+"location_count":1946
 }

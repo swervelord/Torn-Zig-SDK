@@ -1,13 +1,14 @@
 # Model contracts and verification
 
-`torn.current` contains the 712 official 6.13.8 component declarations;
+`torn.current` contains the 719 official 6.14.0 component declarations;
 `torn.frozen` contains the 711 official 6.13.6 declarations; and
 `torn.compatibility` contains 549 maintained declarations. Their names,
-public API locations, source evidence, and all 234 exact operation
+public API locations, source evidence, and all 236 exact operation
 parameter/result contracts appear in `model-coverage.json`.
 
 The generated operation descriptors expose `Params` (also `Parameters`),
-`Response`, `path`, `operation_id`, `method`, `media_type`, and the source
+`Response`, `path`, `operation_id`, `method`, `media_type`, `stability`, optional
+`upstream_cache_ttl_seconds`, and the source
 operation contract. Response objects provide direct typed fields; nullable
 required fields use `?T`, while optional official fields use
 `model.Presence(T)` with `absent`, `null`, and `value` states. Maps contain
@@ -61,7 +62,7 @@ the authoritative snapshots. Its fixture producer is separate from the
 generator and decoder and never derives goldens from implementation output.
 It checks three boundary variants for every component, then every root
 union alternative and every literal of all 86 named enum components:
-7,423 current and 7,419 frozen acceptance/typed-roundtrip
+7,444 current and 7,419 frozen acceptance/typed-roundtrip
 samples. Cases include missing optional fields, nullable alternatives,
 empty/nonempty arrays, named enums, exact integers above 2^53, and required
 unconstrained properties. The tests compare serialized concrete typed values

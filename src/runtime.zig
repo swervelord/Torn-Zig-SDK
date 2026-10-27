@@ -3,7 +3,7 @@ pub const transport = @import("transport.zig");
 
 pub const Config = struct {
     keys: []const []const u8,
-    user_agent: []const u8 = "Torn-Zig-SDK/0.1.0",
+    user_agent: []const u8 = "Torn-Zig-SDK/0.2.0",
     base_url_v2: []const u8 = "https://api.torn.com/v2",
     base_url_v1: []const u8 = "https://api.torn.com",
     attempt_timeout_ms: u32 = 30_000,
@@ -23,7 +23,12 @@ pub const Config = struct {
     }
 };
 
-pub const Route = struct { name: []const u8, proxy_url: ?[]const u8 = null };
+pub const Route = struct {
+    name: []const u8,
+    proxy_url: ?[]const u8 = null,
+    /// Optional route-specific budget; null inherits Config.per_route_per_minute.
+    per_minute: ?u32 = null,
+};
 pub const Options = struct {
     attempts: ?u32 = null,
     timeout_ms: ?u32 = null,
@@ -111,11 +116,12 @@ pub const Client = struct {
         }
         for (config.routes, 0..) |route, i| {
             if (route.name.len == 0) return error.InvalidConfiguration;
+            if (route.per_minute) |limit| if (limit == 0) return error.InvalidConfiguration;
             for (config.routes[0..i]) |prior| if (std.mem.eql(u8, route.name, prior.name)) return error.DuplicateRoute;
             const name = try allocator.dupe(u8, route.name);
             errdefer allocator.free(name);
             const proxy = if (route.proxy_url) |url| try allocator.dupe(u8, url) else null;
-            routes[i] = .{ .name = name, .proxy_url = proxy };
+            routes[i] = .{ .name = name, .proxy_url = proxy, .per_minute = route.per_minute };
             route_count += 1;
         }
         const key_usage = try allocator.alloc(Counter, keys.items.len);
@@ -231,7 +237,7 @@ pub const Client = struct {
             var chosen: ?Reservation = null;
             for (0..self.routes.len) |ri| {
                 if (options.route) |pinned| if (pinned != ri) continue;
-                if (self.route_usage[ri].calls >= self.config.per_route_per_minute) continue;
+                if (self.route_usage[ri].calls >= (self.routes[ri].per_minute orelse self.config.per_route_per_minute)) continue;
                 for (0..self.keys.len) |offset| {
                     const ki = (self.next_key + offset) % self.keys.len;
                     if (self.key_usage[ki].calls >= self.config.per_key_per_minute) continue;
@@ -310,11 +316,11 @@ pub const Client = struct {
                 response.deinit();
                 return error.ResponseTooLarge;
             }
-            const retry = shouldRetryAlloc(self.allocator, response.status, response.body) catch |err| {
+            const retry = retryPolicyAlloc(self.allocator, response.status, response.body) catch |err| {
                 response.deinit();
                 return err;
             };
-            if (attempt + 1 == attempts or !retry) {
+            if (attempt + 1 == attempts or retry == .none) {
                 errdefer response.deinit();
                 if (response.route_name_owned) response.allocator.free(response.route_name);
                 response.route_name_owned = false;
@@ -322,7 +328,13 @@ pub const Client = struct {
                 response.route_name_owned = true;
                 return response;
             }
-            const delay = @max(response.retry_after_ms, @as(u64, self.config.backoff_ms) * (attempt + 1));
+            var delay = @max(response.retry_after_ms, @as(u64, self.config.backoff_ms) * (attempt + 1));
+            if (retry == .minute_boundary) {
+                // Torn code 5 exhausts a server minute quota. Retrying with only
+                // linear backoff can consume every attempt before it resets.
+                const now = self.scheduler.now_fn(self.scheduler.context, self.io);
+                delay = @max(delay, @as(u64, @intCast(60_000 - @mod(now, 60_000))));
+            }
             response.deinit();
             try self.wait(options, delay);
         }
@@ -331,21 +343,107 @@ pub const Client = struct {
 };
 
 pub fn shouldRetry(status: u16, body: []const u8) bool {
-    return shouldRetryAlloc(std.heap.page_allocator, status, body) catch false;
+    return (retryPolicyAlloc(std.heap.page_allocator, status, body) catch return false) != .none;
 }
 
-fn shouldRetryAlloc(allocator: std.mem.Allocator, status: u16, body: []const u8) !bool {
-    switch (status) {
-        408, 429, 500, 502, 503, 504 => return true,
-        else => {},
-    }
+const RetryPolicy = enum { none, backoff, minute_boundary };
+fn retryPolicyAlloc(allocator: std.mem.Allocator, status: u16, body: []const u8) !RetryPolicy {
+    const http_retry: RetryPolicy = switch (status) {
+        408, 429, 500, 502, 503, 504 => .backoff,
+        else => .none,
+    };
     const parsed = std.json.parseFromSlice(struct { @"error": ?struct { code: u32 } = null }, allocator, body, .{ .ignore_unknown_fields = true }) catch |err| switch (err) {
         error.OutOfMemory => return err,
-        else => return false,
+        else => return http_retry,
     };
     defer parsed.deinit();
-    if (parsed.value.@"error") |failure| return failure.code == 5 or failure.code == 8 or failure.code == 9;
-    return false;
+    if (parsed.value.@"error") |failure| return switch (failure.code) {
+        5 => .minute_boundary,
+        8, 9 => .backoff,
+        else => http_retry,
+    };
+    return http_retry;
+}
+
+test "Torn code 5 waits until next absolute minute while honoring longer backoff and Retry-After" {
+    const State = struct {
+        now: i64,
+        retry_after: u64 = 0,
+        expected: u64,
+        calls: usize = 0,
+        waits: usize = 0,
+        client: ?*Client = null,
+        fn nowFn(ctx: ?*anyopaque, _: std.Io) i64 {
+            return (@as(*@This(), @ptrCast(@alignCast(ctx.?)))).now;
+        }
+        fn sendFn(ctx: ?*anyopaque, allocator: std.mem.Allocator, _: std.Io, _: transport.Request) !transport.Response {
+            const self: *@This() = @ptrCast(@alignCast(ctx.?));
+            self.calls += 1;
+            return .{ .allocator = allocator, .status = 200, .body = try allocator.dupe(u8, if (self.calls == 1) "{\"error\":{\"code\":5,\"error\":\"Too many requests\"}}" else "{}"), .retry_after_ms = self.retry_after };
+        }
+        fn waitFn(ctx: ?*anyopaque, _: std.Io, ms: u64) !void {
+            const self: *@This() = @ptrCast(@alignCast(ctx.?));
+            try std.testing.expectEqual(self.expected, ms);
+            try std.testing.expectEqual(@as(usize, 1), self.client.?.permits.permits);
+            self.now += @intCast(ms);
+            self.waits += 1;
+        }
+    };
+    for ([_]State{
+        .{ .now = 100, .expected = 59_900 },
+        .{ .now = 59_900, .expected = 250 },
+        .{ .now = 60_000, .expected = 60_000 },
+        .{ .now = -100, .expected = 250 },
+        .{ .now = 100, .retry_after = 70_000, .expected = 70_000 },
+    }) |initial| {
+        var state = initial;
+        var client = try Client.init(std.testing.allocator, std.testing.io, .{ .keys = &.{"a"}, .max_in_flight = 1, .max_attempts = 2 }, .{ .context = &state, .send_fn = State.sendFn });
+        defer client.deinit();
+        state.client = &client;
+        client.scheduler = .{ .context = &state, .now_fn = State.nowFn, .wait_fn = State.waitFn };
+        var response = try client.execute("http://mock", .{});
+        defer response.deinit();
+        try std.testing.expectEqualStrings("{}", response.body);
+        try std.testing.expectEqual(@as(usize, 2), state.calls);
+        try std.testing.expectEqual(@as(usize, 1), state.waits);
+    }
+}
+
+test "Torn code 5 cooldown respects operation deadline and cancellation without another attempt" {
+    const State = struct {
+        now: i64 = 100,
+        cancel: bool,
+        calls: usize = 0,
+        waits: usize = 0,
+        client: ?*Client = null,
+        fn nowFn(ctx: ?*anyopaque, _: std.Io) i64 {
+            return (@as(*@This(), @ptrCast(@alignCast(ctx.?)))).now;
+        }
+        fn sendFn(ctx: ?*anyopaque, allocator: std.mem.Allocator, _: std.Io, _: transport.Request) !transport.Response {
+            const self: *@This() = @ptrCast(@alignCast(ctx.?));
+            self.calls += 1;
+            return .{ .allocator = allocator, .status = 200, .body = try allocator.dupe(u8, "{\"error\":{\"code\":5}}") };
+        }
+        fn waitFn(ctx: ?*anyopaque, _: std.Io, ms: u64) !void {
+            const self: *@This() = @ptrCast(@alignCast(ctx.?));
+            try std.testing.expectEqual(@as(usize, 1), self.client.?.permits.permits);
+            self.waits += 1;
+            if (self.cancel) return error.Canceled;
+            try std.testing.expectEqual(@as(u64, 900), ms);
+            self.now += @intCast(ms);
+        }
+    };
+    for ([_]bool{ false, true }) |cancel| {
+        var state: State = .{ .cancel = cancel };
+        var client = try Client.init(std.testing.allocator, std.testing.io, .{ .keys = &.{"a"}, .max_in_flight = 1, .max_attempts = 2 }, .{ .context = &state, .send_fn = State.sendFn });
+        defer client.deinit();
+        state.client = &client;
+        client.scheduler = .{ .context = &state, .now_fn = State.nowFn, .wait_fn = State.waitFn };
+        try std.testing.expectError(if (cancel) error.Canceled else error.Timeout, client.execute("http://mock", .{ .deadline_ms = if (cancel) null else 1000 }));
+        try std.testing.expectEqual(@as(usize, 1), state.calls);
+        try std.testing.expectEqual(@as(usize, 1), state.waits);
+        try std.testing.expectEqual(@as(usize, 1), client.permits.permits);
+    }
 }
 
 test "retry policy includes HTTP and Torn error envelopes" {
@@ -450,6 +548,58 @@ test "absolute-minute quotas rotate unique credentials and release permit while 
     }
     try std.testing.expectEqual(@as(usize, 1), state.waits);
     try std.testing.expectEqual(@as(usize, 3), state.calls);
+}
+
+test "route-specific budgets spill over inherit defaults and reset at minute boundary" {
+    const State = struct {
+        now: i64 = 59_900,
+        waits: usize = 0,
+        client: ?*Client = null,
+        fn nowFn(ctx: ?*anyopaque, _: std.Io) i64 {
+            const self: *@This() = @ptrCast(@alignCast(ctx.?));
+            return self.now;
+        }
+        fn waitFn(ctx: ?*anyopaque, _: std.Io, ms: u64) !void {
+            const self: *@This() = @ptrCast(@alignCast(ctx.?));
+            try std.testing.expectEqual(@as(u64, 100), ms);
+            try std.testing.expectEqual(@as(usize, 1), self.client.?.permits.permits);
+            self.now += @intCast(ms);
+            self.waits += 1;
+        }
+        fn sendFn(_: ?*anyopaque, allocator: std.mem.Allocator, _: std.Io, _: transport.Request) !transport.Response {
+            return .{ .allocator = allocator, .status = 200, .body = try allocator.dupe(u8, "{}") };
+        }
+    };
+    var state: State = .{};
+    var client = try Client.init(std.testing.allocator, std.testing.io, .{
+        .keys = &.{"a"},
+        .max_in_flight = 1,
+        .per_route_per_minute = 2,
+        .routes = &.{ .{ .name = "small", .per_minute = 1 }, .{ .name = "inherited" }, .{ .name = "large", .per_minute = 3 } },
+    }, .{ .send_fn = State.sendFn });
+    defer client.deinit();
+    state.client = &client;
+    client.scheduler = .{ .context = &state, .now_fn = State.nowFn, .wait_fn = State.waitFn };
+    for ([_][]const u8{ "small", "inherited", "inherited", "large", "large", "large" }) |expected| {
+        var response = try client.execute("http://mock", .{});
+        defer response.deinit();
+        try std.testing.expectEqualStrings(expected, response.route_name);
+    }
+    try std.testing.expectEqual(@as(usize, 0), state.waits);
+    var pinned = try client.execute("http://mock", .{ .route = 0 });
+    defer pinned.deinit();
+    try std.testing.expectEqualStrings("small", pinned.route_name);
+    try std.testing.expectEqual(@as(usize, 1), state.waits);
+    try std.testing.expectEqual(@as(u32, 1), client.route_usage[0].calls);
+    try std.testing.expectEqual(@as(u32, 0), client.route_usage[1].calls);
+    try std.testing.expectEqual(@as(u32, 0), client.route_usage[2].calls);
+}
+
+test "zero route-specific quota is rejected without leaking allocations" {
+    try std.testing.expectError(error.InvalidConfiguration, Client.init(std.testing.allocator, std.testing.io, .{
+        .keys = &.{"a"},
+        .routes = &.{ .{ .name = "valid", .per_minute = 1 }, .{ .name = "invalid", .per_minute = 0 } },
+    }, .{}));
 }
 
 test "timeout cancels and joins transport and restores permits" {

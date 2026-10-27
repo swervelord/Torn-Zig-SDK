@@ -144,6 +144,11 @@ pub const user = struct {
         pub const name = "gym";
         pub const Response = current.UserGymResponse;
     };
+    pub const halloween = struct {
+        pub const resource = planner.Resource.user;
+        pub const name = "halloween";
+        pub const Response = current.UserHalloweenResponse;
+    };
     pub const hof = struct {
         pub const resource = planner.Resource.user;
         pub const name = "hof";
@@ -920,6 +925,11 @@ pub const torn = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "gyms";
         pub const Response = current.TornGymsResponse;
+    };
+    pub const halloween = struct {
+        pub const resource = planner.Resource.torn;
+        pub const name = "halloween";
+        pub const Response = current.TornHalloweenResponse;
     };
     pub const hof = struct {
         pub const resource = planner.Resource.torn;

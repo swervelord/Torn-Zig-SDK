@@ -29,7 +29,7 @@ const Wire = struct {
     }
 };
 
-test "3042 independently specified compatible pairs each cause exactly one actual send" {
+test "3132 independently specified compatible pairs each cause exactly one actual send" {
     var total: usize = 0;
     for (cases.all_groups) |group| {
         for (group.selections, 0..) |left, i| {
@@ -53,7 +53,7 @@ test "3042 independently specified compatible pairs each cause exactly one actua
             }
         }
     }
-    try std.testing.expectEqual(@as(usize, 3042), total);
+    try std.testing.expectEqual(@as(usize, 3132), total);
 }
 
 test "full resource and semantic domain groups each execute one contributing call" {

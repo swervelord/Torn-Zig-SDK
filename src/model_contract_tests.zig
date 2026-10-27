@@ -155,7 +155,7 @@ fn exercise(comptime T: type, doc: V, name: []const u8) !usize {
     }
     return count;
 }
-test "2136 current component acceptance samples and typed roundtrips" {
+test "2157 current component acceptance samples and typed roundtrips" {
     @setEvalBranchQuota(10000000);
     var doc = try std.json.parseFromSlice(V, std.testing.allocator, current.source_json, .{ .parse_numbers = false });
     defer doc.deinit();
@@ -169,8 +169,8 @@ test "2136 current component acceptance samples and typed roundtrips" {
         };
     }
     try std.testing.expectEqual(0, failures);
-    try std.testing.expectEqual(2136, current.schema_count * 3);
-    try std.testing.expectEqual(7423, accepted);
+    try std.testing.expectEqual(2157, current.schema_count * 3);
+    try std.testing.expectEqual(7444, accepted);
 }
 test "2133 frozen component acceptance samples and typed roundtrips" {
     @setEvalBranchQuota(10000000);

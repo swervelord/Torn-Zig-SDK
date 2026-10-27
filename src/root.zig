@@ -37,4 +37,5 @@ test {
     _ = @import("model_contract_tests.zig");
     _ = @import("helper_tests.zig");
     _ = @import("execution_tests.zig");
+    _ = @import("api_614_tests.zig");
 }
