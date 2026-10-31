@@ -1,4 +1,5 @@
 //! Opt-in, read-only live smoke check. Never writes account response data.
+//! The batch includes `travelinventory`, so the key needs at least limited access.
 const std = @import("std");
 const torn = @import("torn");
 const Counter = struct {
@@ -16,7 +17,7 @@ pub fn main(init: std.process.Init) !void {
     var counter: Counter = .{};
     engine.observer = .{ .context = &counter, .on_send = Counter.observe };
     const client: torn.Client = .{ .engine = &engine };
-    var result = try client.batch(.{ torn.selections.user.profile, torn.selections.user.job }, &.{}, &.{}, .{ .request = .{ .attempts = 1 }, .split_recovery = false, .legacy_fallback = false });
+    var result = try client.batch(.{ torn.selections.user.profile, torn.selections.user.job, torn.selections.user.travelinventory }, &.{}, &.{}, .{ .request = .{ .attempts = 1 }, .split_recovery = false, .legacy_fallback = false });
     defer result.deinit();
     if (result.execution.failure != null or result.value == null) return error.LiveBatchFailed;
     if (counter.sends != 1 or result.execution.reports.len != 1) return error.LiveCallCountMismatch;
@@ -30,5 +31,10 @@ pub fn main(init: std.process.Init) !void {
         },
         .v2 => {},
     }
-    std.debug.print("Live typed profile/job batch passed: exactly one HTTP send; no response data retained.\n", .{});
+    const travel = result.value.?[2].travelinventory;
+    if (travel.capacity.base < 0 or travel.capacity.special < 0) return error.InvalidLiveTravelInventory;
+    for (travel.inventory) |slot| if (slot.item) |item| {
+        if (item.id <= 0) return error.InvalidLiveTravelInventory;
+    };
+    std.debug.print("Live typed profile/job/travelinventory batch passed: exactly one HTTP send; no response data retained.\n", .{});
 }

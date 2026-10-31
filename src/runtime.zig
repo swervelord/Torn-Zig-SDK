@@ -3,7 +3,7 @@ pub const transport = @import("transport.zig");
 
 pub const Config = struct {
     keys: []const []const u8,
-    user_agent: []const u8 = "Torn-Zig-SDK/0.2.0",
+    user_agent: []const u8 = "Torn-Zig-SDK/0.3.0",
     base_url_v2: []const u8 = "https://api.torn.com/v2",
     base_url_v1: []const u8 = "https://api.torn.com",
     attempt_timeout_ms: u32 = 30_000,

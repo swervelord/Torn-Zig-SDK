@@ -22,10 +22,10 @@ test "generated current profile and job are direct typed fields" {
     const Job = current.UserJobResponse;
     _ = @sizeOf(Profile);
     _ = @sizeOf(Job);
-    try std.testing.expectEqual(719, current.schema_count);
+    try std.testing.expectEqual(724, current.schema_count);
     try std.testing.expectEqual(711, frozen.schema_count);
     try std.testing.expectEqual(549, compatibility.schema_count);
-    try std.testing.expectEqual(236, operations.operation_count);
+    try std.testing.expectEqual(237, operations.operation_count);
 }
 
 test "every generated concrete decoder is instantiated" {

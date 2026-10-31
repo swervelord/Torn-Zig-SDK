@@ -4,7 +4,7 @@ const std = @import("std");
 pub const Request = struct {
     url: []const u8,
     api_key: []const u8,
-    user_agent: []const u8 = "Torn-Zig-SDK/0.2.0",
+    user_agent: []const u8 = "Torn-Zig-SDK/0.3.0",
     max_body_bytes: usize = 64 * 1024 * 1024,
     proxy_url: ?[]const u8 = null,
 

@@ -12,7 +12,7 @@ fn Checked(comptime Op: type) type {
 
 // Taking concrete function pointers forces semantic analysis of each generated
 // exact request builder and response decoder without executing undefined data.
-test "all 236 exact methods instantiate with their concrete public parameters" {
+test "all 237 exact methods instantiate with their concrete public parameters" {
     comptime var count: usize = 0;
     inline for (@typeInfo(operations).@"struct".decl_names) |name| {
         const Op = @field(operations, name);
@@ -22,5 +22,5 @@ test "all 236 exact methods instantiate with their concrete public parameters" {
             count += 1;
         }
     }
-    try std.testing.expectEqual(@as(usize, 236), count);
+    try std.testing.expectEqual(@as(usize, 237), count);
 }

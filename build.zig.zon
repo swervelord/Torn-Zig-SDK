@@ -1,6 +1,6 @@
 .{
     .name = .torn_zig_sdk,
-    .version = "0.2.0",
+    .version = "0.3.0",
     .fingerprint = 0x277755c701ca62c2,
     .minimum_zig_version = "0.17.0",
     .dependencies = .{},

@@ -1,1 +1,1 @@
-{"campaign":"os-entropy-property-mutations","iterations":100000,"numeric_cases":200000,"encoding_cases":100000,"json_inputs":100000,"union_cases":100000,"merge_cases":100000,"accepted_json":50036,"elapsed_ms":620,"optimization":"safe","zig":"0.17.0"}
+{"campaign":"os-entropy-property-mutations","iterations":100000,"numeric_cases":200000,"encoding_cases":100000,"json_inputs":100000,"union_cases":100000,"merge_cases":100000,"accepted_json":50040,"elapsed_ms":605,"optimization":"safe","zig":"0.17.0"}

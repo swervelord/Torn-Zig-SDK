@@ -4566,6 +4566,7 @@ pub const FactionTerritoryWarResultEnum = enum {
     end_with_destroy_attack,
     end_with_destroy_defense,
     end_with_peace_treaty,
+    end_with_dirty_bomb,
 };
 pub const FactionAttackResult = enum {
     None,
@@ -4698,6 +4699,7 @@ pub const JobPositionCasinoEnum = enum {
     @"Revenue Manager",
     @"Casino Manager",
     @"Casino President",
+    Dealer,
 };
 pub const AttackFinishingHitEffect = enum {
     proficience,
@@ -5975,6 +5977,35 @@ pub const UserInventoryResponse = struct {
     inventory: UserInventory,
     _metadata: RequestMetadataWithLinksAndTotal,
     pub const json_schema = "{\"required\":[\"inventory\",\"_metadata\"],\"properties\":{\"inventory\":{\"$ref\":\"#/components/schemas/UserInventory\"},\"_metadata\":{\"$ref\":\"#/components/schemas/RequestMetadataWithLinksAndTotal\"}},\"type\":\"object\"}";
+};
+pub const UserTravelInventoryItem = struct {
+    id: ItemId,
+    uid: ?ItemUid,
+    is_equipped: bool,
+    name: []const u8,
+    type: []const u8,
+    is_faction_owned: bool,
+    is_permanent: bool,
+    pub const json_schema = "{\"required\":[\"id\",\"uid\",\"is_equipped\",\"name\",\"type\",\"is_faction_owned\",\"is_permanent\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/ItemId\"},\"uid\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/ItemUid\"},{\"type\":\"null\"}]},\"is_equipped\":{\"type\":\"boolean\"},\"name\":{\"type\":\"string\"},\"type\":{\"type\":\"string\"},\"is_faction_owned\":{\"type\":\"boolean\"},\"is_permanent\":{\"description\":\"True for items added while player was in Torn.\",\"type\":\"boolean\"}},\"type\":\"object\"}";
+};
+pub const UserTravelInventorySlot = struct {
+    id: i64,
+    item: ?UserTravelInventoryItem,
+    pub const json_schema = "{\"required\":[\"id\",\"item\"],\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\"},\"item\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/UserTravelInventoryItem\"},{\"type\":\"null\"}]}},\"type\":\"object\"}";
+};
+pub const UserTravelInventoryCapacity = struct {
+    base: i64,
+    special: i64,
+    pub const json_schema = "{\"required\":[\"base\",\"special\"],\"properties\":{\"base\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
+};
+pub const UserTravelInventory = struct {
+    capacity: UserTravelInventoryCapacity,
+    inventory: []const UserTravelInventorySlot,
+    pub const json_schema = "{\"required\":[\"capacity\",\"inventory\"],\"properties\":{\"capacity\":{\"$ref\":\"#/components/schemas/UserTravelInventoryCapacity\"},\"inventory\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/UserTravelInventorySlot\"}}},\"type\":\"object\"}";
+};
+pub const UserTravelInventoryResponse = struct {
+    travelinventory: UserTravelInventory,
+    pub const json_schema = "{\"required\":[\"travelinventory\"],\"properties\":{\"travelinventory\":{\"$ref\":\"#/components/schemas/UserTravelInventory\"}},\"type\":\"object\"}";
 };
 pub const UserTradeResponse = struct {
     trade: UserTradeDetailed,
@@ -7305,6 +7336,7 @@ pub const UserSelectionName = union(enum) {
         trades,
         trade,
         travel,
+        travelinventory,
         timestamp,
         weaponexp,
         workstats,
@@ -12017,7 +12049,7 @@ pub const TornHalloweenResponse = struct {
     halloween: TornHalloween,
     pub const json_schema = "{\"required\":[\"halloween\"],\"properties\":{\"halloween\":{\"$ref\":\"#/components/schemas/TornHalloween\"}},\"type\":\"object\"}";
 };
-pub const schema_count = 719;
+pub const schema_count = 724;
 pub const all_types = .{
     RaceClassEnum,
     TornItemStatTitleEnum,
@@ -12242,6 +12274,11 @@ pub const all_types = .{
     UserInventoryItem,
     UserInventory,
     UserInventoryResponse,
+    UserTravelInventoryItem,
+    UserTravelInventorySlot,
+    UserTravelInventoryCapacity,
+    UserTravelInventory,
+    UserTravelInventoryResponse,
     UserTradeResponse,
     UserTrade,
     UserTradeParticipant,
@@ -12963,6 +13000,11 @@ pub const all_schema_names = .{
     "UserInventoryItem",
     "UserInventory",
     "UserInventoryResponse",
+    "UserTravelInventoryItem",
+    "UserTravelInventorySlot",
+    "UserTravelInventoryCapacity",
+    "UserTravelInventory",
+    "UserTravelInventoryResponse",
     "UserTradeResponse",
     "UserTrade",
     "UserTradeParticipant",

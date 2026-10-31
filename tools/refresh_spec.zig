@@ -6,7 +6,7 @@ pub fn main(init: std.process.Init) !void {
     var client: std.http.Client = .{ .allocator = a, .io = io };
     defer client.deinit();
     const uri = try std.Uri.parse("https://www.torn.com/swagger/openapi.json");
-    var request = try client.request(.GET, uri, .{ .redirect_behavior = .unhandled, .headers = .{ .user_agent = .{ .override = "Torn-Zig-SDK-spec-refresh/0.2.0" }, .accept_encoding = .{ .override = "identity" } } });
+    var request = try client.request(.GET, uri, .{ .redirect_behavior = .unhandled, .headers = .{ .user_agent = .{ .override = "Torn-Zig-SDK-spec-refresh/0.3.0" }, .accept_encoding = .{ .override = "identity" } } });
     defer request.deinit();
     try request.sendBodiless();
     var response = try request.receiveHead(&.{});
@@ -14,7 +14,7 @@ pub fn main(init: std.process.Init) !void {
     var buffer: [8192]u8 = undefined;
     const bytes = try response.reader(&buffer).allocRemaining(a, .limited(16 * 1024 * 1024));
     const candidate = try std.json.parseFromSliceLeaky(std.json.Value, a, bytes, .{ .parse_numbers = false });
-    const old_bytes = try std.Io.Dir.cwd().readFileAlloc(io, "spec/openapi-6.14.0.json", a, .limited(16 * 1024 * 1024));
+    const old_bytes = try std.Io.Dir.cwd().readFileAlloc(io, "spec/openapi-6.15.0.json", a, .limited(16 * 1024 * 1024));
     const old = try std.json.parseFromSliceLeaky(std.json.Value, a, old_bytes, .{ .parse_numbers = false });
     var digest: [32]u8 = undefined;
     std.crypto.hash.sha2.Sha256.hash(bytes, &digest, .{});
