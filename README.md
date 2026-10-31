@@ -43,9 +43,9 @@ every owned result exactly once with `deinit`.
 
 ## Authentication & keys
 
-- v2 requests authenticate with `Authorization: ApiKey <key>`; v1 requests send
-  `key=` on the wire only. No generated parameter has a `key` field, URLs in
-  reports, hooks and errors never contain a key, and `rawPath` refuses `key=`.
+- v1 and v2 requests authenticate only with `Authorization: ApiKey <key>`; no URL
+  ever carries the key. No generated parameter has a `key` field, the planner
+  rejects a `key` filter, `rawPath` refuses `key=`, and pagination links drop it.
 - `Config.keys` is a pool: round-robin over **healthy** keys. Each key is
   `healthy`, `rate_limited(until)` or `disabled(reason, until?)`; inspect with
   `engine.keyStates(allocator)` (redacted `***` + last four characters, remaining

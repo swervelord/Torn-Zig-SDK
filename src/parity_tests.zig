@@ -108,7 +108,7 @@ test "unknown selections and parameters pass through and stay readable as raw JS
     try std.testing.expectError(error.UseClientAuthentication, h.api().rawPath("/user?key=leak", .{}));
 }
 
-test "v1 sends the key as a query parameter and code 23 reroutes back to v2 (P2.1, P4.3)" {
+test "v1 and v2 both authenticate by header and code 23 reroutes back to v2 (P2.1, P4.3)" {
     var h: Harness = undefined;
     try h.init(.{ .keys = &.{"KEY_A"} });
     defer h.deinit();
@@ -117,10 +117,10 @@ test "v1 sends the key as a query parameter and code 23 reroutes back to v2 (P2.
     var result = try h.api().execute(.{ .resource = .user, .selections = &.{"basic"}, .mode = .v1 }, .{});
     defer result.deinit();
     try std.testing.expect(result.failure == null);
-    try std.testing.expectEqual(transport.Auth.query, h.mock.request(0).auth);
+    try std.testing.expectEqualStrings("KEY_A", h.mock.request(0).api_key);
     try std.testing.expectEqualStrings("/user/", h.mock.request(0).path());
     try std.testing.expect(h.mock.request(0).query("key") == null);
-    try std.testing.expectEqual(transport.Auth.header, h.mock.request(1).auth);
+    try std.testing.expect(std.mem.indexOf(u8, h.mock.request(0).url, "KEY_A") == null);
     try std.testing.expectEqualStrings("/v2/user", h.mock.request(1).path());
     try std.testing.expect(result.reports[0].fallback);
 }

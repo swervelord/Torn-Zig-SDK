@@ -24,7 +24,8 @@ Breaking changes are listed under [Migrating from 0.3.x](#migrating-from-03x).
   `max_attempts`.
 - P4.5 Code 4 (or HTTP 400/404/501) on a multi-selection request splits it once into
   per-selection requests; P4.6 `TORN_API_KEYS` takes precedence over `TORN_API_KEY`.
-- P2 v1 authenticates with `key=` on the wire only; generated `Params` have no `key`
+- P2.1 v1 and v2 authenticate only with the `Authorization: ApiKey` header (Torn
+  accepts it on v1; no URL ever carries the key); generated `Params` have no `key`
   field. Key pool states, failover per `error-codes.json`, `keyStates()`, redacted
   `KeyHint` in every report, hook and error.
 - P3 Sliding 60 s windows per key group (`key_groups`, `detectKeys`) and route;

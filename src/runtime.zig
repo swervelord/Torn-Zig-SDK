@@ -64,7 +64,7 @@ pub const Options = struct {
     deadline_ms: ?i64 = null,
     /// Index in Config.routes. Unpinned calls spill over in configured order.
     route: ?usize = null,
-    /// API version of the URL: 1 sends the key as `key=`, 2 as a header (P2.1).
+    /// API version of the URL (both authenticate with the header, P2.1).
     api_version: u8 = 2,
     /// Operation id or label reported to hooks.
     operation: []const u8 = "",
@@ -763,7 +763,7 @@ pub const Client = struct {
                     if (remaining <= 0) return error.Timeout;
                     timeout = @intCast(@min(timeout, @as(u64, @intCast(remaining))));
                 }
-                break :blk self.send(.{ .url = url, .api_key = key, .user_agent = self.config.user_agent, .max_body_bytes = self.config.max_body_bytes, .proxy_url = self.routes[selected.route].proxy_url, .auth = if (options.api_version == 1) .query else .header }, timeout);
+                break :blk self.send(.{ .url = url, .api_key = key, .user_agent = self.config.user_agent, .max_body_bytes = self.config.max_body_bytes, .proxy_url = self.routes[selected.route].proxy_url }, timeout);
             };
             var response = result catch |err| {
                 sends += 1;
@@ -1202,7 +1202,6 @@ test "injected execution returns owned body and observes actual send" {
         fn send(_: ?*anyopaque, allocator: std.mem.Allocator, _: std.Io, request: transport.Request) !transport.Response {
             try std.testing.expectEqualStrings("http://test/user?selections=profile,job", request.url);
             try std.testing.expectEqualStrings("a", request.api_key);
-            try std.testing.expectEqual(transport.Auth.header, request.auth);
             return .{ .allocator = allocator, .status = 200, .body = try allocator.dupe(u8, "{}") };
         }
     };

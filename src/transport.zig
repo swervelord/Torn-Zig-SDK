@@ -26,19 +26,15 @@ pub const KeyHint = struct {
     }
 };
 
-/// How the key is presented (P2.1): v2 uses `Authorization: ApiKey`, v1 the `key=`
-/// query parameter. The key is appended only inside the transport, never to `url`.
-pub const Auth = enum { header, query };
-
 /// Credentials are borrowed only for the duration of send. Never format Request.
+/// The key is sent only as `Authorization: ApiKey <key>`, for v1 and v2 alike (P2.1);
+/// no URL ever carries it.
 pub const Request = struct {
-    /// Never contains the key; `auth = .query` appends it only on the wire.
     url: []const u8,
     api_key: []const u8,
     user_agent: []const u8 = version.user_agent,
     max_body_bytes: usize = 64 * 1024 * 1024,
     proxy_url: ?[]const u8 = null,
-    auth: Auth = .header,
 
     pub fn format(_: Request, writer: *std.Io.Writer) std.Io.Writer.Error!void {
         try writer.writeAll("Request{redacted}");
@@ -126,8 +122,7 @@ fn sendWith(client: *std.http.Client, allocator: std.mem.Allocator, io: std.Io, 
     if (request.max_body_bytes == 0) return error.InvalidBodyLimit;
     var scratch = std.heap.ArenaAllocator.init(allocator);
     defer scratch.deinit();
-    const wire_url = if (request.auth == .query) try appendKey(scratch.allocator(), request.url, request.api_key) else request.url;
-    const uri = try std.Uri.parse(wire_url);
+    const uri = try std.Uri.parse(request.url);
     var proxy: std.http.Client.Proxy = undefined;
     var proxy_host: [std.Io.net.HostName.max_len]u8 = undefined;
     if (request.proxy_url) |url| {
@@ -166,7 +161,7 @@ fn sendWith(client: *std.http.Client, allocator: std.mem.Allocator, io: std.Io, 
         .redirect_behavior = .unhandled,
         .keep_alive = keep_alive,
         .headers = .{
-            .authorization = if (request.auth == .header) .{ .override = authorization } else .omit,
+            .authorization = .{ .override = authorization },
             .user_agent = .{ .override = request.user_agent },
             .accept_encoding = .{ .override = "identity" },
         },
@@ -311,9 +306,7 @@ fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena
         try tls.writer.writeByte('?');
         try query.formatQuery(&tls.writer);
     }
-    try tls.writer.print(" HTTP/1.1\r\nHost: {s}:{d}\r\n", .{ target_name.bytes, target_port });
-    if (request.auth == .header) try tls.writer.print("Authorization: ApiKey {s}\r\n", .{request.api_key});
-    try tls.writer.print("User-Agent: {s}\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n", .{request.user_agent});
+    try tls.writer.print(" HTTP/1.1\r\nHost: {s}:{d}\r\nAuthorization: ApiKey {s}\r\nUser-Agent: {s}\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n", .{ target_name.bytes, target_port, request.api_key, request.user_agent });
     try tls.writer.flush();
     try tunnel_writer.interface.flush();
     var http: std.http.Reader = .{ .in = &tls.reader, .interface = undefined, .state = .ready, .max_head_len = 8192 };
@@ -346,24 +339,7 @@ fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena
     return .{ .allocator = allocator, .status = @backingInt(head.status), .body = body, .retry_after_ms = retry_after_ms };
 }
 
-/// v1 authentication (P2.1): `key=` is appended on the wire only. Any `key` already in
-/// the URL is never trusted; callers' URLs come from the planner, which reserves it.
-fn appendKey(a: std.mem.Allocator, url: []const u8, key: []const u8) ![]const u8 {
-    var out: std.ArrayList(u8) = .empty;
-    try out.appendSlice(a, url);
-    try out.append(a, if (std.mem.indexOfScalar(u8, url, '?') == null) '?' else '&');
-    try out.appendSlice(a, "key=");
-    for (key) |c| {
-        if (std.ascii.isAlphanumeric(c) or c == '-' or c == '.' or c == '_' or c == '~') try out.append(a, c) else try out.print(a, "%{X:0>2}", .{c});
-    }
-    return out.items;
-}
-
-test "v1 query authentication appends an encoded key only on the wire" {
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    try std.testing.expectEqualStrings("https://api.torn.com/user/?selections=basic&key=AB%2Bc", try appendKey(arena.allocator(), "https://api.torn.com/user/?selections=basic", "AB+c"));
-    try std.testing.expectEqualStrings("https://api.torn.com/user/?key=x", try appendKey(arena.allocator(), "https://api.torn.com/user/", "x"));
+test "key hints reveal at most the last four characters (P2.2)" {
     try std.testing.expectEqualStrings("***", KeyHint.of("short").text());
     try std.testing.expectEqualStrings("***4567", KeyHint.of("SECRETKEY1234567").text());
 }

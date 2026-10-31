@@ -256,11 +256,9 @@ fn runScenario(a: std.mem.Allocator, scenario: V) !void {
         if (get(want, "absentQuery")) |absent| for (absent.array.items) |name| {
             if (got.query(name.string) != null) return runner.fail("send {d}: query {s} must be absent", .{ i, name.string });
         };
-        if (str(get(want, "auth"))) |key| {
-            const v1 = !std.mem.startsWith(u8, got.path(), "/v2/");
-            if (!std.mem.eql(u8, got.api_key, key)) return runner.fail("send {d}: wrong key", .{i});
-            if (got.auth != (if (v1) torn.transport.Auth.query else torn.transport.Auth.header)) return runner.fail("send {d}: auth mode {s}", .{ i, @tagName(got.auth) });
-        }
+        // P2.1: header auth (`Authorization: ApiKey <key>`) on v1 and v2; never in the URL.
+        if (str(get(want, "auth"))) |key| if (!std.mem.eql(u8, got.api_key, key)) return runner.fail("send {d}: wrong key", .{i});
+        if (std.mem.indexOf(u8, got.url, got.api_key) != null) return runner.fail("send {d}: key in URL", .{i});
         if (int(get(want, "atMs"))) |at| if ((got.at_ms orelse -1) < at) return runner.fail("send {d}: at {d}ms, expected >= {d}", .{ i, got.at_ms orelse -1, at });
     }
 

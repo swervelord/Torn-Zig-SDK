@@ -12,16 +12,15 @@ pub const Reply = struct {
     retry_after_ms: u64 = 0,
     network_error: bool = false,
 };
-/// A recorded request. `api_key` is kept so tests can assert which key was used;
-/// formatting redacts it.
+/// A recorded request. `api_key` (sent as the Authorization header) is kept so tests
+/// can assert which key was used; formatting redacts it.
 pub const Recorded = struct {
     url: []const u8,
     api_key: []const u8,
-    auth: wire.Auth,
     /// Virtual (or real) time of the send in milliseconds, when a clock is attached.
     at_ms: ?i64,
     pub fn format(self: Recorded, writer: *std.Io.Writer) std.Io.Writer.Error!void {
-        try writer.print("Recorded{{ url={s}, key={f}, auth={s} }}", .{ self.url, wire.KeyHint.of(self.api_key), @tagName(self.auth) });
+        try writer.print("Recorded{{ url={s}, key={f} }}", .{ self.url, wire.KeyHint.of(self.api_key) });
     }
     /// Path component of the URL (after scheme and host).
     pub fn path(self: Recorded) []const u8 {
@@ -96,7 +95,7 @@ pub const MockTransport = struct {
             self.allocator.free(url);
             return err;
         };
-        self.requests.appendAssumeCapacity(.{ .url = url, .api_key = key, .auth = request_value.auth, .at_ms = if (self.clock) |c| c.now_ms else null });
+        self.requests.appendAssumeCapacity(.{ .url = url, .api_key = key, .at_ms = if (self.clock) |c| c.now_ms else null });
         if (self.next_reply >= self.replies.items.len) return error.UnexpectedRequest;
         const reply = self.replies.items[self.next_reply];
         self.next_reply += 1;
