@@ -28,7 +28,9 @@ machine-readable coverage and typing reports.
 
 All public model layouts, decoders, serializers, endpoint builders and helpers
 receive explicit semantic instantiation checks. Compile-fail cases reject mixed
-resources, empty batches, wrong/missing parameters and invalid closed enums.
+resources, empty batches, wrong/missing parameters and misspelled enum literals
+(`E.Known`). The shared conformance suite (`tests/conformance.zig`) runs all 30
+scenarios of `spec/shared/conformance/` through the mock transport and virtual clock.
 Native tests cover retries, quotas, spillover, concurrency fairness, cancellation,
 deadlines, bounded/chunked/truncated bodies, redirects, authenticated HTTP proxies
 and target TLS after CONNECT. Allocation-failure sweeps cover plans, configuration,
@@ -45,9 +47,11 @@ proxy; `docs/proxy-verification.json` records its result.
 The opt-in live check passed on October 30, 2026 against API 6.15.0: concrete profile,
 job and travel inventory responses decoded from one batched generic call after exactly
 one real HTTP send, with retries, split recovery and legacy fallback disabled. No
-account response or credential was persisted. The executable reads only
-`TORN_LIVE_TEST_API_KEY`, which needs at least limited access for `travelinventory`,
-and prints a result without account data.
+account response or credential was persisted. The executable reads
+`TORN_API_KEY` (or the legacy `TORN_LIVE_TEST_API_KEY`), which needs at least limited
+access for `travelinventory`, and prints results without account data. Since 0.4.0 it
+also runs the live sweep (P9.2) over every operation reachable with the key owner's
+ids, decoded in tolerant mode.
 
 The bounded campaign uses fresh OS entropy for 100,000 iterations: 200,000 exact
 numeric checks and 100,000 each of encoding, union, merge and JSON properties.

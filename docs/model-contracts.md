@@ -13,11 +13,18 @@ operation contract. Response objects provide direct typed fields; nullable
 required fields use `?T`, while optional official fields use
 `model.Presence(T)` with `absent`, `null`, and `value` states. Maps contain
 typed `entries` and a `get` accessor. Unions expose actual Zig tagged
-alternatives (`v0`, `v1`, and so forth) in source branch order.
+alternatives in source branch order, named after the referenced schemas with shared
+CamelCase prefix/suffix words removed (`job`/`company`/`null`, `money`/`item`/...),
+or after the branch kind (`named`, `string`, `integer`, `pattern`, `<schema>_list`).
+Enums are open (`model.Open(E)`): unknown wire values decode to `.unknown` with
+the raw text; strict mode (`Options.mode = .strict`, `contracts.*`) rejects them.
+Properties relaxed by `spec/shared/spec-overrides.json` are `Presence(T)` and listed
+in the struct's `relaxed_fields`; `json_schema` keeps the official contract.
 
 The decoder selects a successfully decoded union branch with the greatest
 nested recognized-field coverage, retaining source order for ties. Literal
-enum fields constrain branches. This avoids a permissive earlier object
+enum fields prefer branches that recognize the value: an unknown value still
+decodes, with lower coverage than a branch that knows it. This avoids a permissive earlier object
 branch silently discarding fields belonging to a later, more specific
 branch. Compatibility competition, employment, trade, and warfare unions
 add explicit discriminator/shape rules and permitted unknown variants.

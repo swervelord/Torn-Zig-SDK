@@ -20,12 +20,14 @@ exceptions. Generation includes those overrides in `docs/routing-coverage.json`.
 | Torn `attacklog` | Exact `/torn/attacklog`, with required `log` filter. | The generic enum and response advertise the selection, but the generic query allowlist has no `log`; its `id` union excludes `AttackCode`. |
 | User and faction `revivesfull` | Lowercase selection token; exact operations retain `/user/revivesFull` and `/faction/revivesFull`. | Literal official paths have a capital `F`. |
 
-Required query parameters and optional closed enum query constraints are
+Required query parameters and optional enum query constraints are
 generated from the exact official operations. A helper rejects missing required
-inputs, closed enum values outside their domains, and incompatible shared
+inputs, enum values outside their documented domains, and incompatible shared
 category values. For example, faction news category `main` cannot also select
-the warfare-chain category `active`. Explicit v1 planning uses its separate
-maintained allowlist and does not inherit current v2 query constraints.
+the warfare-chain category `active`. Other filters, including unknown names and `comment`, are forwarded verbatim
+on v2 and v1 (P1.5). Unknown selection names are sent as v2 generic selections;
+names in the official v2 selection enum without an exact endpoint are asked on v2
+first and rerouted once to v1 when Torn answers code 22 (P4.3).
 
 ## Target domains
 

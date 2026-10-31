@@ -13,11 +13,13 @@ These are configurable SDK policies, not permanent Torn service limits:
 | Policy | Default |
 | --- | --- |
 | HTTP attempt timeout | 30 seconds |
-| Attempts | 3 |
-| Linear retry base | 250 milliseconds |
+| Attempts (total sends; key failover excluded) | 4 (`error-codes.json` `retry.max_attempts`) |
+| Exponential backoff base / cap | 500 ms / 30 s, full jitter |
+| `Retry-After` cap | 120 s |
 | Shared in-flight sends | 8 |
-| Calls per unique key per minute | 100 |
-| Calls per named route per minute | 1,000 |
+| Calls per key group per sliding 60 s | 100 |
+| Calls per named route per sliding 60 s | 1,000 |
+| Route block after Torn code 8 | 60 s (`ip_block_ms`) |
 | Response body limit | 64 MiB |
 | Default route | `direct`, without an inferred environment proxy |
 
@@ -39,32 +41,34 @@ Numeric environment settings require positive decimal digits; signs, whitespace,
 
 ## Quotas, retry, and cancelation
 
-Accounting belongs to one client in this process. Separate clients, other processes, and external applications do not share counters. Credentials rotate in order. Counters reset at absolute wall-clock minute boundaries. Each `Route.per_minute` may override `Config.per_route_per_minute`; null inherits
-the global limit, and zero is rejected. For example, configure
+Accounting belongs to one client in this process. Separate clients, other processes, and external applications do not share counters (`noteSend` can account external sends). Budgets are sliding windows: a log of send times over `rate_window_ms` (60 s), never calendar minutes (P3.1). Keys rotate round-robin over healthy keys. Keys listed together in `Config.key_groups`, or found to share an owner by `detectKeys` (key/info), share one budget, because Torn limits per user (P3.2). Each `Route.per_minute` may override `Config.per_route_per_minute`; null inherits the global limit, and zero is rejected. For example, configure
 `.{ .name = "limited-proxy", .proxy_url = "http://proxy:8080", .per_minute = 10 }`
 alongside a direct route with its own quota.
 
 Named routes spill over in configured order unless `Options.route` pins an index. The caller must give each route the correct egress identity: differently named routes sharing one public IP are separate local counters and cannot guarantee a service-wide IP limit. The default direct route intentionally does not read system proxy variables.
 
-Quota sleepers release the semaphore, so an exhausted pinned route cannot occupy the only permit and block an available route. Network retry backoff also releases its permit. The accounting reservation is charged before the transport call; a canceled or failed attempt may consume a local quota slot. Reports are successful contributions and are not a total-attempt counter.
+Quota sleepers release the semaphore, so an exhausted pinned route cannot occupy the only permit and block an available route. The in-flight permit is held only for the send itself, never during backoff. The accounting reservation is charged before the transport call; a canceled or failed attempt consumes a window slot. Reports are successful contributions; `Report.sends` counts the HTTP sends behind each.
 
-Retries cover transport failures, HTTP 408/429/500/502/503/504, and Torn codes 5/8/9 within the attempt budget. Allocation failure, cancelation, and an oversized response are terminal. The delay is the larger of the linear backoff and `Retry-After`; both delta-seconds and preferred IMF-fixdate are supported. Malformed retry dates are ignored. Torn code 5 additionally waits until at least the next absolute minute boundary,
-respecting a longer Retry-After or backoff. This wait releases the permit and
-remains subject to cancellation and the outer deadline. Code 5 also spends the
-rest of that minute's local budget for the key that received it, so concurrent
-and later calls rotate to other credentials instead of repeating the rejection.
-When the message names the IP as a whole word, the route's budget is spent too
-and calls spill over to other routes. HTTP 429 is retried using its Retry-After
-and backoff without spending budgets, because it is not Torn's documented
-per-key minute quota.
+Classification is by Torn error code (policy generated from `spec/shared/error-codes.json`) and HTTP status, never by message text (P4.1):
 
-Per-request options override attempts, timeout, pinned route, and an absolute outer `deadline_ms`. The outer deadline includes quota waits, semaphore waits, retries, and network I/O. Caller-side serialization can use the public `Client.check(options)` to observe cancelation and that deadline.
+| Action | Codes | Behavior |
+| --- | --- | --- |
+| `rotate_key` | 2, 10, 13, 14, 16, 18 | Retry immediately with the next healthy key; no attempt consumed. 2/10/13/18 disable the key for the client lifetime, 14 until the next UTC midnight, 16 only skips it for this request. With every key disabled the response is flagged `no_usable_keys`. |
+| `wait_rate_window` | 5 | Mark the key group rate limited until its window frees; rotate at once to a key with budget, else sleep until the earliest key frees. |
+| `rotate_route` | 8 | Block the route for `ip_block_ms`; retry only on another unblocked route, never the same IP. |
+| `retry_backoff` | 12, 17, 24, 31; HTTP 429/500/502/503/504; network errors | Exponential backoff `backoff_ms * 2^(n-1)` capped at `max_backoff_ms`, full jitter (`jitter = .none` for tests); `Retry-After` (delta seconds or IMF-fixdate) replaces it, capped at `retry_after_cap_ms`. |
+| `reroute_version` | 22, 23 | Returned to the typed client, which re-plans once on the other API version (P4.3). |
+| `fail` | all others, unknown codes | Returned immediately. |
+
+Allocation failure, cancelation, and an oversized response are terminal.
+
+Per-request options override attempts, timeout, pinned route, pinned key, minimum key access (`check_access`), cache TTL, and an absolute outer `deadline_ms`. The outer deadline includes quota waits, semaphore waits, retries, and network I/O. Caller-side serialization can use the public `Client.check(options)` to observe cancelation and that deadline.
 
 The timer race cancels and joins the losing task. Completed allocated responses from a race are explicitly drained and released. Semaphore, quota, backoff, and native network/body-read paths use the backend's cancelation facilities. The application cancels its surrounding Io task to cancel a call. Scheduler injection supplies a clock and wait callback for deterministic tests; callbacks must remain cancelable. Route observer callbacks run outside the accounting lock and must be thread safe, fast, and non-reentrant with respect to the client.
 
 ## Transport and credential handling
 
-The default transport uses `std.http.Client` for HTTP, TLS with system trust roots, and HTTP or HTTPS proxies. The inspected Zig 0.17.0 source passes an explicit remote hostname and CA bundle into TLS verification (`lib/std/http/Client.zig`, Connection.Tls.create); the TLS client verifies the leaf hostname and chain (`lib/std/crypto/tls/Client.zig`). It sends the API key in the `Authorization: ApiKey ...` header. Redirect responses are returned without following them. A declared or streamed oversized JSON or CSV body fails `ResponseTooLarge`; no partial body is returned as successful output. The transport requests identity encoding and explicitly rejects unexpected compressed responses.
+The default transport uses `std.http.Client` for HTTP, TLS with system trust roots, and HTTP or HTTPS proxies. `runtime.Client.init` with the default transport creates one pooled `std.http.Client` (`transport.Pool`) shared by every direct send, so connections are kept alive and the CA bundle is scanned once; proxied sends keep a per-request client because proxy settings and CONNECT tunnels are per route. The inspected Zig 0.17.0 source passes an explicit remote hostname and CA bundle into TLS verification (`lib/std/http/Client.zig`, Connection.Tls.create); the TLS client verifies the leaf hostname and chain (`lib/std/crypto/tls/Client.zig`). It sends the API key in the `Authorization: ApiKey ...` header for v2, and as the `key=` query parameter for v1 (appended to the wire URL only; `Request.url`, reports, hooks and errors never contain it). Redirect responses are returned without following them. A declared or streamed oversized JSON or CSV body fails `ResponseTooLarge`; no partial body is returned as successful output. The transport requests identity encoding and explicitly rejects unexpected compressed responses.
 
 HTTP proxy URLs are configured per named route. Plain HTTP uses absolute-form targets. HTTPS through a standard HTTP proxy performs CONNECT with proxy authentication, then explicitly upgrades the tunnel with `std.crypto.tls.Client`, the target hostname, and system CA roots. Origin authentication is written only after that TLS handshake succeeds. The explicit upgrade is necessary because the inspected Zig 0.17.0 CONNECT helper returns a connection using the proxy protocol without upgrading it to the target TLS protocol.
 
@@ -74,7 +78,7 @@ Credential-bearing Config, Client, and transport Request implement redacted `{f}
 
 ## Verified evidence and limitations
 
-Native Windows tests exercise real local HTTP, a local plain HTTP proxy with Basic authentication, non-forwarded redirects, explicit declared/streamed oversized-body rejection, retry after a truncated declared-length body, cancelation during a stalled real HTTP body, and rejection of a malformed TLS peer before application authentication. The authenticated local CONNECT test verifies that target TLS starts after proxy authentication and that the origin credential is absent from CONNECT headers. Public pinned TLS fixtures additionally verify real signatures, valid/expired/not-yet-valid intervals, untrusted bundles, and hostname matching. A local Zig peer sends TLS 1.2 certificate records, reaching precise hostname/expiry rejection in the native TLS implementation and certificate rejection in the SDK transport. Fixture provenance and preserved license are recorded in [the fixture README](../tests/fixtures/tls/README.md). Deterministic tests verify unique-key rotation, minute reset, retry delay precedence, quota sleeper fairness across routes, permit cleanup, environment validation, and owned response lifetimes. Systematic allocation-failure tests cover client construction and mocked execution/body/retry inspection. Ordinary tests are offline and use synthetic credentials.
+Native Windows tests exercise real local HTTP, a local plain HTTP proxy with Basic authentication, non-forwarded redirects, explicit declared/streamed oversized-body rejection, retry after a truncated declared-length body, cancelation during a stalled real HTTP body, and rejection of a malformed TLS peer before application authentication. The authenticated local CONNECT test verifies that target TLS starts after proxy authentication and that the origin credential is absent from CONNECT headers. Public pinned TLS fixtures additionally verify real signatures, valid/expired/not-yet-valid intervals, untrusted bundles, and hostname matching. A local Zig peer sends TLS 1.2 certificate records, reaching precise hostname/expiry rejection in the native TLS implementation and certificate rejection in the SDK transport. Fixture provenance and preserved license are recorded in [the fixture README](../tests/fixtures/tls/README.md). Deterministic tests verify unique-key rotation, sliding-window waits, key failover and disabling, key groups, retry delay precedence, connection reuse, quota sleeper fairness across routes, permit cleanup, environment validation, and owned response lifetimes. Systematic allocation-failure tests cover client construction and mocked execution/body/retry inspection. Ordinary tests are offline and use synthetic credentials.
 
 An explicit opt-in public-contract verification tool is `tools/verify_proxy.zig`. It runs a local Zig CONNECT relay and retrieves the official public OpenAPI contract over verified target TLS. The recorded successful HTTP 200/version/body-size evidence is [proxy-verification.json](proxy-verification.json). This uses no private API key, saves no API account data, and is excluded from ordinary tests and CI.
 
