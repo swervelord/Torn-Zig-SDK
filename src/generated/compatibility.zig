@@ -310,8 +310,8 @@ pub const CompanyProfileBundle = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"company\",\"Key\":\"company\",\"Type\":{\"name\":\"CompanyProfile\"},\"Default\":true,\"Flatten\":false,\"Aliases\":[\"profile\"],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const CompanyProfileEmployee = union(enum) {
-    v0: *CompanyProfileEmployeeDetails,
-    v1: u64,
+    company_profile_employee_details: *CompanyProfileEmployeeDetails,
+    uint64: u64,
     pub const compatibility_name = "CompanyProfileEmployee";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"box\",\"arguments\":[{\"name\":\"CompanyProfileEmployeeDetails\"}]},{\"name\":\"uint64\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -440,13 +440,13 @@ pub const CompanyUpgrades = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"staff_room\",\"Key\":\"staff_room\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"storage\",\"Key\":\"storage\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"storage_capacity\",\"Key\":\"storage_capacity\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"optional_stringish\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const DynamicValue = union(enum) {
-    v0: void,
-    v1: bool,
-    v2: i64,
-    v3: model.ExactNumber,
-    v4: []const u8,
-    v5: []const DynamicValue,
-    v6: model.Map(DynamicValue),
+    null: void,
+    bool: bool,
+    int64: i64,
+    exact_number: model.ExactNumber,
+    string: []const u8,
+    array: []const DynamicValue,
+    map: model.Map(DynamicValue),
     pub const compatibility_name = "DynamicValue";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"null\"},{\"name\":\"bool\"},{\"name\":\"int64\"},{\"name\":\"exact_number\"},{\"name\":\"string\"},{\"name\":\"array\",\"arguments\":[{\"name\":\"DynamicValue\"}]},{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"DynamicValue\"}]}],\"Type\":{\"name\":\"\"}}";
 };
@@ -908,9 +908,9 @@ pub const FactionCrimeExpEntry = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"id\",\"Key\":\"id\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"name\",\"Key\":\"name\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"crime_exp\",\"Key\":\"crimeexp\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[\"crime_exp\"],\"Custom\":\"\"},{\"Name\":\"position\",\"Key\":\"position\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"rank\",\"Key\":\"rank\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const FactionCrimeExpSelection = union(enum) {
-    v0: model.Map(FactionCrimeExpEntry),
-    v1: []const FactionCrimeExpEntry,
-    v2: model.Raw,
+    map: model.Map(FactionCrimeExpEntry),
+    array: []const FactionCrimeExpEntry,
+    raw: model.Raw,
     pub const compatibility_name = "FactionCrimeExpSelection";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"FactionCrimeExpEntry\"}]},{\"name\":\"array\",\"arguments\":[{\"name\":\"FactionCrimeExpEntry\"}]},{\"name\":\"raw\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -1151,10 +1151,10 @@ pub const FactionLegacyItemEntry = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"id\",\"Key\":\"ID\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[\"id\"],\"Custom\":\"\"},{\"Name\":\"item_id\",\"Key\":\"item_id\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"uid\",\"Key\":\"uid\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"name\",\"Key\":\"name\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"item_type\",\"Key\":\"type\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"category\",\"Key\":\"category\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"quantity\",\"Key\":\"quantity\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"available\",\"Key\":\"available\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"loaned\",\"Key\":\"loaned\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"loaned_to\",\"Key\":\"loaned_to\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"FactionLegacyItemLoanTarget\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"market_price\",\"Key\":\"market_price\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"average_price\",\"Key\":\"average_price\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"damage\",\"Key\":\"damage\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"float64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"accuracy\",\"Key\":\"accuracy\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"float64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"armor\",\"Key\":\"armor\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"float64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"quality\",\"Key\":\"quality\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"float64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"bonus\",\"Key\":\"bonus\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"required\",\"Key\":\"required\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"bool\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const FactionLegacyItemLoanTarget = union(enum) {
-    v0: u64,
-    v1: []const u8,
-    v2: FactionLegacyItemLoanUser,
-    v3: bool,
+    uint64: u64,
+    string: []const u8,
+    faction_legacy_item_loan_user: FactionLegacyItemLoanUser,
+    bool: bool,
     pub const compatibility_name = "FactionLegacyItemLoanTarget";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"uint64\"},{\"name\":\"string\"},{\"name\":\"FactionLegacyItemLoanUser\"},{\"name\":\"bool\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -1170,9 +1170,9 @@ pub const FactionLegacyItemLoanUser = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"id\",\"Key\":\"id\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"name\",\"Key\":\"name\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const FactionLegacyItemSelection = union(enum) {
-    v0: model.Map(FactionLegacyItemEntry),
-    v1: []const FactionLegacyItemEntry,
-    v2: model.Raw,
+    map: model.Map(FactionLegacyItemEntry),
+    array: []const FactionLegacyItemEntry,
+    raw: model.Raw,
     pub const compatibility_name = "FactionLegacyItemSelection";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"FactionLegacyItemEntry\"}]},{\"name\":\"array\",\"arguments\":[{\"name\":\"FactionLegacyItemEntry\"}]},{\"name\":\"raw\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -2058,11 +2058,11 @@ pub const FactionWarfareBundle = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"warfare\",\"Key\":\"warfare\",\"Type\":{\"name\":\"array\",\"arguments\":[{\"name\":\"FactionWarfareEntry\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"_metadata\",\"Key\":\"_metadata\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"PaginatedMetadata\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const FactionWarfareEntry = union(enum) {
-    v0: FactionRankedWarDetails,
-    v1: FactionTerritoryWarfareSummary,
-    v2: FactionChainWarfareSummary,
-    v3: FactionRaidSummary,
-    v4: FactionUnknownWarfareEntry,
+    ranked_war_details: FactionRankedWarDetails,
+    territory_warfare_summary: FactionTerritoryWarfareSummary,
+    chain_warfare_summary: FactionChainWarfareSummary,
+    raid_summary: FactionRaidSummary,
+    unknown_warfare_entry: FactionUnknownWarfareEntry,
     pub const compatibility_name = "FactionWarfareEntry";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"FactionRankedWarDetails\"},{\"name\":\"FactionTerritoryWarfareSummary\"},{\"name\":\"FactionChainWarfareSummary\"},{\"name\":\"FactionRaidSummary\"},{\"name\":\"FactionUnknownWarfareEntry\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -2394,8 +2394,8 @@ pub const KeyLogEntry = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"timestamp\",\"Key\":\"timestamp\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"entry_type\",\"Key\":\"type\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"selections\",\"Key\":\"selections\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"id\",\"Key\":\"id\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"KeyLogTargetId\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"comment\",\"Key\":\"comment\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"ip\",\"Key\":\"ip\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const KeyLogTargetId = union(enum) {
-    v0: u64,
-    v1: []const u8,
+    uint64: u64,
+    string: []const u8,
     pub const compatibility_name = "KeyLogTargetId";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"uint64\"},{\"name\":\"string\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -3413,8 +3413,8 @@ pub const TornCard = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"name\",\"Key\":\"name\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"short\",\"Key\":\"short\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"TornCardShort\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"rank\",\"Key\":\"rank\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"css_class\",\"Key\":\"class\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const TornCardShort = union(enum) {
-    v0: u64,
-    v1: []const u8,
+    uint64: u64,
+    string: []const u8,
     pub const compatibility_name = "TornCardShort";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"uint64\"},{\"name\":\"string\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -4430,13 +4430,13 @@ pub const TradeInventoryItemDetails = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"id\",\"Key\":\"id\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"uid\",\"Key\":\"uid\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"amount\",\"Key\":\"amount\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const TradeItem = union(enum) {
-    v0: TradeMoneyItem,
-    v1: TradeInventoryItem,
-    v2: TradeFactionItem,
-    v3: TradeCompanyItem,
-    v4: TradePropertyItem,
-    v5: TradeNapItem,
-    v6: UnknownTradeItem,
+    trade_money: TradeMoneyItem,
+    trade_inventory: TradeInventoryItem,
+    trade_faction: TradeFactionItem,
+    trade_company: TradeCompanyItem,
+    trade_property: TradePropertyItem,
+    trade_nap: TradeNapItem,
+    unknown_trade: UnknownTradeItem,
     pub const compatibility_name = "TradeItem";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"TradeMoneyItem\"},{\"name\":\"TradeInventoryItem\"},{\"name\":\"TradeFactionItem\"},{\"name\":\"TradeCompanyItem\"},{\"name\":\"TradePropertyItem\"},{\"name\":\"TradeNapItem\"},{\"name\":\"UnknownTradeItem\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -5035,11 +5035,11 @@ pub const UserCompanyPoints = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"company\",\"Key\":\"company\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserCompanyPointCompany\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"points\",\"Key\":\"points\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const UserCompetition = union(enum) {
-    v0: UserHalloweenCompetition,
-    v1: UserEasterCompetition,
-    v2: UserRpsCompetition,
-    v3: UserEliminationCompetition,
-    v4: UnknownUserCompetition,
+    user_halloween: UserHalloweenCompetition,
+    user_easter: UserEasterCompetition,
+    user_rps: UserRpsCompetition,
+    user_elimination: UserEliminationCompetition,
+    unknown_user: UnknownUserCompetition,
     pub const compatibility_name = "UserCompetition";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"UserHalloweenCompetition\"},{\"name\":\"UserEasterCompetition\"},{\"name\":\"UserRpsCompetition\"},{\"name\":\"UserEliminationCompetition\"},{\"name\":\"UnknownUserCompetition\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -5340,9 +5340,9 @@ pub const UserEliminationCompetition = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"name\",\"Key\":\"name\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"score\",\"Key\":\"score\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"attacks\",\"Key\":\"attacks\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"team\",\"Key\":\"team\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const UserEmployment = union(enum) {
-    v0: UserCityJob,
-    v1: UserCompanyJob,
-    v2: UnknownUserEmployment,
+    user_city_job: UserCityJob,
+    user_company_job: UserCompanyJob,
+    unknown_user_employment: UnknownUserEmployment,
     pub const compatibility_name = "UserEmployment";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"UserCityJob\"},{\"name\":\"UserCompanyJob\"},{\"name\":\"UnknownUserEmployment\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -6501,8 +6501,8 @@ pub const UserOrganizedCrimeRewards = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"money\",\"Key\":\"money\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"respect\",\"Key\":\"respect\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"int64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"items\",\"Key\":\"items\",\"Type\":{\"name\":\"array\",\"arguments\":[{\"name\":\"UserOrganizedCrimeRewardItem\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const UserOrganizedCrimeSelection = union(enum) {
-    v0: *UserOrganizedCrime,
-    v1: UserOrganizedCrimeError,
+    crime: *UserOrganizedCrime,
+    crime_error: UserOrganizedCrimeError,
     pub const compatibility_name = "UserOrganizedCrimeSelection";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"box\",\"arguments\":[{\"name\":\"UserOrganizedCrime\"}]},{\"name\":\"UserOrganizedCrimeError\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -6616,9 +6616,9 @@ pub const UserPersonalStatsCategory = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"attacking\",\"Key\":\"attacking\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"jobs\",\"Key\":\"jobs\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"hospital\",\"Key\":\"hospital\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"crimes\",\"Key\":\"crimes\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"items\",\"Key\":\"items\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"travel\",\"Key\":\"travel\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"drugs\",\"Key\":\"drugs\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"networth\",\"Key\":\"networth\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"other\",\"Key\":\"other\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserPersonalStatsBucket\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const UserPersonalStatsSelection = union(enum) {
-    v0: *UserPersonalStatsCategory,
-    v1: []const UserPersonalStatPoint,
-    v2: model.Raw,
+    user_personal_stats_category: *UserPersonalStatsCategory,
+    array: []const UserPersonalStatPoint,
+    raw: model.Raw,
     pub const compatibility_name = "UserPersonalStatsSelection";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"box\",\"arguments\":[{\"name\":\"UserPersonalStatsCategory\"}]},{\"name\":\"array\",\"arguments\":[{\"name\":\"UserPersonalStatPoint\"}]},{\"name\":\"raw\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -7034,9 +7034,9 @@ pub const UserReviveFull = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"id\",\"Key\":\"id\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"reviver\",\"Key\":\"reviver\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserReviveReviver\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"target\",\"Key\":\"target\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"UserReviveTarget\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"success_chance\",\"Key\":\"success_chance\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"float64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"result\",\"Key\":\"result\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"timestamp\",\"Key\":\"timestamp\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const UserReviveLastAction = union(enum) {
-    v0: UserLastAction,
-    v1: u64,
-    v2: model.Raw,
+    user_last_action: UserLastAction,
+    uint64: u64,
+    raw: model.Raw,
     pub const compatibility_name = "UserReviveLastAction";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"UserLastAction\"},{\"name\":\"uint64\"},{\"name\":\"raw\"}],\"Type\":{\"name\":\"\"}}";
 };
@@ -7280,10 +7280,10 @@ pub const UserTradeParticipant = struct {
     pub const compatibility_json = "{\"Kind\":\"struct\",\"Fields\":[{\"Name\":\"id\",\"Key\":\"id\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"uint64\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"name\",\"Key\":\"name\",\"Type\":{\"name\":\"optional\",\"arguments\":[{\"name\":\"string\"}]},\"Default\":true,\"Flatten\":false,\"Aliases\":[],\"Custom\":\"\"},{\"Name\":\"extra\",\"Key\":\"extra\",\"Type\":{\"name\":\"map\",\"arguments\":[{\"name\":\"string\"},{\"name\":\"raw\"}]},\"Default\":true,\"Flatten\":true,\"Aliases\":[],\"Custom\":\"\"}],\"Variants\":null,\"Type\":{\"name\":\"\"}}";
 };
 pub const UserTradeTimestamp = union(enum) {
-    v0: void,
-    v1: u64,
-    v2: bool,
-    v3: model.Raw,
+    null: void,
+    uint64: u64,
+    bool: bool,
+    raw: model.Raw,
     pub const compatibility_name = "UserTradeTimestamp";
     pub const compatibility_json = "{\"Kind\":\"union\",\"Fields\":null,\"Variants\":[{\"name\":\"null\"},{\"name\":\"uint64\"},{\"name\":\"bool\"},{\"name\":\"raw\"}],\"Type\":{\"name\":\"\"}}";
 };

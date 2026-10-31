@@ -135,9 +135,19 @@ test "legacy recovery retains target in the explicit v1 path" {
     try std.testing.expect(result.reports[0].fallback);
 }
 
-test "combination and v1-migration messages recover without code 4" {
+test "split recovery and version reroute are classified by code, not message text (P4.1, P4.3)" {
+    var text_only: Wire = .{ .steps = &.{
+        .{ .url = "https://example.invalid/v2/user?selections=job%2Cprofile", .body = "{\"error\":{\"code\":6,\"error\":\"Selection cannot be used together with another selection\"}}" },
+    } };
+    var text_engine = try text_only.engine();
+    defer text_engine.deinit();
+    var text_result = try (client.Client{ .engine = &text_engine }).execute(.{ .resource = .user, .selections = &.{ "profile", "job" } }, .{});
+    defer text_result.deinit();
+    try std.testing.expectEqual(@as(?u32, 6), text_result.failure.?.api_code);
+    try std.testing.expectEqual(@as(usize, 1), text_only.count);
+
     var split: Wire = .{ .steps = &.{
-        .{ .url = "https://example.invalid/v2/user?selections=job%2Cprofile", .body = "{\"error\":{\"code\":17,\"error\":\"Selection cannot be used together with another selection\"}}" },
+        .{ .url = "https://example.invalid/v2/user?selections=job%2Cprofile", .body = "{\"error\":{\"code\":4,\"error\":\"Wrong fields\"}}" },
         .{ .url = "https://example.invalid/v2/user?selections=job", .body = "{\"job\":{}}" },
         .{ .url = "https://example.invalid/v2/user?selections=profile", .body = "{\"profile\":{}}" },
     } };
@@ -155,7 +165,8 @@ test "combination and v1-migration messages recover without code 4" {
     } };
     var legacy_engine = try legacy.engine();
     defer legacy_engine.deinit();
-    var legacy_result = try (client.Client{ .engine = &legacy_engine }).execute(.{ .resource = .user, .selections = &.{"profile"}, .target = &.{.{ .name = "id", .value = "123" }} }, .{ .legacy_fallback = true });
+    // Code 22 reroutes once to v1 without opting into legacy fallback.
+    var legacy_result = try (client.Client{ .engine = &legacy_engine }).execute(.{ .resource = .user, .selections = &.{"profile"}, .target = &.{.{ .name = "id", .value = "123" }} }, .{});
     defer legacy_result.deinit();
     try std.testing.expect(legacy_result.failure == null);
     try std.testing.expectEqual(@as(usize, 2), legacy.count);

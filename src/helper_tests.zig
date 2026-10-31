@@ -25,6 +25,16 @@ fn legacy(resource: []const u8, name: []const u8) bool {
     if (eq(resource, "torn")) return eq(name, "competition") or eq(name, "organisedcrimes") or eq(name, "pawnshop");
     return false;
 }
+fn inSelectionEnum(a: std.mem.Allocator, doc: V, resource: []const u8, name: []const u8) !bool {
+    var schema_name = try std.fmt.allocPrint(a, "{s}SelectionName", .{resource});
+    schema_name[0] = std.ascii.toUpper(schema_name[0]);
+    const schema = get(get(get(doc, "components") orelse return false, "schemas") orelse return false, schema_name) orelse return false;
+    const branches: []const V = if (get(schema, "oneOf")) |one| one.array.items else &.{schema};
+    for (branches) |branch| if (get(branch, "enum")) |values| for (values.array.items) |value| {
+        if (value == .string and eq(value.string, name)) return true;
+    };
+    return false;
+}
 fn encode(a: std.mem.Allocator, s: []const u8) ![]const u8 {
     var out: std.ArrayList(u8) = .empty;
     for (s) |c| {
@@ -84,7 +94,11 @@ fn expected(comptime Token: type, a: std.mem.Allocator, doc: V) !Expected {
     const name = Token.name;
     if (legacy(resource, name)) {
         const payload = if (eq(name, "pawnshop")) "{\"pawnshop\":{\"points_value\":1}}" else if (eq(name, "criminalrecord")) "{\"criminalrecord\":{\"total\":1}}" else if (eq(name, "organisedcrimes")) "{\"organisedcrimes\":{}}" else try std.fmt.allocPrint(a, "{{\"{s}\":[]}}", .{name});
-        return .{ .url = try std.fmt.allocPrint(a, "https://example.invalid/{s}/?selections={s}", .{ resource, name }), .target = &.{}, .response = try std.json.parseFromSliceLeaky(V, a, payload, .{ .parse_numbers = false }), .csv = false, .version = 1 };
+        // Names in the official v2 selection enum are asked on v2 first; Torn answers
+        // code 22 when only v1 serves them (P4.3). Others go to v1 directly.
+        const v2 = try inSelectionEnum(a, doc, resource, name);
+        const url = if (v2) try std.fmt.allocPrint(a, "https://example.invalid/v2/{s}?selections={s}", .{ resource, name }) else try std.fmt.allocPrint(a, "https://example.invalid/{s}/?selections={s}", .{ resource, name });
+        return .{ .url = url, .target = &.{}, .response = try std.json.parseFromSliceLeaky(V, a, payload, .{ .parse_numbers = false }), .csv = false, .version = if (v2) 2 else 1 };
     }
     const match_name = if (eq(resource, "user") and eq(name, "itemmod")) "itemmods" else if (eq(resource, "faction") and eq(name, "dirtbombs")) "dirtybombs" else name;
     const base = try std.fmt.allocPrint(a, "/{s}", .{resource});

@@ -1,9 +1,11 @@
 const std = @import("std");
 const data = @import("generated/routing.zig");
+const shared = @import("generated/shared.zig");
 
 pub const Resource = enum { user, faction, company, forum, key, market, property, racing, torn };
 pub const Argument = struct { name: []const u8, value: []const u8 };
 pub const Mode = enum { automatic, v1 };
+pub const AccessLevel = shared.AccessLevel;
 pub const Input = struct {
     resource: Resource,
     selections: []const []const u8,
@@ -11,6 +13,9 @@ pub const Input = struct {
     filters: []const Argument = &.{},
     mode: Mode = .automatic,
     force_direct: bool = false,
+    /// v1 mode normally requires catalog membership; Torn's code 22 ("only available in
+    /// API v1") is authoritative, so the reroute (P4.3) plans unlisted names too.
+    allow_unlisted_v1: bool = false,
     check_context: ?*anyopaque = null,
     check_fn: ?*const fn (?*anyopaque) anyerror!void = null,
 };
@@ -28,6 +33,8 @@ pub const Call = struct {
     fallback_supported: bool,
     target: []const Argument = &.{},
     filters: []const Argument = &.{},
+    /// Highest known access level among the call's selections (P6.1); null if none known.
+    access_level: ?AccessLevel = null,
 };
 /// All strings and slices in calls are owned by this arena, independent of input.
 pub const Plan = struct {
@@ -39,24 +46,9 @@ pub const Plan = struct {
     }
 };
 
-const Value = std.json.Value;
-fn field(v: Value, name: []const u8) Value {
-    return v.object.get(name) orelse .null;
-}
-fn string(v: Value) []const u8 {
-    return if (v == .string) v.string else "";
-}
-fn flag(v: Value, name: []const u8) bool {
-    const f = field(v, name);
-    return f == .bool and f.bool;
-}
+const Capability = data.Capability;
 fn same(a: []const u8, b: []const u8) bool {
     return std.mem.eql(u8, a, b);
-}
-fn contains(v: Value, name: []const u8) bool {
-    if (v != .array) return false;
-    for (v.array.items) |entry| if (same(string(entry), name)) return true;
-    return false;
 }
 fn findArg(args: []const Argument, name: []const u8) ?[]const u8 {
     for (args) |arg| if (same(arg.name, name)) return arg.value;
@@ -72,11 +64,28 @@ pub fn v1Contains(resource: Resource, selection: []const u8) bool {
     for (data.v1_catalog) |entry| if (same(entry.resource, @tagName(resource)) and same(entry.name, selection)) return true;
     return false;
 }
-fn capability(manifest: Value, resource: Resource, name: []const u8) ?Value {
-    for (field(manifest, "capabilities").array.items) |entry| {
-        if (same(string(field(entry, "resource")), @tagName(resource)) and same(string(field(entry, "name")), name)) return entry;
+/// Precomputed routing capability of a selection, or null for names this SDK does not know.
+pub fn capability(resource: Resource, name: []const u8) ?*const Capability {
+    for (&data.capabilities) |*entry| {
+        if (same(entry.resource, @tagName(resource)) and same(entry.name, name)) return entry;
     }
     return null;
+}
+/// Required key access level of a selection (P6.1); null when unknown or unlisted.
+pub fn selectionAccess(resource: Resource, name: []const u8) ?AccessLevel {
+    return if (capability(resource, name)) |cap| cap.access_level else null;
+}
+/// True when `have` satisfies `need`. `custom` keys and requirements are incomparable
+/// and never cause a client-side refusal.
+pub fn accessSatisfies(have: AccessLevel, need: AccessLevel) bool {
+    if (have == .custom or need == .custom) return true;
+    return @backingInt(have) >= @backingInt(need);
+}
+fn maxAccess(current: ?AccessLevel, next: ?AccessLevel) ?AccessLevel {
+    const n = next orelse return current;
+    if (n == .custom) return current;
+    const c = current orelse return n;
+    return if (@backingInt(n) > @backingInt(c)) n else c;
 }
 fn lessThan(_: void, a: []const u8, b: []const u8) bool {
     return std.mem.lessThan(u8, a, b);
@@ -128,6 +137,8 @@ fn finishPlan(arena: *std.heap.ArenaAllocator, calls: *std.ArrayList(Call), inpu
     }
     return .{ .arena = arena.*, .calls = try calls.toOwnedSlice(a) };
 }
+/// Parameters the generic `/{resource}` endpoint documents. Used only for routing
+/// decisions; filters outside this list are still forwarded verbatim (P1.5).
 fn genericParameters(resource: Resource) []const []const u8 {
     return switch (resource) {
         .user, .faction => &.{ "cat", "comment", "filters", "from", "limit", "offset", "sort", "stat", "striptags", "timestamp", "to" },
@@ -154,16 +165,16 @@ fn genericOperation(resource: Resource) []const u8 {
     };
 }
 const Domain = struct { name: []const u8, required: bool };
-fn pathDomain(cap: Value, name: []const u8) Domain {
+fn pathDomain(cap: *const Capability, name: []const u8) Domain {
     var d = domain(cap, name);
     if (domainOverride(cap, name)) |entry| d.name = entry.name;
     return d;
 }
-fn domainOverride(cap: Value, name: []const u8) ?data.IdDomain {
-    for (data.id_domains) |entry| if (same(entry.resource, string(field(cap, "resource"))) and same(entry.selection, name)) return entry;
+fn domainOverride(cap: *const Capability, name: []const u8) ?data.IdDomain {
+    for (data.id_domains) |entry| if (same(entry.resource, cap.resource) and same(entry.selection, name)) return entry;
     return null;
 }
-fn domainParameter(cap: Value, name: []const u8) []const u8 {
+fn domainParameter(cap: *const Capability, name: []const u8) []const u8 {
     return if (domainOverride(cap, name)) |entry| entry.parameter else domain(cap, name).name;
 }
 fn directOverride(resource: Resource, name: []const u8) bool {
@@ -186,35 +197,35 @@ fn queryRequirements(input: Input, selection: []const u8) !bool {
     }
     return compatible_generic;
 }
-fn domain(cap: Value, name: []const u8) Domain {
-    if (flag(cap, "legacy")) return .{ .name = "id", .required = false };
+fn requiredEmpty(required: ?[]const []const u8) bool {
+    return if (required) |r| r.len == 0 else true;
+}
+fn domain(cap: *const Capability, name: []const u8) Domain {
+    if (cap.legacy) return .{ .name = "id", .required = false };
     if (same(name, "timestamp") or same(name, "lookup")) return .{ .name = "neutral", .required = false };
     var optional = false;
     var result: []const u8 = "self";
-    for (field(cap, "endpoints").array.items) |endpoint| {
-        const required = field(endpoint, "required");
-        if (required == .null or (required == .array and required.array.items.len == 0)) {
+    for (cap.endpoints) |endpoint| {
+        if (requiredEmpty(endpoint.required)) {
             optional = true;
-        } else if (required == .array) for (required.array.items) |r| {
-            const n = string(r);
+        } else for (endpoint.required.?) |n| {
             if (!same(n, "id")) return .{ .name = n, .required = !hasOptionalEndpoint(cap) };
             result = "id";
-        };
+        }
     }
     return .{ .name = result, .required = !optional };
 }
-fn hasOptionalEndpoint(cap: Value) bool {
-    for (field(cap, "endpoints").array.items) |endpoint| {
-        const required = field(endpoint, "required");
-        if (required == .null or (required == .array and required.array.items.len == 0)) return true;
-    }
+fn hasOptionalEndpoint(cap: *const Capability) bool {
+    for (cap.endpoints) |endpoint| if (requiredEmpty(endpoint.required)) return true;
     return false;
 }
 fn inStrings(values: []const []const u8, v: []const u8) bool {
     for (values) |item| if (same(item, v)) return true;
     return false;
 }
-fn query(a: std.mem.Allocator, input: Input, names: []const []const u8, allowed: Value, generic: bool, id: ?[]const u8) ![]const u8 {
+/// Every filter except the reserved names is forwarded verbatim, including names this
+/// SDK does not know (P1.5); Torn decides what it accepts.
+fn query(a: std.mem.Allocator, input: Input, names: []const []const u8, id: ?[]const u8) ![]const u8 {
     try checkpoint(input);
     var out: std.ArrayList(u8) = .empty;
     if (names.len > 0) try appendParam(a, &out, "selections", try join(a, names), input);
@@ -228,18 +239,14 @@ fn query(a: std.mem.Allocator, input: Input, names: []const []const u8, allowed:
     for (filters) |arg| {
         try checkpoint(input);
         if (same(arg.name, "key") or same(arg.name, "selections") or same(arg.name, "id") or same(arg.name, "legacy")) return error.ReservedParameter;
-        if (generic) {
-            if (!inStrings(genericParameters(input.resource), arg.name)) return error.UnsupportedParameter;
-        } else if (!contains(allowed, arg.name)) return error.UnsupportedParameter;
         try appendParam(a, &out, arg.name, arg.value, input);
     }
     return out.toOwnedSlice(a);
 }
 fn legacyCall(a: std.mem.Allocator, input: Input, names: []const []const u8) !Call {
     try checkpoint(input);
-    for (names) |name| if (!v1Contains(input.resource, name)) return error.UnsupportedV1Selection;
+    if (!input.allow_unlisted_v1) for (names) |name| if (!v1Contains(input.resource, name)) return error.UnsupportedV1Selection;
     for (input.target) |arg| if (!same(arg.name, "id")) return error.UnsupportedTarget;
-    const catalog = try std.json.parseFromSlice(Value, a, data.v1_json, .{});
     var q: std.ArrayList(u8) = .empty;
     try appendParam(a, &q, "selections", try join(a, names), input);
     const filters = try a.dupe(Argument, input.filters);
@@ -250,10 +257,13 @@ fn legacyCall(a: std.mem.Allocator, input: Input, names: []const []const u8) !Ca
     }.less);
     for (filters) |arg| {
         try checkpoint(input);
-        if (!contains(field(catalog.value, "filters"), arg.name) and !same(arg.name, "comment")) return error.UnsupportedParameter;
+        if (same(arg.name, "key") or same(arg.name, "selections")) return error.ReservedParameter;
+        // `comment` and unknown filters are forwarded on v1 as well (P1.5).
         try appendParam(a, &q, arg.name, arg.value, input);
     }
     const id = findArg(input.target, "id") orelse "";
+    var access: ?AccessLevel = null;
+    for (names) |name| access = maxAccess(access, selectionAccess(input.resource, name));
     return .{
         .path = try std.fmt.allocPrint(a, "/{s}/{s}", .{ @tagName(input.resource), try percentEncodeChecked(a, id, input) }),
         .query = try q.toOwnedSlice(a),
@@ -262,25 +272,24 @@ fn legacyCall(a: std.mem.Allocator, input: Input, names: []const []const u8) !Ca
         .version = 1,
         .media = .json,
         .fallback_supported = true,
+        .access_level = access,
     };
 }
-fn endpointScore(endpoint: Value, targets: []const Argument) ?usize {
-    const required = field(endpoint, "required");
+fn endpointScore(endpoint: data.Endpoint, targets: []const Argument) ?usize {
     var score: usize = 0;
-    if (required == .array) for (required.array.items) |r| {
-        const name = string(r);
+    if (endpoint.required) |required| for (required) |name| {
         if (findArg(targets, name) == null) return null;
         score += 1;
     };
     // A non-matching explicit ID must never be dropped by choosing a self endpoint.
-    for (targets) |arg| if (!contains(required, arg.name)) return null;
+    for (targets) |arg| if (endpoint.required == null or !inStrings(endpoint.required.?, arg.name)) return null;
     return score;
 }
-fn directCall(a: std.mem.Allocator, input: Input, cap: Value, name: []const u8) !Call {
+fn directCall(a: std.mem.Allocator, input: Input, cap: *const Capability, name: []const u8) !Call {
     try checkpoint(input);
-    var selected: ?Value = null;
+    var selected: ?data.Endpoint = null;
     var best: usize = 0;
-    for (field(cap, "endpoints").array.items) |endpoint| {
+    for (cap.endpoints) |endpoint| {
         if (endpointScore(endpoint, input.target)) |score| {
             if (selected == null or score > best) {
                 selected = endpoint;
@@ -289,7 +298,7 @@ fn directCall(a: std.mem.Allocator, input: Input, cap: Value, name: []const u8) 
         }
     }
     const endpoint = selected orelse return error.MissingOrConflictingTarget;
-    const template = string(field(endpoint, "path"));
+    const template = endpoint.path;
     var path: std.ArrayList(u8) = .empty;
     var pos: usize = 0;
     while (pos < template.len) {
@@ -306,16 +315,18 @@ fn directCall(a: std.mem.Allocator, input: Input, cap: Value, name: []const u8) 
     }
     return .{
         .path = try path.toOwnedSlice(a),
-        .query = try query(a, input, &.{}, field(endpoint, "parameters"), false, null),
+        .query = try query(a, input, &.{}, null),
         .selections = try copyNames(a, &.{name}),
-        .operation = try a.dupe(u8, string(field(endpoint, "id"))),
+        .operation = try a.dupe(u8, endpoint.id),
         .version = 2,
-        .media = if (flag(cap, "csv")) .csv else .json,
+        .media = if (cap.csv) .csv else .json,
         .fallback_supported = v1Contains(input.resource, name),
+        .access_level = cap.access_level,
     };
 }
 
 /// Build a deterministic plan. All selections share one target and filter set.
+/// Names this SDK does not know are sent as v2 generic selections (P1.5).
 pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
     try checkpoint(input);
     if (input.selections.len == 0) return error.EmptySelections;
@@ -324,7 +335,6 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
     var arena = std.heap.ArenaAllocator.init(allocator);
     errdefer arena.deinit();
     const a = arena.allocator();
-    const manifest = try std.json.parseFromSlice(Value, a, data.manifest_json, .{});
     try checkpoint(input);
     const sorted = try a.dupe([]const u8, input.selections);
     for (sorted) |name| {
@@ -345,7 +355,7 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
     var shared_domain: ?[]const u8 = null;
     for (names.items) |name| {
         try checkpoint(input);
-        if (capability(manifest.value, input.resource, name)) |cap| {
+        if (capability(input.resource, name)) |cap| {
             const d = pathDomain(cap, name);
             if (d.required and input.target.len == 0) return error.MissingOrConflictingTarget;
             if (input.target.len > 0 and !same(d.name, "neutral")) {
@@ -358,19 +368,28 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
             }
         }
     }
+    var unlisted_generic = false;
     for (names.items) |name| {
         try checkpoint(input);
-        const cap = capability(manifest.value, input.resource, name) orelse {
-            if (!v1Contains(input.resource, name)) return error.UnknownSelection;
-            try legacy.append(a, name);
+        const cap = capability(input.resource, name) orelse {
+            if (v1Contains(input.resource, name)) {
+                try legacy.append(a, name);
+            } else {
+                // Unknown upstream selection: pass through as a v2 generic selection.
+                try generic.append(a, name);
+                unlisted_generic = true;
+            }
             continue;
         };
-        if (flag(cap, "legacy")) {
-            try legacy.append(a, name);
+        if (cap.legacy) {
+            // Listed in the v2 selection enum without an exact v2 endpoint: ask v2
+            // generic first; Torn answers code 22 when only v1 serves it, and the
+            // client reroutes once (P4.3). Other legacy names go to v1 directly.
+            if (cap.v2_enum) try generic.append(a, name) else try legacy.append(a, name);
             continue;
         }
         const compatible_generic = try queryRequirements(input, name);
-        if (flag(cap, "generic") and !flag(cap, "standalone") and !input.force_direct and compatible_generic and !directOverride(input.resource, name)) {
+        if (cap.generic and !cap.standalone and !input.force_direct and compatible_generic and !directOverride(input.resource, name)) {
             try generic.append(a, name);
         } else {
             if (input.target.len > 0 and (same(name, "timestamp") or same(name, "lookup"))) {
@@ -397,20 +416,23 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
     }
     if (generic.items.len > 0) {
         var fallback = true;
-        var generic_has_domain = false;
+        var generic_has_domain = unlisted_generic and input.target.len == 1;
+        var access: ?AccessLevel = null;
         for (generic.items) |name| {
             fallback = fallback and v1Contains(input.resource, name);
-            const cap = capability(manifest.value, input.resource, name).?;
+            const cap = capability(input.resource, name) orelse continue;
+            access = maxAccess(access, cap.access_level);
             generic_has_domain = generic_has_domain or !same(domain(cap, name).name, "neutral");
         }
         try calls.insert(a, 0, .{
             .path = try std.fmt.allocPrint(a, "/{s}", .{@tagName(input.resource)}),
-            .query = try query(a, input, generic.items, .null, true, if (input.target.len == 1 and generic_has_domain) input.target[0].value else null),
+            .query = try query(a, input, generic.items, if (input.target.len == 1 and generic_has_domain) input.target[0].value else null),
             .selections = try copyNames(a, generic.items),
             .operation = try a.dupe(u8, genericOperation(input.resource)),
             .version = 2,
             .media = .json,
             .fallback_supported = fallback,
+            .access_level = access,
         });
     }
     if (legacy.items.len > 0) try calls.append(a, try legacyCall(a, input, legacy.items));
@@ -499,15 +521,24 @@ test "dedicated CSV and standalone calls stay separate" {
     }
 }
 
-test "generic versus direct versus v1 parameter allowlists" {
-    try std.testing.expectError(error.UnsupportedParameter, build(std.testing.allocator, .{ .resource = .company, .selections = &.{"profile"}, .filters = &.{.{ .name = "sort", .value = "ASC" }} }));
-    try std.testing.expectError(error.UnsupportedParameter, build(std.testing.allocator, .{ .resource = .property, .selections = &.{"timestamp"}, .filters = &.{.{ .name = "limit", .value = "1" }} }));
+test "unknown parameters are forwarded verbatim on generic direct and v1 calls (P1.5)" {
+    const cases = .{
+        .{ Resource.company, "profile", Mode.automatic, "sort", "selections=profile&sort=ASC" },
+        .{ Resource.property, "timestamp", Mode.automatic, "limit", "selections=timestamp&limit=ASC" },
+        .{ Resource.user, "snapshot", Mode.automatic, "limit", "limit=ASC" },
+        .{ Resource.user, "profile", Mode.v1, "bonus", "selections=profile&bonus=ASC" },
+        .{ Resource.user, "profile", Mode.v1, "comment", "selections=profile&comment=ASC" },
+    };
+    inline for (cases) |c| {
+        var plan = try build(std.testing.allocator, .{ .resource = c[0], .selections = &.{c[1]}, .mode = c[2], .filters = &.{.{ .name = c[3], .value = "ASC" }} });
+        defer plan.deinit();
+        try std.testing.expectEqualStrings(c[4], plan.calls[0].query);
+    }
     try std.testing.expectError(error.ReservedParameter, build(std.testing.allocator, .{ .resource = .user, .selections = &.{"profile"}, .filters = &.{.{ .name = "key", .value = "credential" }} }));
-    try std.testing.expectError(error.UnsupportedParameter, build(std.testing.allocator, .{ .resource = .user, .selections = &.{"snapshot"}, .filters = &.{.{ .name = "limit", .value = "1" }} }));
-    try std.testing.expectError(error.UnsupportedParameter, build(std.testing.allocator, .{ .resource = .user, .selections = &.{"profile"}, .mode = .v1, .filters = &.{.{ .name = "bonus", .value = "1" }} }));
+    try std.testing.expectError(error.ReservedParameter, build(std.testing.allocator, .{ .resource = .user, .selections = &.{"profile"}, .mode = .v1, .filters = &.{.{ .name = "key", .value = "credential" }} }));
 }
 
-test "unknown and legacy-only names do not receive blanket fallback" {
+test "unknown selections pass through as v2 generic selections (P1.5)" {
     try std.testing.expect(!v1Contains(.forum, "timestamp"));
     try std.testing.expect(!v1Contains(.user, "unlisted"));
     try std.testing.expect(v1Contains(.faction, "armorynews"));
@@ -516,8 +547,27 @@ test "unknown and legacy-only names do not receive blanket fallback" {
     try std.testing.expectEqual(@as(usize, 2), plan.calls.len);
     try std.testing.expectEqual(@as(u8, 2), plan.calls[0].version);
     try std.testing.expectEqual(@as(u8, 1), plan.calls[1].version);
-    try std.testing.expectError(error.UnknownSelection, build(std.testing.allocator, .{ .resource = .forum, .selections = &.{"armorynews"} }));
+    var unknown = try build(std.testing.allocator, .{ .resource = .user, .selections = &.{ "futureselection", "profile" }, .target = &.{.{ .name = "id", .value = "7" }} });
+    defer unknown.deinit();
+    try std.testing.expectEqual(@as(usize, 1), unknown.calls.len);
+    try std.testing.expectEqualStrings("/user", unknown.calls[0].path);
+    try std.testing.expectEqualStrings("selections=futureselection%2Cprofile&id=7", unknown.calls[0].query);
+    var forum = try build(std.testing.allocator, .{ .resource = .forum, .selections = &.{"armorynews"} });
+    defer forum.deinit();
+    try std.testing.expectEqualStrings("selections=armorynews", forum.calls[0].query);
     try std.testing.expectError(error.UnsupportedV1Selection, build(std.testing.allocator, .{ .resource = .racing, .selections = &.{"timestamp"}, .mode = .v1 }));
+    var rerouted = try build(std.testing.allocator, .{ .resource = .racing, .selections = &.{"timestamp"}, .mode = .v1, .allow_unlisted_v1 = true });
+    defer rerouted.deinit();
+    try std.testing.expectEqualStrings("/racing/", rerouted.calls[0].path);
+}
+
+test "calls carry the highest known selection access level (P6.1)" {
+    var plan = try build(std.testing.allocator, .{ .resource = .user, .selections = &.{ "profile", "travelinventory", "futureselection" } });
+    defer plan.deinit();
+    try std.testing.expectEqual(@as(?AccessLevel, .limited), plan.calls[0].access_level);
+    try std.testing.expectEqual(@as(?AccessLevel, .limited), selectionAccess(.user, "travelinventory"));
+    try std.testing.expectEqual(@as(?AccessLevel, null), selectionAccess(.user, "futureselection"));
+    try std.testing.expect(accessSatisfies(.full, .limited) and !accessSatisfies(.public, .limited) and accessSatisfies(.custom, .full));
 }
 
 test "multi-ID arrays are encoded as one comma-separated path value" {

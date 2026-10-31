@@ -26,6 +26,11 @@ pub fn main(init: std.process.Init) !void {
         if (operations != snapshot.object.get("operations").?.integer) return error.OperationInventoryMismatch;
         if (doc.object.get("components").?.object.get("schemas").?.object.count() != snapshot.object.get("schemas").?.integer) return error.SchemaInventoryMismatch;
     }
+    // SDK_VERSION is the single version source (P8.7); the package manifest must agree.
+    const zon = try cwd.readFileAlloc(io, "build.zig.zon", a, .limited(64 * 1024));
+    const needle = try std.fmt.allocPrint(a, ".version = \"{s}\"", .{torn.SDK_VERSION});
+    if (std.mem.indexOf(u8, zon, needle) == null) return error.PackageVersionMismatch;
+    if (!std.mem.eql(u8, torn.SPEC_VERSION, "6.15.0")) return error.SpecVersionMismatch;
     if (torn.current.schema_count != 724 or torn.frozen.schema_count != 711 or torn.compatibility.schema_count != 549 or torn.operations.operation_count != 237) return error.PublicInventoryMismatch;
     const args = try init.minimal.args.toSlice(a);
     if (args.len == 3 and std.mem.eql(u8, args[1], "--historical")) {

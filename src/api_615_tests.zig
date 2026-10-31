@@ -66,10 +66,10 @@ test "travel inventory selection, exact operation and limited access contract ar
     // Access level is official contract metadata: the operation's key parameter.
     try std.testing.expect(std.mem.indexOf(u8, Op.contract_json, "#/components/parameters/ApiKeyLimited") != null);
     try std.testing.expect(std.mem.indexOf(u8, Op.contract_json, "Requires limited access key.") != null);
-    const Known = @FieldType(current.UserSelectionName, "v0");
+    const Known = @FieldType(current.UserSelectionName, "named").Known;
     try std.testing.expect(@hasField(Known, "travelinventory"));
-    const generic: operations.getUserGeneric.Params = .{ .selections = .{ .value = &.{.{ .v0 = .travelinventory }} } };
-    try std.testing.expectEqual(Known.travelinventory, generic.selections.value[0].v0);
+    const generic: operations.getUserGeneric.Params = .{ .selections = .{ .value = &.{.{ .named = .of(.travelinventory) }} } };
+    try std.testing.expect(generic.selections.value[0].named.eql(Known.travelinventory));
     // A new v2-only selection is not part of the maintained v1 catalog.
     try std.testing.expect(!planner.v1Contains(.user, "travelinventory"));
 }
@@ -116,8 +116,8 @@ test "typed batch decodes travel inventory and a casino Dealer job from one send
     const data = result.value.?;
     try std.testing.expectEqual(@as(i64, 28), data[0].travelinventory.capacity.base);
     try std.testing.expect(data[0].travelinventory.inventory[0].item == null);
-    try std.testing.expectEqual(current.JobTypeEnum.Casino, data[1].job.v0.name);
-    try std.testing.expectEqual(current.JobPositionCasinoEnum.Dealer, data[1].job.v0.position.v2);
+    try std.testing.expect(data[1].job.job.name.eql(.Casino));
+    try std.testing.expect(data[1].job.job.position.casino.eql(.Dealer));
     try std.testing.expectEqual(@as(i64, 1000), data[2].timestamp);
 }
 
@@ -136,17 +136,17 @@ test "exact travel inventory operation uses its direct path" {
 test "6.15.0 enum additions decode as named public literals" {
     var war = try contracts.decodeCurrent(current.FactionTerritoryWarResultEnum, std.testing.allocator, "\"end_with_dirty_bomb\"");
     defer war.deinit();
-    try std.testing.expectEqual(current.FactionTerritoryWarResultEnum.end_with_dirty_bomb, war.value);
+    try std.testing.expect(war.value.eql(.end_with_dirty_bomb));
     var dealer = try contracts.decodeCurrent(current.JobPositionCasinoEnum, std.testing.allocator, "\"Dealer\"");
     defer dealer.deinit();
-    try std.testing.expectEqual(current.JobPositionCasinoEnum.Dealer, dealer.value);
+    try std.testing.expect(dealer.value.eql(.Dealer));
     var job = try contracts.decodeCurrent(current.UserJobResponse, std.testing.allocator,
         \\{"job":{"type":"job","name":"Casino","position":"Dealer"}}
     );
     defer job.deinit();
-    try std.testing.expectEqual(current.JobPositionCasinoEnum.Dealer, job.value.job.v0.position.v2);
-    try std.testing.expectEqual(@as(usize, 7), std.enums.values(current.FactionTerritoryWarResultEnum).len);
-    try std.testing.expectEqual(@as(usize, 6), std.enums.values(current.JobPositionCasinoEnum).len);
+    try std.testing.expect(job.value.job.job.position.casino.eql(.Dealer));
+    try std.testing.expectEqual(@as(usize, 7), current.FactionTerritoryWarResultEnum.known_values.len);
+    try std.testing.expectEqual(@as(usize, 6), current.JobPositionCasinoEnum.known_values.len);
 }
 
 test "official enums stay closed: values beyond the pinned contract are rejected" {

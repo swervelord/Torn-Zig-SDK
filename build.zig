@@ -9,9 +9,18 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&b.addRunArtifact(tests).step);
     const tls_tests = b.addTest(.{ .root_module = b.createModule(.{ .root_source_file = b.path("tests/tls_tests.zig"), .target = target, .optimize = optimize, .imports = &.{.{ .name = "torn", .module = torn }} }) });
     test_step.dependOn(&b.addRunArtifact(tls_tests).step);
+    // Shared cross-SDK conformance scenarios (P9.1), read from spec/shared/conformance at run time.
+    const conformance_options = b.addOptions();
+    conformance_options.addOption([]const u8, "dir", "spec/shared/conformance");
+    const conformance = b.addTest(.{ .root_module = b.createModule(.{ .root_source_file = b.path("tests/conformance.zig"), .target = target, .optimize = optimize, .imports = &.{ .{ .name = "torn", .module = torn }, .{ .name = "conformance_options", .module = conformance_options.createModule() } } }) });
+    const conformance_run = b.addRunArtifact(conformance);
+    conformance_run.setCwd(b.path("."));
+    test_step.dependOn(&conformance_run.step);
+    b.step("conformance", "Run the shared conformance scenarios").dependOn(&conformance_run.step);
     const check = b.step("check", "Compile public types and runtime");
     check.dependOn(&tests.step);
     check.dependOn(&tls_tests.step);
+    check.dependOn(&conformance.step);
     check.dependOn(compile_fail);
     const generate = b.step("generate", "Regenerate pinned contracts offline");
     const fresh = b.step("generate-check", "Verify generated files match pinned contracts");

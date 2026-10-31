@@ -21,18 +21,61 @@ pub fn decodeNamed(comptime T: type, a: std.mem.Allocator, document: []const u8,
     return decodeNamedChecked(T, a, document, name, json, null);
 }
 pub fn decodeNamedChecked(comptime T: type, a: std.mem.Allocator, document: []const u8, name: []const u8, json: []const u8, checkpoint: ?model.Checkpoint) !model.Owned(T) {
-    var diagnostic: model.Diagnostic = .{ .checkpoint = checkpoint };
+    var diagnostic: model.Diagnostic = .{ .checkpoint = checkpoint, .mode = .strict };
     return decodeNamedDetailed(T, a, document, name, json, &diagnostic);
 }
+/// Contract decoding is the strict validation mode (P1.3): unknown enum values, unknown
+/// properties and override-relaxed fields are errors. Pass a `.tolerant` diagnostic to
+/// keep only the official schema's structural checks.
 pub fn decodeNamedDetailed(comptime T: type, a: std.mem.Allocator, document: []const u8, name: []const u8, json: []const u8, diagnostic: *model.Diagnostic) !model.Owned(T) {
     var result = try model.decodeDetailed(T, a, json, diagnostic);
     errdefer result.deinit();
     var arena = std.heap.ArenaAllocator.init(a);
     defer arena.deinit();
-    const doc = try std.json.parseFromSliceLeaky(model.Raw, arena.allocator(), document, .{ .parse_numbers = false });
+    const doc = try parsedDocument(arena.allocator(), document);
     const contract = doc.object.get("components").?.object.get("schemas").?.object.get(name) orelse return error.UnknownSchema;
     try schema.validateDetailed(doc, contract, result.raw, diagnostic);
     return result;
+}
+
+/// Parses an embedded contract once per process (lock-free once; losers spin until the
+/// winner publishes). The parsed tree is immutable and lives for the process lifetime.
+const DocumentCache = struct {
+    state: std.atomic.Value(u8) = .init(0),
+    value: model.Raw = .null,
+    arena: std.heap.ArenaAllocator = .init(std.heap.page_allocator),
+    fn get(self: *DocumentCache, source: []const u8) !model.Raw {
+        while (true) switch (self.state.load(.acquire)) {
+            2 => return self.value,
+            0 => if (self.state.cmpxchgStrong(0, 1, .acquire, .monotonic) == null) {
+                const parsed = std.json.parseFromSliceLeaky(model.Raw, self.arena.allocator(), source, .{ .parse_numbers = false }) catch |err| {
+                    _ = self.arena.reset(.free_all);
+                    self.state.store(0, .release);
+                    return err;
+                };
+                self.value = parsed;
+                self.state.store(2, .release);
+                return parsed;
+            },
+            else => std.atomic.spinLoopHint(),
+        };
+    }
+};
+var current_document: DocumentCache = .{};
+var frozen_document: DocumentCache = .{};
+/// The embedded current (`current.source_json`) contract, parsed once.
+pub fn currentDocument() !model.Raw {
+    return current_document.get(current.source_json);
+}
+pub fn frozenDocument() !model.Raw {
+    return frozen_document.get(frozen.source_json);
+}
+/// Embedded contracts come from the process-wide cache; other documents are parsed
+/// into `arena` for this call only.
+pub fn parsedDocument(arena: std.mem.Allocator, document: []const u8) !model.Raw {
+    if (document.ptr == current.source_json.ptr and document.len == current.source_json.len) return currentDocument();
+    if (document.ptr == frozen.source_json.ptr and document.len == frozen.source_json.len) return frozenDocument();
+    return std.json.parseFromSliceLeaky(model.Raw, arena, document, .{ .parse_numbers = false });
 }
 
 test "current elimination requires captains independently of frozen leaders" {

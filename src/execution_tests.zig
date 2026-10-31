@@ -119,12 +119,20 @@ test "strict response diagnostics retain a path without a borrowed checkpoint" {
     var engine = try runtime.Client.init(std.testing.allocator, std.testing.io, .{ .keys = &.{"test-only"} }, .{ .send_fn = BoundWire.send });
     defer engine.deinit();
     const c: client.Client = .{ .engine = &engine };
-    var result = try c.select(selections.user.timestamp, &.{}, &.{}, .{});
+    // Tolerant decoding (default) accepts the out-of-contract integer; strict mode
+    // validates the official int32 bound and keeps the raw payload (P1.3, P1.4).
+    var tolerant = try c.select(selections.user.timestamp, &.{}, &.{}, .{});
+    defer tolerant.deinit();
+    try std.testing.expectEqual(@as(i64, 2147483648), tolerant.value.?.timestamp);
+    var result = try c.select(selections.user.timestamp, &.{}, &.{}, .{ .mode = .strict });
     defer result.deinit();
     try std.testing.expect(result.value == null);
     const failure = result.execution.failure.?;
     try std.testing.expectEqualStrings("/timestamp", failure.diagnostic.jsonPath());
+    try std.testing.expectEqualStrings("timestamp", failure.selection);
     try std.testing.expect(failure.diagnostic.checkpoint == null);
+    try std.testing.expect(result.result == .failed);
+    try std.testing.expectEqualStrings("2147483648", result.execution.raw.object.get("timestamp").?.number_string);
 }
 test "exact generic response preserves both fields and validates every contribution" {
     const GenericWire = struct {
@@ -140,12 +148,14 @@ test "exact generic response preserves both fields and validates every contribut
         var engine = try runtime.Client.init(std.testing.allocator, std.testing.io, .{ .keys = &.{"test-only"} }, .{ .context = &wire, .send_fn = GenericWire.send });
         defer engine.deinit();
         const c: client.Client = .{ .engine = &engine };
-        var result = try c.exact(@import("generated/operations.zig").getUserGeneric, .{ .selections = .{ .value = &.{ .{ .v0 = .job }, .{ .v0 = .timestamp } } } }, .{});
+        var result = try c.exact(@import("generated/operations.zig").getUserGeneric, .{ .selections = .{ .value = &.{ .{ .named = .of(.job) }, .{ .named = .of(.timestamp) } } } }, .{ .mode = .strict });
         defer result.deinit();
         if (invalid) {
             try std.testing.expect(result.value == null);
             try std.testing.expectEqualStrings("/timestamp", result.execution.failure.?.diagnostic.jsonPath());
-            try std.testing.expectEqual(@as(usize, 0), result.execution.reports.len);
+            // The successful HTTP payload is retained despite the failed contract check (P1.4).
+            try std.testing.expectEqual(@as(usize, 1), result.execution.reports.len);
+            try std.testing.expect(result.execution.raw.object.get("timestamp") != null);
         } else {
             try std.testing.expect(result.value.?.job == .null);
             try std.testing.expectEqual(@as(i64, 1000), result.value.?.timestamp.value);

@@ -1,12 +1,44 @@
 const std = @import("std");
+const version = @import("version.zig");
+
+/// Redacted key identity for reports, hooks and errors (P2.2): `***` plus at most the
+/// last four characters, and only for keys long enough that four characters reveal
+/// little (16 characters, Torn's key length).
+pub const KeyHint = struct {
+    bytes: [7]u8 = "***\x00\x00\x00\x00".*,
+    len: u8 = 3,
+    pub fn of(key: []const u8) KeyHint {
+        var hint: KeyHint = .{};
+        if (key.len >= 16) {
+            @memcpy(hint.bytes[3..7], key[key.len - 4 ..]);
+            hint.len = 7;
+        }
+        return hint;
+    }
+    pub fn text(self: *const KeyHint) []const u8 {
+        return self.bytes[0..self.len];
+    }
+    pub fn format(self: KeyHint, writer: *std.Io.Writer) std.Io.Writer.Error!void {
+        try writer.writeAll(self.bytes[0..self.len]);
+    }
+    pub fn jsonStringify(self: KeyHint, writer: anytype) !void {
+        try writer.write(self.bytes[0..self.len]);
+    }
+};
+
+/// How the key is presented (P2.1): v2 uses `Authorization: ApiKey`, v1 the `key=`
+/// query parameter. The key is appended only inside the transport, never to `url`.
+pub const Auth = enum { header, query };
 
 /// Credentials are borrowed only for the duration of send. Never format Request.
 pub const Request = struct {
+    /// Never contains the key; `auth = .query` appends it only on the wire.
     url: []const u8,
     api_key: []const u8,
-    user_agent: []const u8 = "Torn-Zig-SDK/0.3.0",
+    user_agent: []const u8 = version.user_agent,
     max_body_bytes: usize = 64 * 1024 * 1024,
     proxy_url: ?[]const u8 = null,
+    auth: Auth = .header,
 
     pub fn format(_: Request, writer: *std.Io.Writer) std.Io.Writer.Error!void {
         try writer.writeAll("Request{redacted}");
@@ -23,6 +55,16 @@ pub const Response = struct {
     retry_after_ms: u64 = 0,
     route_name: []const u8 = "direct",
     route_name_owned: bool = false,
+    /// Runtime metadata (set by runtime.Client.execute, defaults for raw transports).
+    key_index: ?usize = null,
+    key_hint: KeyHint = .{},
+    /// Total HTTP sends made for this logical request.
+    sends: u32 = 0,
+    /// Torn error code of the returned envelope, if any.
+    api_code: ?u32 = null,
+    /// Every key was disabled while serving this request; the body is the last error (P2.4).
+    no_usable_keys: bool = false,
+    from_cache: bool = false,
 
     pub fn deinit(self: *Response) void {
         self.allocator.free(self.body);
@@ -47,21 +89,50 @@ fn validHeader(value: []const u8) bool {
     return std.mem.indexOfAny(u8, value, "\r\n\x00") == null;
 }
 
+/// One `std.http.Client` shared by every direct send of a runtime client: connections
+/// are pooled (keep-alive) and the CA bundle is scanned once (std.http.Client is safe
+/// for concurrent requests). Proxied sends keep a per-request client, because the
+/// proxy settings and CONNECT tunnels are per route.
+pub const Pool = struct {
+    client: std.http.Client,
+    pub fn init(allocator: std.mem.Allocator, io: std.Io) Pool {
+        return .{ .client = .{ .allocator = allocator, .io = io } };
+    }
+    pub fn deinit(self: *Pool) void {
+        self.client.deinit();
+        self.* = undefined;
+    }
+    pub fn transport(self: *Pool) Transport {
+        return .{ .context = self, .send_fn = pooledSend };
+    }
+    fn pooledSend(context: ?*anyopaque, allocator: std.mem.Allocator, io: std.Io, request: Request) !Response {
+        const self: *Pool = @ptrCast(@alignCast(context.?));
+        if (request.proxy_url != null) return nativeSend(null, allocator, io, request);
+        return sendWith(&self.client, allocator, io, request, true);
+    }
+};
+
 /// Uses the selected Io backend for cancelable DNS, TCP, TLS and body reads.
 /// Every send owns its HTTP client; credentials never cross a redirect.
+/// runtime.Client uses a shared `Pool` instead for direct sends.
 pub fn nativeSend(_: ?*anyopaque, allocator: std.mem.Allocator, io: std.Io, request: Request) !Response {
-    if (!validHeader(request.api_key) or !validHeader(request.user_agent) or !validHeader(request.url)) return error.InvalidHeader;
-    if (request.max_body_bytes == 0) return error.InvalidBodyLimit;
-    const uri = try std.Uri.parse(request.url);
-    var scratch = std.heap.ArenaAllocator.init(allocator);
-    defer scratch.deinit();
     var client: std.http.Client = .{ .allocator = allocator, .io = io };
     defer client.deinit();
+    return sendWith(&client, allocator, io, request, true);
+}
+
+fn sendWith(client: *std.http.Client, allocator: std.mem.Allocator, io: std.Io, request: Request, keep_alive: bool) !Response {
+    if (!validHeader(request.api_key) or !validHeader(request.user_agent) or !validHeader(request.url)) return error.InvalidHeader;
+    if (request.max_body_bytes == 0) return error.InvalidBodyLimit;
+    var scratch = std.heap.ArenaAllocator.init(allocator);
+    defer scratch.deinit();
+    const wire_url = if (request.auth == .query) try appendKey(scratch.allocator(), request.url, request.api_key) else request.url;
+    const uri = try std.Uri.parse(wire_url);
     var proxy: std.http.Client.Proxy = undefined;
     var proxy_host: [std.Io.net.HostName.max_len]u8 = undefined;
     if (request.proxy_url) |url| {
         const proxy_uri = try std.Uri.parse(url);
-        if (std.ascii.eqlIgnoreCase(uri.scheme, "https")) return secureProxySend(&client, allocator, scratch.allocator(), io, request, uri, proxy_uri);
+        if (std.ascii.eqlIgnoreCase(uri.scheme, "https")) return secureProxySend(client, allocator, scratch.allocator(), io, request, uri, proxy_uri);
         const protocol = std.http.Client.Protocol.fromUri(proxy_uri) orelse return error.UnsupportedProxyScheme;
         if (protocol == .tls) {
             // std.http.Client initializes trust from the origin scheme, so an
@@ -93,8 +164,9 @@ pub fn nativeSend(_: ?*anyopaque, allocator: std.mem.Allocator, io: std.Io, requ
     defer allocator.free(authorization);
     var req = try client.request(.GET, uri, .{
         .redirect_behavior = .unhandled,
+        .keep_alive = keep_alive,
         .headers = .{
-            .authorization = .{ .override = authorization },
+            .authorization = if (request.auth == .header) .{ .override = authorization } else .omit,
             .user_agent = .{ .override = request.user_agent },
             .accept_encoding = .{ .override = "identity" },
         },
@@ -239,7 +311,9 @@ fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena
         try tls.writer.writeByte('?');
         try query.formatQuery(&tls.writer);
     }
-    try tls.writer.print(" HTTP/1.1\r\nHost: {s}:{d}\r\nAuthorization: ApiKey {s}\r\nUser-Agent: {s}\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n", .{ target_name.bytes, target_port, request.api_key, request.user_agent });
+    try tls.writer.print(" HTTP/1.1\r\nHost: {s}:{d}\r\n", .{ target_name.bytes, target_port });
+    if (request.auth == .header) try tls.writer.print("Authorization: ApiKey {s}\r\n", .{request.api_key});
+    try tls.writer.print("User-Agent: {s}\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n", .{request.user_agent});
     try tls.writer.flush();
     try tunnel_writer.interface.flush();
     var http: std.http.Reader = .{ .in = &tls.reader, .interface = undefined, .state = .ready, .max_head_len = 8192 };
@@ -270,6 +344,28 @@ fn secureProxySend(client: *std.http.Client, allocator: std.mem.Allocator, arena
         return error.BodyReadFailed;
     };
     return .{ .allocator = allocator, .status = @backingInt(head.status), .body = body, .retry_after_ms = retry_after_ms };
+}
+
+/// v1 authentication (P2.1): `key=` is appended on the wire only. Any `key` already in
+/// the URL is never trusted; callers' URLs come from the planner, which reserves it.
+fn appendKey(a: std.mem.Allocator, url: []const u8, key: []const u8) ![]const u8 {
+    var out: std.ArrayList(u8) = .empty;
+    try out.appendSlice(a, url);
+    try out.append(a, if (std.mem.indexOfScalar(u8, url, '?') == null) '?' else '&');
+    try out.appendSlice(a, "key=");
+    for (key) |c| {
+        if (std.ascii.isAlphanumeric(c) or c == '-' or c == '.' or c == '_' or c == '~') try out.append(a, c) else try out.print(a, "%{X:0>2}", .{c});
+    }
+    return out.items;
+}
+
+test "v1 query authentication appends an encoded key only on the wire" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    try std.testing.expectEqualStrings("https://api.torn.com/user/?selections=basic&key=AB%2Bc", try appendKey(arena.allocator(), "https://api.torn.com/user/?selections=basic", "AB+c"));
+    try std.testing.expectEqualStrings("https://api.torn.com/user/?key=x", try appendKey(arena.allocator(), "https://api.torn.com/user/", "x"));
+    try std.testing.expectEqualStrings("***", KeyHint.of("short").text());
+    try std.testing.expectEqualStrings("***4567", KeyHint.of("SECRETKEY1234567").text());
 }
 
 /// RFC 9110 delta-seconds and preferred IMF-fixdate. Invalid dates are ignored.

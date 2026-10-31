@@ -1,12 +1,13 @@
 //! Explicit online fetch. Writes a candidate only; pinned contracts need review.
 const std = @import("std");
+const torn = @import("torn");
 pub fn main(init: std.process.Init) !void {
     const a = init.arena.allocator();
     const io = init.io;
     var client: std.http.Client = .{ .allocator = a, .io = io };
     defer client.deinit();
     const uri = try std.Uri.parse("https://www.torn.com/swagger/openapi.json");
-    var request = try client.request(.GET, uri, .{ .redirect_behavior = .unhandled, .headers = .{ .user_agent = .{ .override = "Torn-Zig-SDK-spec-refresh/0.3.0" }, .accept_encoding = .{ .override = "identity" } } });
+    var request = try client.request(.GET, uri, .{ .redirect_behavior = .unhandled, .headers = .{ .user_agent = .{ .override = "Torn-Zig-SDK-spec-refresh/" ++ torn.SDK_VERSION }, .accept_encoding = .{ .override = "identity" } } });
     defer request.deinit();
     try request.sendBodiless();
     var response = try request.receiveHead(&.{});

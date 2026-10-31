@@ -22,7 +22,7 @@ test "unspecified required Halloween upgrade type is retained and cannot be omit
     ;
     var result = try contracts.decodeCurrent(current.TornHalloweenUpgrade, std.testing.allocator, json);
     defer result.deinit();
-    try std.testing.expectEqualStrings("unknown-future-type", result.value.type.string);
+    try std.testing.expectEqualStrings("unknown-future-type", result.value.type.value.string);
     try std.testing.expectError(error.MissingField, contracts.decodeCurrent(current.TornHalloweenUpgrade, std.testing.allocator,
         \\{"id":1,"name":"Basket","description":"Benefit","flavor":"Flavor","cost":25,"requirement":0}
     ));

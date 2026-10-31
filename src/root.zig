@@ -7,11 +7,29 @@ pub const operations = @import("generated/operations.zig");
 pub const planner = @import("planner.zig");
 pub const runtime = @import("runtime.zig");
 pub const transport = @import("transport.zig");
+/// Torn error codes, policy table and helpers (P5).
+pub const errors = @import("errors.zig");
+pub const TornErrorCode = errors.TornErrorCode;
+pub const AccessLevel = planner.AccessLevel;
+/// Torn URL builders and time helpers (P8.6).
+pub const helpers = @import("helpers.zig");
+/// Consumer test kit: scripted mock transport, virtual clock, fixtures (P8.5).
+pub const testing = @import("testing.zig");
+const version = @import("version.zig");
+/// Package version (single source; also used in the default user agent).
+pub const SDK_VERSION = version.SDK_VERSION;
+/// OpenAPI version of the embedded contract.
+pub const SPEC_VERSION = version.SPEC_VERSION;
+/// SHA-256 of the embedded contract bytes.
+pub const SPEC_SHA256 = version.SPEC_SHA256;
 test {
     _ = model;
     _ = planner;
     _ = runtime;
     _ = transport;
+    _ = errors;
+    _ = helpers;
+    _ = testing;
 }
 pub const client = @import("client.zig");
 pub const Client = client.Client;
@@ -39,4 +57,5 @@ test {
     _ = @import("execution_tests.zig");
     _ = @import("api_614_tests.zig");
     _ = @import("api_615_tests.zig");
+    _ = @import("parity_tests.zig");
 }

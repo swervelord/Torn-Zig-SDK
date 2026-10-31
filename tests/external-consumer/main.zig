@@ -24,7 +24,7 @@ pub fn main(init: std.process.Init) !void {
     if (result.execution.failure != null) return error.BatchFailed;
     const data = result.value.?;
     if (!std.mem.eql(u8, data[0].profile.name, "Example")) return error.WrongProfile;
-    if (data[1].job != .v0) return error.WrongJob;
-    if (data[1].job.v0.name != .Army or data[2].timestamp != 1000) return error.WrongValues;
+    if (data[1].job != .job) return error.WrongJob;
+    if (!data[1].job.job.name.eql(.Army) or data[2].timestamp != 1000) return error.WrongValues;
     if (mock.calls != 1 or result.execution.reports.len != 1) return error.WrongCallCount;
 }

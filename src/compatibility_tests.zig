@@ -138,15 +138,15 @@ test "union field access stays within the selected public branch" {
     const a = std.testing.allocator;
     var easter = try model.decode(c.UserCompetition, a, "{\"name\":\"Easter Egg Hunt\",\"score\":8}");
     defer easter.deinit();
-    try std.testing.expectEqual(@as(?u64, 8), easter.value.v1.score);
+    try std.testing.expectEqual(@as(?u64, 8), easter.value.user_easter.score);
     var job = try model.decode(c.UserEmployment, a, "{\"type\":\"company\",\"id\":3}");
     defer job.deinit();
-    try std.testing.expectEqual(@as(?u64, 3), job.value.v1.id);
+    try std.testing.expectEqual(@as(?u64, 3), job.value.user_company_job.id);
     var unknown = try model.decode(c.UserCompetition, a, "{\"name\":\"Future\",\"new_score\":9007199254740993}");
     defer unknown.deinit();
-    try std.testing.expectEqualStrings("9007199254740993", unknown.value.v4.extra.get("new_score").?.number_string);
-    const created: c.UserTradeTimestamp = .{ .v1 = 42 };
-    try std.testing.expectEqual(@as(u64, 42), created.v1);
+    try std.testing.expectEqualStrings("9007199254740993", unknown.value.unknown_user.extra.get("new_score").?.number_string);
+    const created: c.UserTradeTimestamp = .{ .uint64 = 42 };
+    try std.testing.expectEqual(@as(u64, 42), created.uint64);
 }
 fn allocationScenario(a: std.mem.Allocator) !void {
     var r = try model.decode(c.CompanyNewsBundle, a, "{\"news\":[{\"id\":7,\"news\":\"News\",\"future\":true}],\"unknown\":null}");
@@ -176,7 +176,7 @@ test "typed mutations serialize canonical alias keys and retained unknown fields
 }
 test "union serialization emits its payload and presence omits absent fields" {
     const a = std.testing.allocator;
-    const value: c.UserTradeTimestamp = .{ .v1 = 9007199254740993 };
+    const value: c.UserTradeTimestamp = .{ .uint64 = 9007199254740993 };
     const bytes = try model.stringify(a, value);
     defer a.free(bytes);
     try std.testing.expectEqualStrings("9007199254740993", bytes);
@@ -216,7 +216,7 @@ test "exact numeric variant rejects sibling values and preserves arbitrary expon
     const a = std.testing.allocator;
     var exact = try model.decode(c.DynamicValue, a, "18446744073709551616");
     defer exact.deinit();
-    try std.testing.expectEqualStrings("18446744073709551616", exact.value.v3.lexeme);
+    try std.testing.expectEqualStrings("18446744073709551616", exact.value.exact_number.lexeme);
     var huge = try model.decode(model.ExactNumber, a, "1e999999999999999999999999999999999999999999999999999999");
     defer huge.deinit();
     const bytes = try huge.toJson(a);

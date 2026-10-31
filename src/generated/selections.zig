@@ -3,385 +3,462 @@ const planner = @import("../planner.zig");
 const current = @import("current.zig");
 const compatibility = @import("compatibility.zig");
 const model = @import("../model.zig");
+const shared = @import("shared.zig");
 pub const user = struct {
     pub const ammo = struct {
         pub const resource = planner.Resource.user;
         pub const name = "ammo";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserAmmoResponse;
     };
     pub const attacks = struct {
         pub const resource = planner.Resource.user;
         pub const name = "attacks";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.AttacksResponse;
     };
     pub const attacksfull = struct {
         pub const resource = planner.Resource.user;
         pub const name = "attacksfull";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.AttacksFullResponse;
     };
     pub const bars = struct {
         pub const resource = planner.Resource.user;
         pub const name = "bars";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserBarsResponse;
     };
     pub const basic = struct {
         pub const resource = planner.Resource.user;
         pub const name = "basic";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserBasicResponse;
     };
     pub const battlestats = struct {
         pub const resource = planner.Resource.user;
         pub const name = "battlestats";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserBattleStatsResponse;
     };
     pub const bazaar = struct {
         pub const resource = planner.Resource.user;
         pub const name = "bazaar";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.UserBazaarBundle;
     };
     pub const bounties = struct {
         pub const resource = planner.Resource.user;
         pub const name = "bounties";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserBountiesResponse;
     };
     pub const calendar = struct {
         pub const resource = planner.Resource.user;
         pub const name = "calendar";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserCalendarResponse;
     };
     pub const casino = struct {
         pub const resource = planner.Resource.user;
         pub const name = "casino";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserCasinoResponse;
     };
     pub const competition = struct {
         pub const resource = planner.Resource.user;
         pub const name = "competition";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserCompetitionResponse;
     };
     pub const cooldowns = struct {
         pub const resource = planner.Resource.user;
         pub const name = "cooldowns";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserCooldownsResponse;
     };
     pub const crimes = struct {
         pub const resource = planner.Resource.user;
         pub const name = "crimes";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserCrimesResponse;
     };
     pub const criminalrecord = struct {
         pub const resource = planner.Resource.user;
         pub const name = "criminalrecord";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.UserCriminalRecordBundle;
     };
     pub const discord = struct {
         pub const resource = planner.Resource.user;
         pub const name = "discord";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserDiscordResponse;
     };
     pub const display = struct {
         pub const resource = planner.Resource.user;
         pub const name = "display";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.UserDisplayBundle;
     };
     pub const education = struct {
         pub const resource = planner.Resource.user;
         pub const name = "education";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserEducationResponse;
     };
     pub const enlistedcars = struct {
         pub const resource = planner.Resource.user;
         pub const name = "enlistedcars";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserEnlistedCarsResponse;
     };
     pub const equipment = struct {
         pub const resource = planner.Resource.user;
         pub const name = "equipment";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserEquipmentResponse;
     };
     pub const events = struct {
         pub const resource = planner.Resource.user;
         pub const name = "events";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserEventsResponse;
     };
     pub const faction = struct {
         pub const resource = planner.Resource.user;
         pub const name = "faction";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserFactionResponse;
     };
     pub const factionbalance = struct {
         pub const resource = planner.Resource.user;
         pub const name = "factionbalance";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserFactionBalanceResponse;
     };
     pub const forumfeed = struct {
         pub const resource = planner.Resource.user;
         pub const name = "forumfeed";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserForumFeedResponse;
     };
     pub const forumfriends = struct {
         pub const resource = planner.Resource.user;
         pub const name = "forumfriends";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserForumFriendsResponse;
     };
     pub const forumposts = struct {
         pub const resource = planner.Resource.user;
         pub const name = "forumposts";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserForumPostsResponse;
     };
     pub const forumsubscribedthreads = struct {
         pub const resource = planner.Resource.user;
         pub const name = "forumsubscribedthreads";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserForumSubscribedThreadsResponse;
     };
     pub const forumthreads = struct {
         pub const resource = planner.Resource.user;
         pub const name = "forumthreads";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserForumThreadsResponse;
     };
     pub const gym = struct {
         pub const resource = planner.Resource.user;
         pub const name = "gym";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserGymResponse;
     };
     pub const halloween = struct {
         pub const resource = planner.Resource.user;
         pub const name = "halloween";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserHalloweenResponse;
     };
     pub const hof = struct {
         pub const resource = planner.Resource.user;
         pub const name = "hof";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserHofResponse;
     };
     pub const honors = struct {
         pub const resource = planner.Resource.user;
         pub const name = "honors";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserHonorsResponse;
     };
     pub const icons = struct {
         pub const resource = planner.Resource.user;
         pub const name = "icons";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserIconsResponse;
     };
     pub const inventory = struct {
         pub const resource = planner.Resource.user;
         pub const name = "inventory";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserInventoryResponse;
     };
     pub const itemmarket = struct {
         pub const resource = planner.Resource.user;
         pub const name = "itemmarket";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserItemMarketResponse;
     };
     pub const itemmod = struct {
         pub const resource = planner.Resource.user;
         pub const name = "itemmod";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserItemModsResponse;
     };
     pub const itemmods = struct {
         pub const resource = planner.Resource.user;
         pub const name = "itemmods";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserItemModsResponse;
     };
     pub const job = struct {
         pub const resource = planner.Resource.user;
         pub const name = "job";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserJobResponse;
     };
     pub const jobpoints = struct {
         pub const resource = planner.Resource.user;
         pub const name = "jobpoints";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserJobPointsResponse;
     };
     pub const jobranks = struct {
         pub const resource = planner.Resource.user;
         pub const name = "jobranks";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserJobRanksResponse;
     };
     pub const list = struct {
         pub const resource = planner.Resource.user;
         pub const name = "list";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserListResponse;
     };
     pub const log = struct {
         pub const resource = planner.Resource.user;
         pub const name = "log";
+        pub const access_level: ?shared.AccessLevel = .full;
         pub const Response = current.UserLogsResponse;
     };
     pub const lookup = struct {
         pub const resource = planner.Resource.user;
         pub const name = "lookup";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserLookupResponse;
     };
     pub const medals = struct {
         pub const resource = planner.Resource.user;
         pub const name = "medals";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserMedalsResponse;
     };
     pub const merits = struct {
         pub const resource = planner.Resource.user;
         pub const name = "merits";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserMeritsResponse;
     };
     pub const messages = struct {
         pub const resource = planner.Resource.user;
         pub const name = "messages";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserMessagesResponse;
     };
     pub const missions = struct {
         pub const resource = planner.Resource.user;
         pub const name = "missions";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserMissionsResponse;
     };
     pub const money = struct {
         pub const resource = planner.Resource.user;
         pub const name = "money";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserMoneyResponse;
     };
     pub const networth = struct {
         pub const resource = planner.Resource.user;
         pub const name = "networth";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserNetworthResponse;
     };
     pub const newevents = struct {
         pub const resource = planner.Resource.user;
         pub const name = "newevents";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserNewEventsResponse;
     };
     pub const newmessages = struct {
         pub const resource = planner.Resource.user;
         pub const name = "newmessages";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserNewMessagesResponse;
     };
     pub const notifications = struct {
         pub const resource = planner.Resource.user;
         pub const name = "notifications";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserNotificationsResponse;
     };
     pub const organizedcrime = struct {
         pub const resource = planner.Resource.user;
         pub const name = "organizedcrime";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserOrganizedCrimeResponse;
     };
     pub const organizedcrimes = struct {
         pub const resource = planner.Resource.user;
         pub const name = "organizedcrimes";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserOrganizedCrimesResponse;
     };
     pub const perks = struct {
         pub const resource = planner.Resource.user;
         pub const name = "perks";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserPerksResponse;
     };
     pub const personalstats = struct {
         pub const resource = planner.Resource.user;
         pub const name = "personalstats";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserPersonalStatsResponse;
     };
     pub const profile = struct {
         pub const resource = planner.Resource.user;
         pub const name = "profile";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserProfileResponse;
     };
     pub const properties = struct {
         pub const resource = planner.Resource.user;
         pub const name = "properties";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserPropertiesResponse;
     };
     pub const property = struct {
         pub const resource = planner.Resource.user;
         pub const name = "property";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserPropertyResponse;
     };
     pub const races = struct {
         pub const resource = planner.Resource.user;
         pub const name = "races";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserRacesResponse;
     };
     pub const racingrecords = struct {
         pub const resource = planner.Resource.user;
         pub const name = "racingrecords";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserRacingRecordsResponse;
     };
     pub const refills = struct {
         pub const resource = planner.Resource.user;
         pub const name = "refills";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserRefillsResponse;
     };
     pub const reports = struct {
         pub const resource = planner.Resource.user;
         pub const name = "reports";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.ReportsResponse;
     };
     pub const revives = struct {
         pub const resource = planner.Resource.user;
         pub const name = "revives";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.RevivesResponse;
     };
     pub const revivesfull = struct {
         pub const resource = planner.Resource.user;
         pub const name = "revivesfull";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.RevivesFullResponse;
     };
     pub const search = struct {
         pub const resource = planner.Resource.user;
         pub const name = "search";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.UserSearchResponse;
     };
     pub const skills = struct {
         pub const resource = planner.Resource.user;
         pub const name = "skills";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserSkillsResponse;
     };
     pub const snapshot = struct {
         pub const resource = planner.Resource.user;
         pub const name = "snapshot";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = []const u8;
     };
     pub const stocks = struct {
         pub const resource = planner.Resource.user;
         pub const name = "stocks";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserStocksResponse;
     };
     pub const timestamp = struct {
         pub const resource = planner.Resource.user;
         pub const name = "timestamp";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TimestampResponse;
     };
     pub const trade = struct {
         pub const resource = planner.Resource.user;
         pub const name = "trade";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserTradeResponse;
     };
     pub const trades = struct {
         pub const resource = planner.Resource.user;
         pub const name = "trades";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserTradesResponse;
     };
     pub const travel = struct {
         pub const resource = planner.Resource.user;
         pub const name = "travel";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserTravelResponse;
     };
     pub const travelinventory = struct {
         pub const resource = planner.Resource.user;
         pub const name = "travelinventory";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.UserTravelInventoryResponse;
     };
     pub const virus = struct {
         pub const resource = planner.Resource.user;
         pub const name = "virus";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserVirusResponse;
     };
     pub const weaponexp = struct {
         pub const resource = planner.Resource.user;
         pub const name = "weaponexp";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserWeaponExpResponse;
     };
     pub const workstats = struct {
         pub const resource = planner.Resource.user;
         pub const name = "workstats";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.UserWorkStatsResponse;
     };
 };
@@ -389,261 +466,313 @@ pub const faction = struct {
     pub const applications = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "applications";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.FactionApplicationsResponse;
     };
     pub const armor = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "armor";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionArmorBundle;
     };
     pub const attacks = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "attacks";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.AttacksResponse;
     };
     pub const attacksfull = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "attacksfull";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.AttacksFullResponse;
     };
     pub const balance = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "balance";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.FactionBalanceResponse;
     };
     pub const basic = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "basic";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionBasicResponse;
     };
     pub const boosters = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "boosters";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionBoostersBundle;
     };
     pub const caches = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "caches";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionCachesBundle;
     };
     pub const cesium = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "cesium";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionCesiumBundle;
     };
     pub const chain = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "chain";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionOngoingChainResponse;
     };
     pub const chainreport = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "chainreport";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionChainReportResponse;
     };
     pub const chains = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "chains";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionChainsResponse;
     };
     pub const contributors = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "contributors";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.FactionContributorsResponse;
     };
     pub const crime = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "crime";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.FactionCrimeResponse;
     };
     pub const crimeexp = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "crimeexp";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.FactionCrimeExpResponse;
     };
     pub const crimes = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "crimes";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.FactionCrimesResponse;
     };
     pub const dirtbombs = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "dirtbombs";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionWarfareDirtyBombsResponse;
     };
     pub const dirtybombs = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "dirtybombs";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionWarfareDirtyBombsResponse;
     };
     pub const drugs = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "drugs";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionDrugsBundle;
     };
     pub const hof = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "hof";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionHofResponse;
     };
     pub const inventory = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "inventory";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.FactionInventoryResponse;
     };
     pub const lookup = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "lookup";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionLookupResponse;
     };
     pub const medical = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "medical";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionMedicalBundle;
     };
     pub const members = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "members";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionMembersResponse;
     };
     pub const news = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "news";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.NewsResponse;
     };
     pub const positions = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "positions";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.FactionPositionsResponse;
     };
     pub const rackets = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "rackets";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionRacketsResponse;
     };
     pub const raidreport = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "raidreport";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionRaidWarReportResponse;
     };
     pub const raids = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "raids";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionRaidsResponse;
     };
     pub const rankedwarreport = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "rankedwarreport";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionRankedWarReportResponse;
     };
     pub const rankedwars = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "rankedwars";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionRankedWarResponse;
     };
     pub const reports = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "reports";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.ReportsResponse;
     };
     pub const revives = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "revives";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.RevivesResponse;
     };
     pub const revivesfull = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "revivesfull";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.RevivesFullResponse;
     };
     pub const search = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "search";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionSearchResponse;
     };
     pub const snapshot = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "snapshot";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = []const u8;
     };
     pub const stats = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "stats";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.FactionStatsResponse;
     };
     pub const temporary = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "temporary";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionTemporaryBundle;
     };
     pub const territory = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "territory";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionTerritoriesResponse;
     };
     pub const territoryownership = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "territoryownership";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionTerritoriesOwnershipResponse;
     };
     pub const territorywarreport = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "territorywarreport";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionTerritoryWarReportResponse;
     };
     pub const territorywars = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "territorywars";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionTerritoryWarsHistoryResponse;
     };
     pub const timestamp = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "timestamp";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TimestampResponse;
     };
     pub const upgrades = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "upgrades";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.FactionUpgradesResponse;
     };
     pub const utilities = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "utilities";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionUtilitiesBundle;
     };
     pub const warfare = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "warfare";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionWarfareResponse;
     };
     pub const warfarechains = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "warfarechains";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionWarfareChainsResponse;
     };
     pub const warfareraids = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "warfareraids";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionWarfareRaidsResponse;
     };
     pub const warfareranked = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "warfareranked";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionWarfareRankedResponse;
     };
     pub const warfareterritory = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "warfareterritory";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionWarfareTerritoryWarsResponse;
     };
     pub const wars = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "wars";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.FactionWarsResponse;
     };
     pub const weapons = struct {
         pub const resource = planner.Resource.faction;
         pub const name = "weapons";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.FactionWeaponsBundle;
     };
 };
@@ -651,56 +780,67 @@ pub const company = struct {
     pub const applications = struct {
         pub const resource = planner.Resource.company;
         pub const name = "applications";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.CompanyApplicationsResponse;
     };
     pub const companies = struct {
         pub const resource = planner.Resource.company;
         pub const name = "companies";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.CompaniesResponse;
     };
     pub const employees = struct {
         pub const resource = planner.Resource.company;
         pub const name = "employees";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = compatibility.CompanyEmployeesBundle;
     };
     pub const lookup = struct {
         pub const resource = planner.Resource.company;
         pub const name = "lookup";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.CompanyLookupResponse;
     };
     pub const news = struct {
         pub const resource = planner.Resource.company;
         pub const name = "news";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.NewsResponse;
     };
     pub const profile = struct {
         pub const resource = planner.Resource.company;
         pub const name = "profile";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = compatibility.CompanyProfileBundle;
     };
     pub const search = struct {
         pub const resource = planner.Resource.company;
         pub const name = "search";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.CompaniesSearchResponse;
     };
     pub const snapshot = struct {
         pub const resource = planner.Resource.company;
         pub const name = "snapshot";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = []const u8;
     };
     pub const stock = struct {
         pub const resource = planner.Resource.company;
         pub const name = "stock";
+        pub const access_level: ?shared.AccessLevel = .limited;
         pub const Response = current.CompanyStockResponse;
     };
     pub const timestamp = struct {
         pub const resource = planner.Resource.company;
         pub const name = "timestamp";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TimestampResponse;
     };
     pub const detail = struct {
         pub const resource = planner.Resource.company;
         pub const name = "profile";
+        pub const access_level: ?shared.AccessLevel = company.profile.access_level;
         pub const required_target = "id";
         pub const Response = compatibility.CompanyDetailedBundle;
     };
@@ -709,31 +849,37 @@ pub const forum = struct {
     pub const categories = struct {
         pub const resource = planner.Resource.forum;
         pub const name = "categories";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.ForumCategoriesResponse;
     };
     pub const lookup = struct {
         pub const resource = planner.Resource.forum;
         pub const name = "lookup";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.ForumLookupResponse;
     };
     pub const posts = struct {
         pub const resource = planner.Resource.forum;
         pub const name = "posts";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.ForumPostsResponse;
     };
     pub const thread = struct {
         pub const resource = planner.Resource.forum;
         pub const name = "thread";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.ForumThreadResponse;
     };
     pub const threads = struct {
         pub const resource = planner.Resource.forum;
         pub const name = "threads";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.ForumThreadsResponse;
     };
     pub const timestamp = struct {
         pub const resource = planner.Resource.forum;
         pub const name = "timestamp";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TimestampResponse;
     };
 };
@@ -741,11 +887,13 @@ pub const key = struct {
     pub const info = struct {
         pub const resource = planner.Resource.key;
         pub const name = "info";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.KeyInfoResponse;
     };
     pub const log = struct {
         pub const resource = planner.Resource.key;
         pub const name = "log";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.KeyLogResponse;
     };
 };
@@ -753,46 +901,55 @@ pub const market = struct {
     pub const auctionhouse = struct {
         pub const resource = planner.Resource.market;
         pub const name = "auctionhouse";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.AuctionHouseResponse;
     };
     pub const auctionhouselisting = struct {
         pub const resource = planner.Resource.market;
         pub const name = "auctionhouselisting";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.AuctionHouseListingResponse;
     };
     pub const bazaar = struct {
         pub const resource = planner.Resource.market;
         pub const name = "bazaar";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = compatibility.MarketBazaarBundle;
     };
     pub const itemmarket = struct {
         pub const resource = planner.Resource.market;
         pub const name = "itemmarket";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.MarketItemMarketResponse;
     };
     pub const lookup = struct {
         pub const resource = planner.Resource.market;
         pub const name = "lookup";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.MarketLookupResponse;
     };
     pub const pointsmarket = struct {
         pub const resource = planner.Resource.market;
         pub const name = "pointsmarket";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.PointsMarketResponse;
     };
     pub const properties = struct {
         pub const resource = planner.Resource.market;
         pub const name = "properties";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.MarketPropertiesResponse;
     };
     pub const rentals = struct {
         pub const resource = planner.Resource.market;
         pub const name = "rentals";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.MarketRentalsResponse;
     };
     pub const timestamp = struct {
         pub const resource = planner.Resource.market;
         pub const name = "timestamp";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TimestampResponse;
     };
 };
@@ -800,16 +957,19 @@ pub const property = struct {
     pub const lookup = struct {
         pub const resource = planner.Resource.property;
         pub const name = "lookup";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.PropertyLookupResponse;
     };
     pub const property = struct {
         pub const resource = planner.Resource.property;
         pub const name = "property";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.PropertyPropertyResponse;
     };
     pub const timestamp = struct {
         pub const resource = planner.Resource.property;
         pub const name = "timestamp";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TimestampResponse;
     };
 };
@@ -817,41 +977,49 @@ pub const racing = struct {
     pub const cars = struct {
         pub const resource = planner.Resource.racing;
         pub const name = "cars";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.RacingCarsResponse;
     };
     pub const carupgrades = struct {
         pub const resource = planner.Resource.racing;
         pub const name = "carupgrades";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.RacingCarUpgradesResponse;
     };
     pub const lookup = struct {
         pub const resource = planner.Resource.racing;
         pub const name = "lookup";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.RacingLookupResponse;
     };
     pub const race = struct {
         pub const resource = planner.Resource.racing;
         pub const name = "race";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.RacingRaceDetailsResponse;
     };
     pub const races = struct {
         pub const resource = planner.Resource.racing;
         pub const name = "races";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.RacingRacesResponse;
     };
     pub const records = struct {
         pub const resource = planner.Resource.racing;
         pub const name = "records";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.RacingTrackRecordsResponse;
     };
     pub const timestamp = struct {
         pub const resource = planner.Resource.racing;
         pub const name = "timestamp";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TimestampResponse;
     };
     pub const tracks = struct {
         pub const resource = planner.Resource.racing;
         pub const name = "tracks";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.RacingTracksResponse;
     };
 };
@@ -859,216 +1027,259 @@ pub const torn = struct {
     pub const attacklog = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "attacklog";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.AttackLogResponse;
     };
     pub const bank = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "bank";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornBankResponse;
     };
     pub const bounties = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "bounties";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornBountiesResponse;
     };
     pub const calendar = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "calendar";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornCalendarResponse;
     };
     pub const cards = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "cards";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornCardsResponse;
     };
     pub const cityshops = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "cityshops";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornCityShopsResponse;
     };
     pub const companies = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "companies";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornCompaniesResponse;
     };
     pub const competition = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "competition";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.TornCompetitionBundle;
     };
     pub const crimes = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "crimes";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornCrimesResponse;
     };
     pub const education = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "education";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornEducationResponse;
     };
     pub const elimination = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "elimination";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornEliminationTeamsResponse;
     };
     pub const eliminationteam = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "eliminationteam";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornEliminationTeamPlayersResponse;
     };
     pub const factionhof = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "factionhof";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornFactionHofResponse;
     };
     pub const factiontree = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "factiontree";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornFactionTreeResponse;
     };
     pub const gyms = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "gyms";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornGymsResponse;
     };
     pub const halloween = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "halloween";
+        pub const access_level: ?shared.AccessLevel = .minimal;
         pub const Response = current.TornHalloweenResponse;
     };
     pub const hof = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "hof";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornHofResponse;
     };
     pub const honors = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "honors";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornHonorsResponse;
     };
     pub const itemammo = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "itemammo";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornItemAmmoResponse;
     };
     pub const itemdetails = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "itemdetails";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornItemDetailsResponse;
     };
     pub const itemmods = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "itemmods";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornItemModsResponse;
     };
     pub const items = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "items";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornItemsResponse;
     };
     pub const itemstats = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "itemstats";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornItemStatsResponse;
     };
     pub const logcategories = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "logcategories";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornLogCategoriesResponse;
     };
     pub const logtypes = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "logtypes";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornLogTypesResponse;
     };
     pub const lookup = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "lookup";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornLookupResponse;
     };
     pub const medals = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "medals";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornMedalsResponse;
     };
     pub const merits = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "merits";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornMeritsResponse;
     };
     pub const museum = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "museum";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornMuseumResponse;
     };
     pub const organisedcrimes = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "organisedcrimes";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.TornOrganisedCrimesBundle;
     };
     pub const organizedcrimes = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "organizedcrimes";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornOrganizedCrimeResponse;
     };
     pub const pawnshop = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "pawnshop";
+        pub const access_level: ?shared.AccessLevel = null;
         pub const Response = compatibility.TornPawnshopBundle;
     };
     pub const pokertables = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "pokertables";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornPokerTablesResponse;
     };
     pub const properties = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "properties";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornProperties;
     };
     pub const rockpaperscissors = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "rockpaperscissors";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornRockPaperScissorsResponse;
     };
     pub const searchforcash = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "searchforcash";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornSearchForCashResponse;
     };
     pub const shoplifting = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "shoplifting";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornShopliftingResponse;
     };
     pub const stats = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "stats";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornCityStatsResponse;
     };
     pub const stocks = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "stocks";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = compatibility.TornStocksBundle;
     };
     pub const subcrimes = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "subcrimes";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornSubcrimesResponse;
     };
     pub const territory = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "territory";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TornTerritoriesResponse;
     };
     pub const timestamp = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "timestamp";
+        pub const access_level: ?shared.AccessLevel = .public;
         pub const Response = current.TimestampResponse;
     };
     pub const stock = struct {
         pub const resource = planner.Resource.torn;
         pub const name = "stocks";
+        pub const access_level: ?shared.AccessLevel = torn.stocks.access_level;
         pub const required_target = "stockId";
         pub const force_direct = true;
         pub const Response = compatibility.TornStockBundle;

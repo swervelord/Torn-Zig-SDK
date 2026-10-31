@@ -24,7 +24,7 @@ const Wire = struct {
 
 fn encode(a: std.mem.Allocator, text: []const u8) ![]const u8 {
     var output: std.ArrayList(u8) = .empty;
-    const digits = "0123656789ABCDEF";
+    const digits = "0123456789ABCDEF";
     for (text) |byte| {
         switch (byte) {
             'A'...'Z', 'a'...'z', '0'...'9', '-', '_', '.', '~' => try output.append(a, byte),

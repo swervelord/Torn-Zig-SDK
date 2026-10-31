@@ -1,6 +1,7 @@
 // Generated exact operation contracts.
 const model = @import("../model.zig");
 const current = @import("current.zig");
+const shared = @import("shared.zig");
 const RaceClassEnum = current.RaceClassEnum;
 const TornItemStatTitleEnum = current.TornItemStatTitleEnum;
 const FactionArmoryCategoryEnum = current.FactionArmoryCategoryEnum;
@@ -729,16 +730,23 @@ pub const getMyAmmo = struct {
     pub const operation_id = "getMyAmmo";
     pub const path = "/user/ammo";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserAmmoResponse;
     pub const media_type = "application/json";
@@ -748,24 +756,31 @@ pub const getMyAttacks = struct {
     pub const operation_id = "getMyAttacks";
     pub const path = "/user/attacks";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"idFilter\"]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         filters: model.Presence([]const ApiFiltersAttacksRevivesEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = AttacksResponse;
     pub const media_type = "application/json";
@@ -775,24 +790,31 @@ pub const getMyAttacksSimplified = struct {
     pub const operation_id = "getMyAttacksSimplified";
     pub const path = "/user/attacksfull";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"idFilter\"]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":1000,\"maximum\":1000,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         filters: model.Presence([]const ApiFiltersAttacksRevivesEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = AttacksFullResponse;
     pub const media_type = "application/json";
@@ -802,16 +824,23 @@ pub const getMyBars = struct {
     pub const operation_id = "getMyBars";
     pub const path = "/user/bars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserBarsResponse;
     pub const media_type = "application/json";
@@ -821,20 +850,27 @@ pub const getMyBasicInformation = struct {
     pub const operation_id = "getMyBasicInformation";
     pub const path = "/user/basic";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserBasicResponse;
     pub const media_type = "application/json";
@@ -844,21 +880,28 @@ pub const getUserBasicInformation = struct {
     pub const operation_id = "getUserBasicInformation";
     pub const path = "/user/{id}/basic";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserBasicResponse;
     pub const media_type = "application/json";
@@ -868,16 +911,23 @@ pub const getMyBattlestats = struct {
     pub const operation_id = "getMyBattlestats";
     pub const path = "/user/battlestats";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserBattleStatsResponse;
     pub const media_type = "application/json";
@@ -887,16 +937,23 @@ pub const getMyBounties = struct {
     pub const operation_id = "getMyBounties";
     pub const path = "/user/bounties";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserBountiesResponse;
     pub const media_type = "application/json";
@@ -906,17 +963,24 @@ pub const getUserBounties = struct {
     pub const operation_id = "getUserBounties";
     pub const path = "/user/{id}/bounties";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserBountiesResponse;
     pub const media_type = "application/json";
@@ -926,16 +990,23 @@ pub const getMyCalendarTime = struct {
     pub const operation_id = "getMyCalendarTime";
     pub const path = "/user/calendar";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserCalendarResponse;
     pub const media_type = "application/json";
@@ -945,16 +1016,23 @@ pub const getMyCasinoStreak = struct {
     pub const operation_id = "getMyCasinoStreak";
     pub const path = "/user/casino";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserCasinoResponse;
     pub const media_type = "application/json";
@@ -964,16 +1042,23 @@ pub const getMyCompetitionInfo = struct {
     pub const operation_id = "getMyCompetitionInfo";
     pub const path = "/user/competition";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserCompetitionResponse;
     pub const media_type = "application/json";
@@ -983,17 +1068,24 @@ pub const getUserCompetitionInfo = struct {
     pub const operation_id = "getUserCompetitionInfo";
     pub const path = "/user/{id}/competition";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserCompetitionResponse;
     pub const media_type = "application/json";
@@ -1003,16 +1095,23 @@ pub const getMyCooldowns = struct {
     pub const operation_id = "getMyCooldowns";
     pub const path = "/user/cooldowns";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserCooldownsResponse;
     pub const media_type = "application/json";
@@ -1022,17 +1121,24 @@ pub const getMyCrimes = struct {
     pub const operation_id = "getMyCrimes";
     pub const path = "/user/{crimeId}/crimes";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"crimeId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         crimeId: TornCrimeId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserCrimesResponse;
     pub const media_type = "application/json";
@@ -1042,16 +1148,23 @@ pub const getMyDiscord = struct {
     pub const operation_id = "getMyDiscord";
     pub const path = "/user/discord";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserDiscordResponse;
     pub const media_type = "application/json";
@@ -1061,17 +1174,24 @@ pub const getUserDiscord = struct {
     pub const operation_id = "getUserDiscord";
     pub const path = "/user/{id}/discord";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserDiscordResponse;
     pub const media_type = "application/json";
@@ -1081,16 +1201,23 @@ pub const getMyEducation = struct {
     pub const operation_id = "getMyEducation";
     pub const path = "/user/education";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserEducationResponse;
     pub const media_type = "application/json";
@@ -1100,16 +1227,23 @@ pub const getMyEnlistedCars = struct {
     pub const operation_id = "getMyEnlistedCars";
     pub const path = "/user/enlistedcars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserEnlistedCarsResponse;
     pub const media_type = "application/json";
@@ -1119,16 +1253,23 @@ pub const getMyEquipment = struct {
     pub const operation_id = "getMyEquipment";
     pub const path = "/user/equipment";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserEquipmentResponse;
     pub const media_type = "application/json";
@@ -1138,23 +1279,30 @@ pub const getMyEvents = struct {
     pub const operation_id = "getMyEvents";
     pub const path = "/user/events";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"false\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserEventsResponse;
     pub const media_type = "application/json";
@@ -1164,16 +1312,23 @@ pub const getMyFaction = struct {
     pub const operation_id = "getMyFaction";
     pub const path = "/user/faction";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserFactionResponse;
     pub const media_type = "application/json";
@@ -1183,17 +1338,24 @@ pub const getUserFaction = struct {
     pub const operation_id = "getUserFaction";
     pub const path = "/user/{id}/faction";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserFactionResponse;
     pub const media_type = "application/json";
@@ -1203,16 +1365,23 @@ pub const getMyForumFeed = struct {
     pub const operation_id = "getMyForumFeed";
     pub const path = "/user/forumfeed";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserForumFeedResponse;
     pub const media_type = "application/json";
@@ -1222,16 +1391,23 @@ pub const getMyForumFriendsUpdates = struct {
     pub const operation_id = "getMyForumFriendsUpdates";
     pub const path = "/user/forumfriends";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserForumFriendsResponse;
     pub const media_type = "application/json";
@@ -1241,27 +1417,34 @@ pub const getMyForumPosts = struct {
     pub const operation_id = "getMyForumPosts";
     pub const path = "/user/forumposts";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":20,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserForumPostsResponse;
     pub const media_type = "application/json";
@@ -1271,28 +1454,35 @@ pub const getUserForumPosts = struct {
     pub const operation_id = "getUserForumPosts";
     pub const path = "/user/{id}/forumposts";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":20,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         id: UserDiscordPathId,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserForumPostsResponse;
     pub const media_type = "application/json";
@@ -1302,16 +1492,23 @@ pub const getMyForumSubscribedThreads = struct {
     pub const operation_id = "getMyForumSubscribedThreads";
     pub const path = "/user/forumsubscribedthreads";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserForumSubscribedThreadsResponse;
     pub const media_type = "application/json";
@@ -1321,23 +1518,30 @@ pub const getMyForumThreads = struct {
     pub const operation_id = "getMyForumThreads";
     pub const path = "/user/forumthreads";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserForumThreadsResponse;
     pub const media_type = "application/json";
@@ -1347,24 +1551,31 @@ pub const getUserForumThreads = struct {
     pub const operation_id = "getUserForumThreads";
     pub const path = "/user/{id}/forumthreads";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserForumThreadsResponse;
     pub const media_type = "application/json";
@@ -1374,16 +1585,23 @@ pub const getMyGym = struct {
     pub const operation_id = "getMyGym";
     pub const path = "/user/gym";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserGymResponse;
     pub const media_type = "application/json";
@@ -1393,16 +1611,23 @@ pub const getMyHalloween = struct {
     pub const operation_id = "getMyHalloween";
     pub const path = "/user/halloween";
     pub const stability = "Untable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserHalloweenResponse;
     pub const media_type = "application/json";
@@ -1412,16 +1637,23 @@ pub const getMyHoF = struct {
     pub const operation_id = "getMyHoF";
     pub const path = "/user/hof";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserHofResponse;
     pub const media_type = "application/json";
@@ -1431,17 +1663,24 @@ pub const getUserHoF = struct {
     pub const operation_id = "getUserHoF";
     pub const path = "/user/{id}/hof";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserHofResponse;
     pub const media_type = "application/json";
@@ -1451,16 +1690,23 @@ pub const getMyHonors = struct {
     pub const operation_id = "getMyHonors";
     pub const path = "/user/honors";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserHonorsResponse;
     pub const media_type = "application/json";
@@ -1470,16 +1716,23 @@ pub const getMyIcons = struct {
     pub const operation_id = "getMyIcons";
     pub const path = "/user/icons";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserIconsResponse;
     pub const media_type = "application/json";
@@ -1489,17 +1742,24 @@ pub const getUserIcons = struct {
     pub const operation_id = "getUserIcons";
     pub const path = "/user/{id}/icons";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserIconsResponse;
     pub const media_type = "application/json";
@@ -1509,19 +1769,26 @@ pub const getMyInventory = struct {
     pub const operation_id = "getMyInventory";
     pub const path = "/user/inventory";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = 900;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"Collectible\",\"Clothing\",\"Other\",\"Tool\",\"Melee\",\"Defensive\",\"Material\",\"Car\",\"Primary\",\"Secondary\",\"Book\",\"Special\",\"Supply Pack\",\"Temporary\",\"Enhancer\",\"Artifact\",\"Flower\",\"Booster\",\"Medical\",\"Candy\",\"Jewelry\",\"Alcohol\",\"Plushie\",\"Drug\",\"Energy Drink\"]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":250,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: model.Presence(TornInventoryItemType) = .absent,
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserInventoryResponse;
     pub const media_type = "application/json";
@@ -1531,17 +1798,24 @@ pub const getMyItemMarketListings = struct {
     pub const operation_id = "getMyItemMarketListings";
     pub const path = "/user/itemmarket";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserItemMarketResponse;
     pub const media_type = "application/json";
@@ -1551,16 +1825,23 @@ pub const getMyItemModsInformation = struct {
     pub const operation_id = "getMyItemModsInformation";
     pub const path = "/user/itemmods";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserItemModsResponse;
     pub const media_type = "application/json";
@@ -1570,16 +1851,23 @@ pub const getMyJob = struct {
     pub const operation_id = "getMyJob";
     pub const path = "/user/job";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserJobResponse;
     pub const media_type = "application/json";
@@ -1589,17 +1877,24 @@ pub const getUserJob = struct {
     pub const operation_id = "getUserJob";
     pub const path = "/user/{id}/job";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserJobResponse;
     pub const media_type = "application/json";
@@ -1609,16 +1904,23 @@ pub const getMyJobPoints = struct {
     pub const operation_id = "getMyJobPoints";
     pub const path = "/user/jobpoints";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserJobPointsResponse;
     pub const media_type = "application/json";
@@ -1628,16 +1930,23 @@ pub const getMyJobRanks = struct {
     pub const operation_id = "getMyJobRanks";
     pub const path = "/user/jobranks";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserJobRanksResponse;
     pub const media_type = "application/json";
@@ -1647,27 +1956,34 @@ pub const getMyContactsList = struct {
     pub const operation_id = "getMyContactsList";
     pub const path = "/user/list";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"Friends\",\"Enemies\",\"Targets\"]}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":50,\"maximum\":50,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"ASC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: UserListEnum,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserListResponse;
     pub const media_type = "application/json";
@@ -1677,9 +1993,17 @@ pub const getMyLogs = struct {
     pub const operation_id = "getMyLogs";
     pub const path = "/user/log";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .full;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"log\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int32\"}}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"target\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"nanostamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         log: model.Presence([]const LogId) = .absent,
         cat: model.Presence(LogCategoryId) = .absent,
@@ -1688,12 +2012,11 @@ pub const getMyLogs = struct {
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         nanostamp: model.Presence([]const u8) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserLogsResponse;
     pub const media_type = "application/json";
@@ -1703,16 +2026,23 @@ pub const getMyMedals = struct {
     pub const operation_id = "getMyMedals";
     pub const path = "/user/medals";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserMedalsResponse;
     pub const media_type = "application/json";
@@ -1722,17 +2052,24 @@ pub const getUserMedals = struct {
     pub const operation_id = "getUserMedals";
     pub const path = "/user/{id}/medals";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserMedalsResponse;
     pub const media_type = "application/json";
@@ -1742,16 +2079,23 @@ pub const getMyMerits = struct {
     pub const operation_id = "getMyMerits";
     pub const path = "/user/merits";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserMeritsResponse;
     pub const media_type = "application/json";
@@ -1761,23 +2105,30 @@ pub const getMyMessages = struct {
     pub const operation_id = "getMyMessages";
     pub const path = "/user/messages";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserMessagesResponse;
     pub const media_type = "application/json";
@@ -1787,16 +2138,23 @@ pub const getMyMissions = struct {
     pub const operation_id = "getMyMissions";
     pub const path = "/user/missions";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserMissionsResponse;
     pub const media_type = "application/json";
@@ -1806,16 +2164,23 @@ pub const getMyMoney = struct {
     pub const operation_id = "getMyMoney";
     pub const path = "/user/money";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserMoneyResponse;
     pub const media_type = "application/json";
@@ -1825,20 +2190,27 @@ pub const getMyNewEvents = struct {
     pub const operation_id = "getMyNewEvents";
     pub const path = "/user/newevents";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"false\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserNewEventsResponse;
     pub const media_type = "application/json";
@@ -1848,16 +2220,23 @@ pub const getMyNetworth = struct {
     pub const operation_id = "getMyNetworth";
     pub const path = "/user/networth";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserNetworthResponse;
     pub const media_type = "application/json";
@@ -1867,16 +2246,23 @@ pub const getMyNewMessages = struct {
     pub const operation_id = "getMyNewMessages";
     pub const path = "/user/newmessages";
     pub const stability = "Stable";
-    pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
+    pub const upstream_cache_ttl_seconds: ?u32 = 3600;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserNewMessagesResponse;
     pub const media_type = "application/json";
@@ -1886,16 +2272,23 @@ pub const getMyNotifications = struct {
     pub const operation_id = "getMyNotifications";
     pub const path = "/user/notifications";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserNotificationsResponse;
     pub const media_type = "application/json";
@@ -1905,16 +2298,23 @@ pub const getMyOrganizedCrime = struct {
     pub const operation_id = "getMyOrganizedCrime";
     pub const path = "/user/organizedcrime";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserOrganizedCrimeResponse;
     pub const media_type = "application/json";
@@ -1924,16 +2324,23 @@ pub const getMyAvailableOrganizedCrimes = struct {
     pub const operation_id = "getMyAvailableOrganizedCrimes";
     pub const path = "/user/organizedcrimes";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserOrganizedCrimesResponse;
     pub const media_type = "application/json";
@@ -1943,16 +2350,23 @@ pub const getMyPerks = struct {
     pub const operation_id = "getMyPerks";
     pub const path = "/user/perks";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserPerksResponse;
     pub const media_type = "application/json";
@@ -1962,15 +2376,22 @@ pub const getMyPersonalStats = struct {
     pub const operation_id = "getMyPersonalStats";
     pub const path = "/user/personalstats";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"all\",\"popular\",\"attacking\",\"battle_stats\",\"jobs\",\"trading\",\"jail\",\"hospital\",\"finishing_hits\",\"communication\",\"crimes\",\"bounties\",\"investments\",\"items\",\"travel\",\"drugs\",\"missions\",\"racing\",\"networth\",\"other\",\"itemmarketcustomers\",\"itemmarketsales\",\"itemmarketrevenue\",\"itemmarketfees\"]}},{\"name\":\"stat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"attackswon\",\"attackslost\",\"attacksdraw\",\"attacksassisted\",\"defendswon\",\"defendslost\",\"defendsstalemated\",\"elo\",\"yourunaway\",\"theyrunaway\",\"unarmoredwon\",\"bestkillstreak\",\"attackhits\",\"attackmisses\",\"attackdamage\",\"bestdamage\",\"onehitkills\",\"attackcriticalhits\",\"roundsfired\",\"specialammoused\",\"hollowammoused\",\"tracerammoused\",\"piercingammoused\",\"incendiaryammoused\",\"attacksstealthed\",\"retals\",\"moneymugged\",\"largestmug\",\"itemslooted\",\"highestbeaten\",\"respectforfaction\",\"rankedwarhits\",\"raidhits\",\"territoryjoins\",\"territoryclears\",\"territorytime\",\"jobpointsused\",\"trainsreceived\",\"marketitemsbought\",\"auctionswon\",\"auctionsells\",\"itemssent\",\"trades\",\"cityitemsbought\",\"pointsbought\",\"pointssold\",\"bazaarcustomers\",\"bazaarsales\",\"bazaarprofit\",\"jailed\",\"peoplebusted\",\"failedbusts\",\"peoplebought\",\"peopleboughtspent\",\"hospital\",\"medicalitemsused\",\"bloodwithdrawn\",\"reviveskill\",\"revives\",\"revivesreceived\",\"heavyhits\",\"machinehits\",\"riflehits\",\"smghits\",\"shotgunhits\",\"pistolhits\",\"temphits\",\"piercinghits\",\"slashinghits\",\"clubbinghits\",\"mechanicalhits\",\"h2hhits\",\"mailssent\",\"friendmailssent\",\"factionmailssent\",\"companymailssent\",\"spousemailssent\",\"classifiedadsplaced\",\"personalsplaced\",\"criminaloffensesold\",\"sellillegalgoods\",\"theftold\",\"autotheftcrime\",\"drugdealscrime\",\"computercrime\",\"fraudold\",\"murdercrime\",\"othercrime\",\"organizedcrimes\",\"bountiesplaced\",\"totalbountyspent\",\"bountiescollected\",\"totalbountyreward\",\"bountiesreceived\",\"receivedbountyvalue\",\"cityfinds\",\"dumpfinds\",\"itemsdumped\",\"booksread\",\"boostersused\",\"consumablesused\",\"candyused\",\"alcoholused\",\"energydrinkused\",\"statenhancersused\",\"eastereggsfound\",\"eastereggsused\",\"virusescoded\",\"traveltimes\",\"timespenttraveling\",\"itemsboughtabroad\",\"attackswonabroad\",\"defendslostabroad\",\"argtravel\",\"mextravel\",\"uaetravel\",\"hawtravel\",\"japtravel\",\"uktravel\",\"satravel\",\"switravel\",\"chitravel\",\"cantravel\",\"caytravel\",\"drugsused\",\"overdosed\",\"rehabs\",\"rehabcost\",\"cantaken\",\"exttaken\",\"kettaken\",\"lsdtaken\",\"opitaken\",\"pcptaken\",\"shrtaken\",\"spetaken\",\"victaken\",\"xantaken\",\"missionscompleted\",\"contractscompleted\",\"dukecontractscompleted\",\"missioncreditsearned\",\"racingskill\",\"racingpointsearned\",\"racesentered\",\"raceswon\",\"networth\",\"timeplayed\",\"activestreak\",\"bestactivestreak\",\"awards\",\"refills\",\"nerverefills\",\"tokenrefills\",\"meritsbought\",\"daysbeendonator\",\"criminaloffenses\",\"vandalism\",\"theft\",\"counterfeiting\",\"fraud\",\"illicitservices\",\"cybercrime\",\"extortion\",\"illegalproduction\",\"currentkillstreak\",\"strength\",\"defense\",\"speed\",\"dexterity\",\"totalstats\",\"manuallabor\",\"intelligence\",\"endurance\",\"totalworkingstats\",\"moneyinvested\",\"investedprofit\",\"investamount\",\"banktimeleft\",\"stockprofits\",\"stocklosses\",\"stockfees\",\"stocknetprofits\",\"stockpayouts\",\"networthwallet\",\"networthvault\",\"networthbank\",\"networthcayman\",\"networthpoints\",\"networthitems\",\"networthdisplaycase\",\"networthbazaar\",\"networthitemmarket\",\"networthproperties\",\"networthstockmarket\",\"networthauctionhouse\",\"networthbookie\",\"networthcompany\",\"networthenlistedcars\",\"networthpiggybank\",\"networthpending\",\"networthloan\",\"networthunpaidfees\",\"huntingskill\",\"searchforcashskill\",\"bootleggingskill\",\"graffitiskill\",\"shopliftingskill\",\"pickpocketingskill\",\"cardskimmingskill\",\"burglaryskill\",\"hustlingskill\",\"disposalskill\",\"crackingskill\",\"forgeryskill\",\"scammingskill\",\"arsonskill\"]}}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: model.Presence(PersonalStatsCategoryEnum) = .absent,
         stat: model.Presence([]const PersonalStatsStatName) = .absent,
         timestamp: model.Presence(i64) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserPersonalStatsResponse;
     pub const media_type = "application/json";
@@ -1980,16 +2401,23 @@ pub const getUserPersonalStats = struct {
     pub const operation_id = "getUserPersonalStats";
     pub const path = "/user/{id}/personalstats";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"all\",\"popular\",\"attacking\",\"battle_stats\",\"jobs\",\"trading\",\"jail\",\"hospital\",\"finishing_hits\",\"communication\",\"crimes\",\"bounties\",\"investments\",\"items\",\"travel\",\"drugs\",\"missions\",\"racing\",\"networth\",\"other\",\"itemmarketcustomers\",\"itemmarketsales\",\"itemmarketrevenue\",\"itemmarketfees\"]}},{\"name\":\"stat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"attackswon\",\"attackslost\",\"attacksdraw\",\"attacksassisted\",\"defendswon\",\"defendslost\",\"defendsstalemated\",\"elo\",\"yourunaway\",\"theyrunaway\",\"unarmoredwon\",\"bestkillstreak\",\"attackhits\",\"attackmisses\",\"attackdamage\",\"bestdamage\",\"onehitkills\",\"attackcriticalhits\",\"roundsfired\",\"specialammoused\",\"hollowammoused\",\"tracerammoused\",\"piercingammoused\",\"incendiaryammoused\",\"attacksstealthed\",\"retals\",\"moneymugged\",\"largestmug\",\"itemslooted\",\"highestbeaten\",\"respectforfaction\",\"rankedwarhits\",\"raidhits\",\"territoryjoins\",\"territoryclears\",\"territorytime\",\"jobpointsused\",\"trainsreceived\",\"marketitemsbought\",\"auctionswon\",\"auctionsells\",\"itemssent\",\"trades\",\"cityitemsbought\",\"pointsbought\",\"pointssold\",\"bazaarcustomers\",\"bazaarsales\",\"bazaarprofit\",\"jailed\",\"peoplebusted\",\"failedbusts\",\"peoplebought\",\"peopleboughtspent\",\"hospital\",\"medicalitemsused\",\"bloodwithdrawn\",\"reviveskill\",\"revives\",\"revivesreceived\",\"heavyhits\",\"machinehits\",\"riflehits\",\"smghits\",\"shotgunhits\",\"pistolhits\",\"temphits\",\"piercinghits\",\"slashinghits\",\"clubbinghits\",\"mechanicalhits\",\"h2hhits\",\"mailssent\",\"friendmailssent\",\"factionmailssent\",\"companymailssent\",\"spousemailssent\",\"classifiedadsplaced\",\"personalsplaced\",\"criminaloffensesold\",\"sellillegalgoods\",\"theftold\",\"autotheftcrime\",\"drugdealscrime\",\"computercrime\",\"fraudold\",\"murdercrime\",\"othercrime\",\"organizedcrimes\",\"bountiesplaced\",\"totalbountyspent\",\"bountiescollected\",\"totalbountyreward\",\"bountiesreceived\",\"receivedbountyvalue\",\"cityfinds\",\"dumpfinds\",\"itemsdumped\",\"booksread\",\"boostersused\",\"consumablesused\",\"candyused\",\"alcoholused\",\"energydrinkused\",\"statenhancersused\",\"eastereggsfound\",\"eastereggsused\",\"virusescoded\",\"traveltimes\",\"timespenttraveling\",\"itemsboughtabroad\",\"attackswonabroad\",\"defendslostabroad\",\"argtravel\",\"mextravel\",\"uaetravel\",\"hawtravel\",\"japtravel\",\"uktravel\",\"satravel\",\"switravel\",\"chitravel\",\"cantravel\",\"caytravel\",\"drugsused\",\"overdosed\",\"rehabs\",\"rehabcost\",\"cantaken\",\"exttaken\",\"kettaken\",\"lsdtaken\",\"opitaken\",\"pcptaken\",\"shrtaken\",\"spetaken\",\"victaken\",\"xantaken\",\"missionscompleted\",\"contractscompleted\",\"dukecontractscompleted\",\"missioncreditsearned\",\"racingskill\",\"racingpointsearned\",\"racesentered\",\"raceswon\",\"networth\",\"timeplayed\",\"activestreak\",\"bestactivestreak\",\"awards\",\"refills\",\"nerverefills\",\"tokenrefills\",\"meritsbought\",\"daysbeendonator\",\"criminaloffenses\",\"vandalism\",\"theft\",\"counterfeiting\",\"fraud\",\"illicitservices\",\"cybercrime\",\"extortion\",\"illegalproduction\",\"currentkillstreak\",\"strength\",\"defense\",\"speed\",\"dexterity\",\"totalstats\",\"manuallabor\",\"intelligence\",\"endurance\",\"totalworkingstats\",\"moneyinvested\",\"investedprofit\",\"investamount\",\"banktimeleft\",\"stockprofits\",\"stocklosses\",\"stockfees\",\"stocknetprofits\",\"stockpayouts\",\"networthwallet\",\"networthvault\",\"networthbank\",\"networthcayman\",\"networthpoints\",\"networthitems\",\"networthdisplaycase\",\"networthbazaar\",\"networthitemmarket\",\"networthproperties\",\"networthstockmarket\",\"networthauctionhouse\",\"networthbookie\",\"networthcompany\",\"networthenlistedcars\",\"networthpiggybank\",\"networthpending\",\"networthloan\",\"networthunpaidfees\",\"huntingskill\",\"searchforcashskill\",\"bootleggingskill\",\"graffitiskill\",\"shopliftingskill\",\"pickpocketingskill\",\"cardskimmingskill\",\"burglaryskill\",\"hustlingskill\",\"disposalskill\",\"crackingskill\",\"forgeryskill\",\"scammingskill\",\"arsonskill\"]}}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         cat: model.Presence(PersonalStatsCategoryEnum) = .absent,
         stat: model.Presence([]const PersonalStatsStatName) = .absent,
         timestamp: model.Presence(i64) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserPersonalStatsResponse;
     pub const media_type = "application/json";
@@ -1999,20 +2427,27 @@ pub const getMyProfile = struct {
     pub const operation_id = "getMyProfile";
     pub const path = "/user/profile";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserProfileResponse;
     pub const media_type = "application/json";
@@ -2022,21 +2457,28 @@ pub const getUserProfile = struct {
     pub const operation_id = "getUserProfile";
     pub const path = "/user/{id}/profile";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserProfileResponse;
     pub const media_type = "application/json";
@@ -2046,22 +2488,29 @@ pub const getMyProperties = struct {
     pub const operation_id = "getMyProperties";
     pub const path = "/user/properties";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"ownedByUser\",\"ownedBySpouse\"]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        filters: model.Presence(enum {
+        filters: model.Presence(model.Open(enum {
             ownedByUser,
             ownedBySpouse,
-        }) = .absent,
+        })) = .absent,
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserPropertiesResponse;
     pub const media_type = "application/json";
@@ -2071,23 +2520,30 @@ pub const getUserProperties = struct {
     pub const operation_id = "getUserProperties";
     pub const path = "/user/{id}/properties";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"ownedByUser\",\"ownedBySpouse\"]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
-        filters: model.Presence(enum {
+        filters: model.Presence(model.Open(enum {
             ownedByUser,
             ownedBySpouse,
-        }) = .absent,
+        })) = .absent,
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserPropertiesResponse;
     pub const media_type = "application/json";
@@ -2097,16 +2553,23 @@ pub const getMyProperty = struct {
     pub const operation_id = "getMyProperty";
     pub const path = "/user/property";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserPropertyResponse;
     pub const media_type = "application/json";
@@ -2116,17 +2579,24 @@ pub const getUserProperty = struct {
     pub const operation_id = "getUserProperty";
     pub const path = "/user/{id}/property";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: UserDiscordPathId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserPropertyResponse;
     pub const media_type = "application/json";
@@ -2136,24 +2606,31 @@ pub const getMyRaces = struct {
     pub const operation_id = "getMyRaces";
     pub const path = "/user/races";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"official\",\"custom\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         cat: model.Presence(RacingRaceTypeEnum) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserRacesResponse;
     pub const media_type = "application/json";
@@ -2163,16 +2640,23 @@ pub const getMyRacingRecords = struct {
     pub const operation_id = "getMyRacingRecords";
     pub const path = "/user/racingrecords";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserRacingRecordsResponse;
     pub const media_type = "application/json";
@@ -2182,16 +2666,23 @@ pub const getMyRefills = struct {
     pub const operation_id = "getMyRefills";
     pub const path = "/user/refills";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserRefillsResponse;
     pub const media_type = "application/json";
@@ -2201,24 +2692,31 @@ pub const getMyReports = struct {
     pub const operation_id = "getMyReports";
     pub const path = "/user/reports";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"mostwanted\",\"money\",\"stats\",\"references\",\"friendorfoe\",\"companyfinancials\",\"truelevel\",\"stockanalysis\",\"anonymousbounties\",\"investment\"]}},{\"name\":\"target\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: model.Presence(ReportTypeEnum) = .absent,
         target: model.Presence(UserId) = .absent,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = ReportsResponse;
     pub const media_type = "application/json";
@@ -2228,28 +2726,35 @@ pub const getMyRevives = struct {
     pub const operation_id = "getMyRevives";
     pub const path = "/user/revives";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"idFilter\"]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         filters: model.Presence([]const ApiFiltersAttacksRevivesEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RevivesResponse;
     pub const media_type = "application/json";
@@ -2259,28 +2764,35 @@ pub const getMyRevivesSimplified = struct {
     pub const operation_id = "getMyRevivesSimplified";
     pub const path = "/user/revivesFull";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"idFilter\"]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":1000,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         filters: model.Presence([]const ApiFiltersAttacksRevivesEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RevivesFullResponse;
     pub const media_type = "application/json";
@@ -2290,16 +2802,23 @@ pub const getMySkills = struct {
     pub const operation_id = "getMySkills";
     pub const path = "/user/skills";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserSkillsResponse;
     pub const media_type = "application/json";
@@ -2309,13 +2828,21 @@ pub const getUsersSearch = struct {
     pub const operation_id = "getUsersSearch";
     pub const path = "/user/search";
     pub const stability = "Unstable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"name\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}},{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"schema\":\"UserSearchParameter\",\"oneOf\":[{\"type\":\"string\",\"enum\":[\"married\",\"notMarried\",\"traveling\",\"notTraveling\",\"inFaction\",\"notInFaction\",\"inCompany\",\"notInCompany\",\"inHospital\",\"notInHospital\",\"inJail\",\"notInJail\",\"inFederalJail\",\"notInFederalJail\",\"male\",\"female\",\"enby\",\"lastActionNow\",\"lastActionRecent\",\"lastActionHourAgo\",\"lastActionDayAgo\",\"lastActionWeekAgo\",\"lastActionMonthAgo\",\"lastActionYearAgo\"]},{\"type\":\"string\",\"pattern\":\"^(level|daysOld|offences):(=|!=|<|<=|>=|>|Equal|NotEqual|Less|LessOrEqual|GreaterOrEqual|Greater):\\\\d+$\"},{\"type\":\"string\",\"pattern\":\"^factions:\\\\d+(;\\\\d+)*$\"}]}}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"cursor\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         name: model.Presence([]const u8) = .absent,
         filters: model.Presence([]const union(enum) {
-            v0: enum {
+            named: model.Open(enum {
                 married,
                 notMarried,
                 traveling,
@@ -2340,22 +2867,21 @@ pub const getUsersSearch = struct {
                 lastActionWeekAgo,
                 lastActionMonthAgo,
                 lastActionYearAgo,
-            },
-            v1: []const u8,
-            v2: []const u8,
+            }),
+            pattern: []const u8,
+            pattern_2: []const u8,
         }) = .absent,
         offset: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         cursor: model.Presence([]const u8) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserSearchResponse;
     pub const media_type = "application/json";
@@ -2365,16 +2891,23 @@ pub const getUsersSnapshot = struct {
     pub const operation_id = "getUsersSnapshot";
     pub const path = "/user/snapshot";
     pub const stability = "Unstable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = []const u8;
     pub const media_type = "text/csv";
@@ -2384,16 +2917,23 @@ pub const getMyStocks = struct {
     pub const operation_id = "getMyStocks";
     pub const path = "/user/stocks";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserStocksResponse;
     pub const media_type = "application/json";
@@ -2403,24 +2943,31 @@ pub const getMyTrades = struct {
     pub const operation_id = "getMyTrades";
     pub const path = "/user/trades";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"ongoing\",\"enum\":[\"finished\",\"ongoing\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: model.Presence(TradeCategoryEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserTradesResponse;
     pub const media_type = "application/json";
@@ -2430,17 +2977,24 @@ pub const getMyDetailedTrade = struct {
     pub const operation_id = "getMyDetailedTrade";
     pub const path = "/user/{tradeId}/trade";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"tradeId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int64\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         tradeId: TradeId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserTradeResponse;
     pub const media_type = "application/json";
@@ -2450,16 +3004,23 @@ pub const getMyTravelInformation = struct {
     pub const operation_id = "getMyTravelInformation";
     pub const path = "/user/travel";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserTravelResponse;
     pub const media_type = "application/json";
@@ -2469,16 +3030,23 @@ pub const getMyTravelInventory = struct {
     pub const operation_id = "getMyTravelInventory";
     pub const path = "/user/travelinventory";
     pub const stability = "Unstable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserTravelInventoryResponse;
     pub const media_type = "application/json";
@@ -2488,16 +3056,23 @@ pub const getMyVirusCodingInformation = struct {
     pub const operation_id = "getMyVirusCodingInformation";
     pub const path = "/user/virus";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserVirusResponse;
     pub const media_type = "application/json";
@@ -2507,16 +3082,23 @@ pub const getMyWeaponExp = struct {
     pub const operation_id = "getMyWeaponExp";
     pub const path = "/user/weaponexp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserWeaponExpResponse;
     pub const media_type = "application/json";
@@ -2526,16 +3108,23 @@ pub const getMyWorkstats = struct {
     pub const operation_id = "getMyWorkstats";
     pub const path = "/user/workstats";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserWorkStatsResponse;
     pub const media_type = "application/json";
@@ -2545,16 +3134,23 @@ pub const getUserLookup = struct {
     pub const operation_id = "getUserLookup";
     pub const path = "/user/lookup";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = UserLookupResponse;
     pub const media_type = "application/json";
@@ -2564,16 +3160,23 @@ pub const getUserTimestamp = struct {
     pub const operation_id = "getUserTimestamp";
     pub const path = "/user/timestamp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TimestampResponse;
     pub const media_type = "application/json";
@@ -2583,51 +3186,58 @@ pub const getUserGeneric = struct {
     pub const operation_id = "getUserGeneric";
     pub const path = "/user";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"ammo\",\"attacks\",\"attacksfull\",\"bars\",\"basic\",\"battlestats\",\"bounties\",\"calendar\",\"casino\",\"competition\",\"cooldowns\",\"crimes\",\"discord\",\"enlistedcars\",\"equipment\",\"events\",\"faction\",\"factionbalance\",\"forumfeed\",\"forumfriends\",\"forumposts\",\"forumsubscribedthreads\",\"forumthreads\",\"gym\",\"halloween\",\"hof\",\"honors\",\"icons\",\"inventory\",\"itemmarket\",\"itemmod\",\"job\",\"jobpoints\",\"jobranks\",\"list\",\"log\",\"lookup\",\"medals\",\"merits\",\"messages\",\"missions\",\"money\",\"networth\",\"newevents\",\"newmessages\",\"notifications\",\"organizedcrime\",\"personalstats\",\"profile\",\"properties\",\"property\",\"races\",\"racingrecords\",\"refills\",\"reports\",\"revives\",\"revivesfull\",\"skills\",\"snapshot\",\"stocks\",\"trades\",\"trade\",\"travel\",\"travelinventory\",\"timestamp\",\"weaponexp\",\"workstats\",\"bazaar\",\"criminalrecord\",\"display\",\"education\",\"perks\"]},{\"type\":\"string\"}]}}},{\"name\":\"id\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int64\"},{\"type\":\"string\"}]}},{\"name\":\"legacy\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"ammo\",\"attacks\",\"attacksfull\",\"bars\",\"basic\",\"battlestats\",\"bounties\",\"calendar\",\"casino\",\"competition\",\"cooldowns\",\"crimes\",\"discord\",\"enlistedcars\",\"equipment\",\"events\",\"faction\",\"factionbalance\",\"forumfeed\",\"forumfriends\",\"forumposts\",\"forumsubscribedthreads\",\"forumthreads\",\"gym\",\"halloween\",\"hof\",\"honors\",\"icons\",\"inventory\",\"itemmarket\",\"itemmod\",\"job\",\"jobpoints\",\"jobranks\",\"list\",\"log\",\"lookup\",\"medals\",\"merits\",\"messages\",\"missions\",\"money\",\"networth\",\"newevents\",\"newmessages\",\"notifications\",\"organizedcrime\",\"personalstats\",\"profile\",\"properties\",\"property\",\"races\",\"racingrecords\",\"refills\",\"reports\",\"revives\",\"revivesfull\",\"skills\",\"snapshot\",\"stocks\",\"trades\",\"trade\",\"travel\",\"travelinventory\",\"timestamp\",\"weaponexp\",\"workstats\",\"bazaar\",\"criminalrecord\",\"display\",\"education\",\"perks\"]},{\"type\":\"string\"}]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":1}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"mostwanted\",\"money\",\"stats\",\"references\",\"friendorfoe\",\"companyfinancials\",\"truelevel\",\"stockanalysis\",\"anonymousbounties\",\"investment\"]},{\"type\":\"string\",\"enum\":[\"Friends\",\"Enemies\",\"Targets\"]},{\"type\":\"string\",\"enum\":[\"all\",\"popular\",\"attacking\",\"battle_stats\",\"jobs\",\"trading\",\"jail\",\"hospital\",\"finishing_hits\",\"communication\",\"crimes\",\"bounties\",\"investments\",\"items\",\"travel\",\"drugs\",\"missions\",\"racing\",\"networth\",\"other\",\"itemmarketcustomers\",\"itemmarketsales\",\"itemmarketrevenue\",\"itemmarketfees\"]},{\"type\":\"string\",\"enum\":[\"official\",\"custom\"]},{\"type\":\"string\",\"enum\":[\"Collectible\",\"Clothing\",\"Other\",\"Tool\",\"Melee\",\"Defensive\",\"Material\",\"Car\",\"Primary\",\"Secondary\",\"Book\",\"Special\",\"Supply Pack\",\"Temporary\",\"Enhancer\",\"Artifact\",\"Flower\",\"Booster\",\"Medical\",\"Candy\",\"Jewelry\",\"Alcohol\",\"Plushie\",\"Drug\",\"Energy Drink\"]},{\"type\":\"string\",\"default\":\"ongoing\",\"enum\":[\"finished\",\"ongoing\"]}]}},{\"name\":\"stat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"attackswon\",\"attackslost\",\"attacksdraw\",\"attacksassisted\",\"defendswon\",\"defendslost\",\"defendsstalemated\",\"elo\",\"yourunaway\",\"theyrunaway\",\"unarmoredwon\",\"bestkillstreak\",\"attackhits\",\"attackmisses\",\"attackdamage\",\"bestdamage\",\"onehitkills\",\"attackcriticalhits\",\"roundsfired\",\"specialammoused\",\"hollowammoused\",\"tracerammoused\",\"piercingammoused\",\"incendiaryammoused\",\"attacksstealthed\",\"retals\",\"moneymugged\",\"largestmug\",\"itemslooted\",\"highestbeaten\",\"respectforfaction\",\"rankedwarhits\",\"raidhits\",\"territoryjoins\",\"territoryclears\",\"territorytime\",\"jobpointsused\",\"trainsreceived\",\"marketitemsbought\",\"auctionswon\",\"auctionsells\",\"itemssent\",\"trades\",\"cityitemsbought\",\"pointsbought\",\"pointssold\",\"bazaarcustomers\",\"bazaarsales\",\"bazaarprofit\",\"jailed\",\"peoplebusted\",\"failedbusts\",\"peoplebought\",\"peopleboughtspent\",\"hospital\",\"medicalitemsused\",\"bloodwithdrawn\",\"reviveskill\",\"revives\",\"revivesreceived\",\"heavyhits\",\"machinehits\",\"riflehits\",\"smghits\",\"shotgunhits\",\"pistolhits\",\"temphits\",\"piercinghits\",\"slashinghits\",\"clubbinghits\",\"mechanicalhits\",\"h2hhits\",\"mailssent\",\"friendmailssent\",\"factionmailssent\",\"companymailssent\",\"spousemailssent\",\"classifiedadsplaced\",\"personalsplaced\",\"criminaloffensesold\",\"sellillegalgoods\",\"theftold\",\"autotheftcrime\",\"drugdealscrime\",\"computercrime\",\"fraudold\",\"murdercrime\",\"othercrime\",\"organizedcrimes\",\"bountiesplaced\",\"totalbountyspent\",\"bountiescollected\",\"totalbountyreward\",\"bountiesreceived\",\"receivedbountyvalue\",\"cityfinds\",\"dumpfinds\",\"itemsdumped\",\"booksread\",\"boostersused\",\"consumablesused\",\"candyused\",\"alcoholused\",\"energydrinkused\",\"statenhancersused\",\"eastereggsfound\",\"eastereggsused\",\"virusescoded\",\"traveltimes\",\"timespenttraveling\",\"itemsboughtabroad\",\"attackswonabroad\",\"defendslostabroad\",\"argtravel\",\"mextravel\",\"uaetravel\",\"hawtravel\",\"japtravel\",\"uktravel\",\"satravel\",\"switravel\",\"chitravel\",\"cantravel\",\"caytravel\",\"drugsused\",\"overdosed\",\"rehabs\",\"rehabcost\",\"cantaken\",\"exttaken\",\"kettaken\",\"lsdtaken\",\"opitaken\",\"pcptaken\",\"shrtaken\",\"spetaken\",\"victaken\",\"xantaken\",\"missionscompleted\",\"contractscompleted\",\"dukecontractscompleted\",\"missioncreditsearned\",\"racingskill\",\"racingpointsearned\",\"racesentered\",\"raceswon\",\"networth\",\"timeplayed\",\"activestreak\",\"bestactivestreak\",\"awards\",\"refills\",\"nerverefills\",\"tokenrefills\",\"meritsbought\",\"daysbeendonator\",\"criminaloffenses\",\"vandalism\",\"theft\",\"counterfeiting\",\"fraud\",\"illicitservices\",\"cybercrime\",\"extortion\",\"illegalproduction\",\"currentkillstreak\",\"strength\",\"defense\",\"speed\",\"dexterity\",\"totalstats\",\"manuallabor\",\"intelligence\",\"endurance\",\"totalworkingstats\",\"moneyinvested\",\"investedprofit\",\"investamount\",\"banktimeleft\",\"stockprofits\",\"stocklosses\",\"stockfees\",\"stocknetprofits\",\"stockpayouts\",\"networthwallet\",\"networthvault\",\"networthbank\",\"networthcayman\",\"networthpoints\",\"networthitems\",\"networthdisplaycase\",\"networthbazaar\",\"networthitemmarket\",\"networthproperties\",\"networthstockmarket\",\"networthauctionhouse\",\"networthbookie\",\"networthcompany\",\"networthenlistedcars\",\"networthpiggybank\",\"networthpending\",\"networthloan\",\"networthunpaidfees\",\"huntingskill\",\"searchforcashskill\",\"bootleggingskill\",\"graffitiskill\",\"shopliftingskill\",\"pickpocketingskill\",\"cardskimmingskill\",\"burglaryskill\",\"hustlingskill\",\"disposalskill\",\"crackingskill\",\"forgeryskill\",\"scammingskill\",\"arsonskill\"]}}},{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"ownedByUser\",\"ownedBySpouse\"]}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const UserSelectionName) = .absent,
         id: model.Presence(union(enum) {
-            v0: UserDiscordPathId,
-            v1: TornCrimeId,
-            v2: TradeId,
-            v3: []const u8,
+            user_discord_path: UserDiscordPathId,
+            torn_crime: TornCrimeId,
+            trade: TradeId,
+            string: []const u8,
         }) = .absent,
         legacy: model.Presence([]const UserSelectionName) = .absent,
         limit: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         cat: model.Presence(union(enum) {
-            v0: ReportTypeEnum,
-            v1: UserListEnum,
-            v2: PersonalStatsCategoryEnum,
-            v3: RacingRaceTypeEnum,
-            v4: TornInventoryItemType,
-            v5: TradeCategoryEnum,
+            report_type: ReportTypeEnum,
+            user_list: UserListEnum,
+            personal_stats_category: PersonalStatsCategoryEnum,
+            racing_race_type: RacingRaceTypeEnum,
+            torn_inventory_item_type: TornInventoryItemType,
+            trade_category: TradeCategoryEnum,
         }) = .absent,
         stat: model.Presence([]const PersonalStatsStatName) = .absent,
-        filters: model.Presence(enum {
+        filters: model.Presence(model.Open(enum {
             incoming,
             outgoing,
             ownedByUser,
             ownedBySpouse,
-        }) = .absent,
-        striptags: model.Presence(enum {
+        })) = .absent,
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         crimes: model.Presence(UserCrime) = .absent,
@@ -2640,8 +3250,8 @@ pub const getUserGeneric = struct {
         }) = .absent,
         races: model.Presence([]const UserRaceDetails) = .absent,
         _metadata: model.Presence(union(enum) {
-            v0: RequestMetadataWithLinks,
-            v1: RequestMetadataWithLinksAndTotal,
+            links: RequestMetadataWithLinks,
+            links_and_total: RequestMetadataWithLinksAndTotal,
         }) = .absent,
         enlistedcars: model.Presence([]const UserRaceCarDetails) = .absent,
         forumPosts: model.Presence([]const ForumPost) = .absent,
@@ -2674,26 +3284,26 @@ pub const getUserGeneric = struct {
         bounties_delay: model.Presence(i64) = .absent,
         jobranks: model.Presence(UserJobRanks) = .absent,
         properties: model.Presence([]const union(enum) {
-            v0: UserPropertyBasicDetails,
-            v1: UserPropertyDetailsExtended,
-            v2: UserPropertyDetailsExtendedRented,
-            v3: UserPropertyDetailsExtendedForRent,
-            v4: UserPropertyDetailsExtendedForSale,
+            basic_details: UserPropertyBasicDetails,
+            details_extended: UserPropertyDetailsExtended,
+            details_extended_rented: UserPropertyDetailsExtendedRented,
+            details_extended_for_rent: UserPropertyDetailsExtendedForRent,
+            details_extended_for_sale: UserPropertyDetailsExtendedForSale,
         }) = .absent,
         factionBalance: model.Presence(?UserFactionBalance) = .absent,
         profile: model.Presence(union(enum) {
-            v0: UserBasic,
-            v1: struct {
+            user_basic: UserBasic,
+            object: struct {
                 id: UserId,
                 name: []const u8,
                 level: i64,
                 rank: union(enum) {
-                    v0: UserRankEnum,
-                    v1: []const u8,
+                    user_rank: UserRankEnum,
+                    string: []const u8,
                 },
                 title: union(enum) {
-                    v0: UserTitleEnum,
-                    v1: []const u8,
+                    user_title: UserTitleEnum,
+                    string: []const u8,
                 },
                 donator_status: ?UserDonatorStatusEnum,
                 age: i64,
@@ -2727,27 +3337,27 @@ pub const getUserGeneric = struct {
             },
         }) = .absent,
         revives: model.Presence(union(enum) {
-            v0: []const Revive,
-            v1: []const ReviveSimplified,
+            revive_list: []const Revive,
+            revive_simplified_list: []const ReviveSimplified,
         }) = .absent,
         honors: model.Presence([]const UserHonor) = .absent,
         medals: model.Presence([]const UserMedal) = .absent,
         merits: model.Presence(UserMerits) = .absent,
         job: model.Presence(union(enum) {
-            v0: UserJob,
-            v1: UserCompany,
-            v2: void,
+            job: UserJob,
+            company: UserCompany,
+            null: void,
         }) = .absent,
         faction: model.Presence(?UserFaction) = .absent,
         competition: model.Presence(union(enum) {
-            v0: UserCompetitionHalloween,
-            v1: UserCompetitionEasterEggs,
-            v2: UserCompetitionRps,
-            v3: UserCompetitionElimination,
+            halloween: UserCompetitionHalloween,
+            easter_eggs: UserCompetitionEasterEggs,
+            rps: UserCompetitionRps,
+            elimination: UserCompetitionElimination,
         }) = .absent,
         icons: model.Presence(union(enum) {
-            v0: []const UserIconPrivate,
-            v1: []const UserIconPublic,
+            private_list: []const UserIconPrivate,
+            public_list: []const UserIconPublic,
         }) = .absent,
         itemmarket: model.Presence([]const UserItemMarketListing) = .absent,
         list: model.Presence([]const UserList) = .absent,
@@ -2777,13 +3387,13 @@ pub const getUserGeneric = struct {
             },
             rewards: []const struct {
                 type: union(enum) {
-                    v0: MissionRewardUpgrade,
-                    v1: []const u8,
+                    mission_reward_upgrade: MissionRewardUpgrade,
+                    string: []const u8,
                 },
                 details: union(enum) {
-                    v0: MissionRewardDetailsAmmo,
-                    v1: MissionRewardDetailsUpgrade,
-                    v2: MissionRewardDetailsItem,
+                    ammo: MissionRewardDetailsAmmo,
+                    upgrade: MissionRewardDetailsUpgrade,
+                    item: MissionRewardDetailsItem,
                 },
                 amount: i64,
                 cost: i64,
@@ -2793,7 +3403,7 @@ pub const getUserGeneric = struct {
             pub const json_schema = "{\"required\":[\"credits\",\"givers\",\"rewards\"],\"properties\":{\"credits\":{\"type\":\"integer\",\"format\":\"int32\"},\"givers\":{\"type\":\"array\",\"items\":{\"required\":[\"id\",\"name\",\"contracts\"],\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/UserId\"},\"name\":{\"type\":\"string\"},\"contracts\":{\"type\":\"array\",\"items\":{\"required\":[\"title\",\"difficulty\",\"status\",\"created_at\",\"started_at\",\"expires_at\",\"completed_at\",\"rewards\"],\"properties\":{\"title\":{\"type\":\"string\"},\"difficulty\":{\"$ref\":\"#/components/schemas/MissionDifficultyEnum\"},\"status\":{\"$ref\":\"#/components/schemas/MissionStatusEnum\"},\"created_at\":{\"type\":\"integer\",\"format\":\"int32\"},\"started_at\":{\"description\":\"Null if the status is 'Available'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"expires_at\":{\"description\":\"Null if the status is not 'Accepted'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"completed_at\":{\"description\":\"Null if the status is not 'Failed' or 'Completed'.\",\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"null\"}]},\"rewards\":{\"description\":\"Null if the status is not 'Completed'.\",\"oneOf\":[{\"required\":[\"money\",\"credits\"],\"properties\":{\"money\":{\"type\":\"integer\",\"format\":\"int32\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},{\"type\":\"null\"}]}},\"type\":\"object\"}}},\"type\":\"object\"}},\"rewards\":{\"type\":\"array\",\"items\":{\"required\":[\"type\",\"details\",\"amount\",\"cost\",\"expires_at\"],\"properties\":{\"type\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/MissionRewardUpgrade\"},{\"type\":\"string\"}]},\"details\":{\"description\":\"The response depends on the 'type' value.\",\"oneOf\":[{\"$ref\":\"#/components/schemas/MissionRewardDetailsAmmo\"},{\"$ref\":\"#/components/schemas/MissionRewardDetailsUpgrade\"},{\"$ref\":\"#/components/schemas/MissionRewardDetailsItem\"}]},\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"cost\":{\"type\":\"integer\",\"format\":\"int32\"},\"expires_at\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}}},\"type\":\"object\"}";
         }) = .absent,
         personalstats: model.Presence(union(enum) {
-            v0: struct {
+            value: struct {
                 attacking: struct {
                     attacks: struct {
                         won: i64,
@@ -2976,8 +3586,8 @@ pub const getUserGeneric = struct {
                     pub const json_schema = "{\"required\":[\"mails_sent\",\"classified_ads\",\"personals\"],\"properties\":{\"mails_sent\":{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"classified_ads\":{\"type\":\"integer\",\"format\":\"int32\"},\"personals\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
                 },
                 crimes: union(enum) {
-                    v0: PersonalStatsCrimesV1,
-                    v1: PersonalStatsCrimesV2,
+                    v1: PersonalStatsCrimesV1,
+                    v2: PersonalStatsCrimesV2,
                 },
                 bounties: struct {
                     placed: struct {
@@ -3147,7 +3757,7 @@ pub const getUserGeneric = struct {
                 },
                 pub const json_schema = "{\"properties\":{\"attacking\":{\"required\":[\"attacks\",\"defends\",\"elo\",\"unarmored_wins\",\"highest_level_beaten\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\",\"stealth\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"},\"stealth\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"total\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"unarmored_wins\":{\"type\":\"integer\",\"format\":\"int32\"},\"highest_level_beaten\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"total\",\"best\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"retaliations\",\"ranked_war_hits\",\"raid_hits\",\"territory\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"retaliations\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"raid_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"territory\":{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}},\"type\":\"object\"},\"battle_stats\":{\"required\":[\"strength\",\"defense\",\"speed\",\"dexterity\",\"total\"],\"properties\":{\"strength\":{\"type\":\"integer\",\"format\":\"int64\"},\"defense\":{\"type\":\"integer\",\"format\":\"int64\"},\"speed\":{\"type\":\"integer\",\"format\":\"int64\"},\"dexterity\":{\"type\":\"integer\",\"format\":\"int64\"},\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"jobs\":{\"required\":[\"job_points_used\",\"trains_received\",\"stats\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"},\"stats\":{\"required\":[\"manual\",\"intelligence\",\"endurance\",\"total\"],\"properties\":{\"manual\":{\"type\":\"integer\",\"format\":\"int32\"},\"intelligence\":{\"type\":\"integer\",\"format\":\"int32\"},\"endurance\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"trading\":{\"required\":[\"items\",\"trades\",\"points\",\"bazaar\"],\"properties\":{\"items\":{\"required\":[\"bought\",\"sent\",\"auctions\"],\"properties\":{\"bought\":{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"auctions\":{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"sent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trades\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"required\":[\"bought\",\"sold\"],\"properties\":{\"bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bazaar\":{\"required\":[\"customers\",\"sales\",\"profit\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"item_market\":{\"required\":[\"customers\",\"sales\",\"revenue\",\"fees\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"revenue\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"jail\":{\"required\":[\"times_jailed\",\"busts\",\"bails\"],\"properties\":{\"times_jailed\":{\"type\":\"integer\",\"format\":\"int32\"},\"busts\":{\"required\":[\"success\",\"fails\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"fails\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bails\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"hospital\":{\"required\":[\"times_hospitalized\",\"medical_items_used\",\"blood_withdrawn\",\"reviving\"],\"properties\":{\"times_hospitalized\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"blood_withdrawn\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\",\"revives_received\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"finishing_hits\":{\"required\":[\"heavy_artillery\",\"machine_guns\",\"rifles\",\"sub_machine_guns\",\"shotguns\",\"pistols\",\"temporary\",\"piercing\",\"slashing\",\"clubbing\",\"mechanical\",\"hand_to_hand\"],\"properties\":{\"heavy_artillery\":{\"type\":\"integer\",\"format\":\"int32\"},\"machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"rifles\":{\"type\":\"integer\",\"format\":\"int32\"},\"sub_machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"shotguns\":{\"type\":\"integer\",\"format\":\"int32\"},\"pistols\":{\"type\":\"integer\",\"format\":\"int32\"},\"temporary\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"slashing\":{\"type\":\"integer\",\"format\":\"int32\"},\"clubbing\":{\"type\":\"integer\",\"format\":\"int32\"},\"mechanical\":{\"type\":\"integer\",\"format\":\"int32\"},\"hand_to_hand\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"communication\":{\"required\":[\"mails_sent\",\"classified_ads\",\"personals\"],\"properties\":{\"mails_sent\":{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"classified_ads\":{\"type\":\"integer\",\"format\":\"int32\"},\"personals\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"crimes\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/PersonalStatsCrimesV1\"},{\"$ref\":\"#/components/schemas/PersonalStatsCrimesV2\"}]},\"bounties\":{\"required\":[\"placed\",\"collected\",\"received\"],\"properties\":{\"placed\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"collected\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"received\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"investments\":{\"required\":[\"bank\",\"stocks\"],\"properties\":{\"bank\":{\"required\":[\"total\",\"profit\",\"current\",\"time_remaining\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"},\"current\":{\"type\":\"integer\",\"format\":\"int64\"},\"time_remaining\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"stocks\":{\"required\":[\"profits\",\"losses\",\"fees\",\"net_profits\",\"payouts\"],\"properties\":{\"profits\":{\"type\":\"integer\",\"format\":\"int64\"},\"losses\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"},\"net_profits\":{\"type\":\"integer\",\"format\":\"int64\"},\"payouts\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"items\":{\"required\":[\"found\",\"trashed\",\"used\",\"viruses_coded\"],\"properties\":{\"found\":{\"required\":[\"city\",\"dump\",\"easter_eggs\"],\"properties\":{\"city\":{\"type\":\"integer\",\"format\":\"int32\"},\"dump\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int32\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"viruses_coded\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"travel\":{\"required\":[\"total\",\"time_spent\",\"items_bought\",\"hunting\",\"attacks_won\",\"defends_lost\",\"argentina\",\"canada\",\"cayman_islands\",\"china\",\"hawaii\",\"japan\",\"mexico\",\"united_arab_emirates\",\"united_kingdom\",\"south_africa\",\"switzerland\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"},\"items_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"hunting\":{\"required\":[\"skill\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"attacks_won\":{\"type\":\"integer\",\"format\":\"int32\"},\"defends_lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int32\"},\"canada\":{\"type\":\"integer\",\"format\":\"int32\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int32\"},\"china\":{\"type\":\"integer\",\"format\":\"int32\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int32\"},\"japan\":{\"type\":\"integer\",\"format\":\"int32\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int32\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int32\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"drugs\":{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"missions\":{\"required\":[\"missions\",\"contracts\",\"credits\"],\"properties\":{\"missions\":{\"type\":\"integer\",\"format\":\"int32\"},\"contracts\":{\"required\":[\"total\",\"duke\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"duke\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"racing\":{\"required\":[\"skill\",\"points\",\"races\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"races\":{\"required\":[\"entered\",\"won\"],\"properties\":{\"entered\":{\"type\":\"integer\",\"format\":\"int32\"},\"won\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"total\",\"wallet\",\"vaults\",\"bank\",\"overseas_bank\",\"points\",\"inventory\",\"display_case\",\"bazaar\",\"item_market\",\"property\",\"stock_market\",\"auction_house\",\"bookie\",\"company\",\"enlisted_cars\",\"piggy_bank\",\"pending\",\"loans\",\"unpaid_fees\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"wallet\":{\"type\":\"integer\",\"format\":\"int64\"},\"vaults\":{\"type\":\"integer\",\"format\":\"int64\"},\"bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"overseas_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"points\":{\"type\":\"integer\",\"format\":\"int64\"},\"inventory\":{\"type\":\"integer\",\"format\":\"int64\"},\"display_case\":{\"type\":\"integer\",\"format\":\"int64\"},\"bazaar\":{\"type\":\"integer\",\"format\":\"int64\"},\"item_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"property\":{\"type\":\"integer\",\"format\":\"int64\"},\"stock_market\":{\"type\":\"integer\",\"format\":\"int64\"},\"auction_house\":{\"type\":\"integer\",\"format\":\"int64\"},\"bookie\":{\"type\":\"integer\",\"format\":\"int64\"},\"company\":{\"type\":\"integer\",\"format\":\"int64\"},\"enlisted_cars\":{\"type\":\"integer\",\"format\":\"int64\"},\"piggy_bank\":{\"type\":\"integer\",\"format\":\"int64\"},\"pending\":{\"type\":\"integer\",\"format\":\"int64\"},\"loans\":{\"type\":\"integer\",\"format\":\"int64\"},\"unpaid_fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"other\":{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\",\"token\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"},\"token\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"required\":[\"attacking\",\"battle_stats\",\"jobs\",\"trading\",\"jail\",\"hospital\",\"finishing_hits\",\"communication\",\"crimes\",\"bounties\",\"investments\",\"items\",\"travel\",\"drugs\",\"missions\",\"racing\",\"networth\",\"other\"]}";
             },
-            v1: struct {
+            value_1: struct {
                 attacking: struct {
                     attacks: struct {
                         won: i64,
@@ -3314,8 +3924,8 @@ pub const getUserGeneric = struct {
                     pub const json_schema = "{\"required\":[\"mails_sent\",\"classified_ads\",\"personals\"],\"properties\":{\"mails_sent\":{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"classified_ads\":{\"type\":\"integer\",\"format\":\"int32\"},\"personals\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
                 },
                 crimes: union(enum) {
-                    v0: PersonalStatsCrimesV1,
-                    v1: PersonalStatsCrimesV2,
+                    v1: PersonalStatsCrimesV1,
+                    v2: PersonalStatsCrimesV2,
                 },
                 bounties: struct {
                     placed: struct {
@@ -3448,7 +4058,7 @@ pub const getUserGeneric = struct {
                 },
                 pub const json_schema = "{\"properties\":{\"attacking\":{\"required\":[\"attacks\",\"defends\",\"elo\",\"unarmored_wins\",\"highest_level_beaten\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\",\"stealth\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"},\"stealth\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"total\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"unarmored_wins\":{\"type\":\"integer\",\"format\":\"int32\"},\"highest_level_beaten\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"total\",\"best\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"retaliations\",\"ranked_war_hits\",\"raid_hits\",\"territory\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"retaliations\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"raid_hits\":{\"type\":\"integer\",\"format\":\"int32\"},\"territory\":{\"required\":[\"wall_joins\",\"wall_clears\",\"wall_time\"],\"properties\":{\"wall_joins\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_clears\":{\"type\":\"integer\",\"format\":\"int32\"},\"wall_time\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"}},\"type\":\"object\"},\"jobs\":{\"required\":[\"job_points_used\",\"trains_received\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trading\":{\"required\":[\"items\",\"trades\",\"points\",\"bazaar\"],\"properties\":{\"items\":{\"required\":[\"bought\",\"sent\",\"auctions\"],\"properties\":{\"bought\":{\"required\":[\"market\",\"shops\"],\"properties\":{\"market\":{\"type\":\"integer\",\"format\":\"int32\"},\"shops\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"auctions\":{\"required\":[\"won\",\"sold\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"sent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trades\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"required\":[\"bought\",\"sold\"],\"properties\":{\"bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"sold\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bazaar\":{\"required\":[\"customers\",\"sales\",\"profit\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"profit\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"item_market\":{\"required\":[\"customers\",\"sales\",\"revenue\",\"fees\"],\"properties\":{\"customers\":{\"type\":\"integer\",\"format\":\"int32\"},\"sales\":{\"type\":\"integer\",\"format\":\"int32\"},\"revenue\":{\"type\":\"integer\",\"format\":\"int64\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"jail\":{\"required\":[\"times_jailed\",\"busts\",\"bails\"],\"properties\":{\"times_jailed\":{\"type\":\"integer\",\"format\":\"int32\"},\"busts\":{\"required\":[\"success\",\"fails\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"fails\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"bails\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"hospital\":{\"required\":[\"times_hospitalized\",\"medical_items_used\",\"blood_withdrawn\",\"reviving\"],\"properties\":{\"times_hospitalized\":{\"type\":\"integer\",\"format\":\"int32\"},\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"blood_withdrawn\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\",\"revives_received\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"finishing_hits\":{\"required\":[\"heavy_artillery\",\"machine_guns\",\"rifles\",\"sub_machine_guns\",\"shotguns\",\"pistols\",\"temporary\",\"piercing\",\"slashing\",\"clubbing\",\"mechanical\",\"hand_to_hand\"],\"properties\":{\"heavy_artillery\":{\"type\":\"integer\",\"format\":\"int32\"},\"machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"rifles\":{\"type\":\"integer\",\"format\":\"int32\"},\"sub_machine_guns\":{\"type\":\"integer\",\"format\":\"int32\"},\"shotguns\":{\"type\":\"integer\",\"format\":\"int32\"},\"pistols\":{\"type\":\"integer\",\"format\":\"int32\"},\"temporary\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"slashing\":{\"type\":\"integer\",\"format\":\"int32\"},\"clubbing\":{\"type\":\"integer\",\"format\":\"int32\"},\"mechanical\":{\"type\":\"integer\",\"format\":\"int32\"},\"hand_to_hand\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"communication\":{\"required\":[\"mails_sent\",\"classified_ads\",\"personals\"],\"properties\":{\"mails_sent\":{\"required\":[\"total\",\"friends\",\"faction\",\"colleagues\",\"spouse\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"friends\":{\"type\":\"integer\",\"format\":\"int32\"},\"faction\":{\"type\":\"integer\",\"format\":\"int32\"},\"colleagues\":{\"type\":\"integer\",\"format\":\"int32\"},\"spouse\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"classified_ads\":{\"type\":\"integer\",\"format\":\"int32\"},\"personals\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"crimes\":{\"oneOf\":[{\"$ref\":\"#/components/schemas/PersonalStatsCrimesV1\"},{\"$ref\":\"#/components/schemas/PersonalStatsCrimesV2\"}]},\"bounties\":{\"required\":[\"placed\",\"collected\",\"received\"],\"properties\":{\"placed\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"collected\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"received\":{\"required\":[\"amount\",\"value\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"value\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"items\":{\"required\":[\"found\",\"trashed\",\"used\",\"viruses_coded\"],\"properties\":{\"found\":{\"required\":[\"city\",\"dump\",\"easter_eggs\"],\"properties\":{\"city\":{\"type\":\"integer\",\"format\":\"int32\"},\"dump\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"trashed\":{\"type\":\"integer\",\"format\":\"int32\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"viruses_coded\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"travel\":{\"required\":[\"total\",\"time_spent\",\"items_bought\",\"hunting\",\"attacks_won\",\"defends_lost\",\"argentina\",\"canada\",\"cayman_islands\",\"china\",\"hawaii\",\"japan\",\"mexico\",\"united_arab_emirates\",\"united_kingdom\",\"south_africa\",\"switzerland\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"},\"items_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"hunting\":{\"required\":[\"skill\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"attacks_won\":{\"type\":\"integer\",\"format\":\"int32\"},\"defends_lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"argentina\":{\"type\":\"integer\",\"format\":\"int32\"},\"canada\":{\"type\":\"integer\",\"format\":\"int32\"},\"cayman_islands\":{\"type\":\"integer\",\"format\":\"int32\"},\"china\":{\"type\":\"integer\",\"format\":\"int32\"},\"hawaii\":{\"type\":\"integer\",\"format\":\"int32\"},\"japan\":{\"type\":\"integer\",\"format\":\"int32\"},\"mexico\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_arab_emirates\":{\"type\":\"integer\",\"format\":\"int32\"},\"united_kingdom\":{\"type\":\"integer\",\"format\":\"int32\"},\"south_africa\":{\"type\":\"integer\",\"format\":\"int32\"},\"switzerland\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"drugs\":{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"missions\":{\"required\":[\"missions\",\"contracts\",\"credits\"],\"properties\":{\"missions\":{\"type\":\"integer\",\"format\":\"int32\"},\"contracts\":{\"required\":[\"total\",\"duke\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"duke\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"credits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"racing\":{\"required\":[\"skill\",\"points\",\"races\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"points\":{\"type\":\"integer\",\"format\":\"int32\"},\"races\":{\"required\":[\"entered\",\"won\"],\"properties\":{\"entered\":{\"type\":\"integer\",\"format\":\"int32\"},\"won\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"other\":{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\",\"token\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"},\"token\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"required\":[\"attacking\",\"jobs\",\"trading\",\"jail\",\"hospital\",\"finishing_hits\",\"communication\",\"crimes\",\"bounties\",\"items\",\"travel\",\"drugs\",\"missions\",\"racing\",\"networth\",\"other\"]}";
             },
-            v2: struct {
+            value_2: struct {
                 attacking: struct {
                     attacks: struct {
                         won: i64,
@@ -3596,35 +4206,35 @@ pub const getUserGeneric = struct {
                 },
                 pub const json_schema = "{\"properties\":{\"attacking\":{\"required\":[\"attacks\",\"defends\",\"elo\",\"escapes\",\"killstreak\",\"hits\",\"damage\",\"networth\",\"ammunition\",\"faction\"],\"properties\":{\"attacks\":{\"required\":[\"won\",\"lost\",\"stalemate\",\"assist\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"},\"assist\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"defends\":{\"required\":[\"won\",\"lost\",\"stalemate\"],\"properties\":{\"won\":{\"type\":\"integer\",\"format\":\"int32\"},\"lost\":{\"type\":\"integer\",\"format\":\"int32\"},\"stalemate\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"elo\":{\"type\":\"integer\",\"format\":\"int32\"},\"escapes\":{\"required\":[\"player\",\"foes\"],\"properties\":{\"player\":{\"type\":\"integer\",\"format\":\"int32\"},\"foes\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"killstreak\":{\"required\":[\"best\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hits\":{\"required\":[\"success\",\"miss\",\"critical\",\"one_hit_kills\"],\"properties\":{\"success\":{\"type\":\"integer\",\"format\":\"int32\"},\"miss\":{\"type\":\"integer\",\"format\":\"int32\"},\"critical\":{\"type\":\"integer\",\"format\":\"int32\"},\"one_hit_kills\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"damage\":{\"required\":[\"best\",\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"},\"best\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"money_mugged\",\"largest_mug\",\"items_looted\"],\"properties\":{\"money_mugged\":{\"type\":\"integer\",\"format\":\"int64\"},\"largest_mug\":{\"type\":\"integer\",\"format\":\"int64\"},\"items_looted\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"ammunition\":{\"required\":[\"total\",\"special\",\"hollow_point\",\"tracer\",\"piercing\",\"incendiary\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"special\":{\"type\":\"integer\",\"format\":\"int32\"},\"hollow_point\":{\"type\":\"integer\",\"format\":\"int32\"},\"tracer\":{\"type\":\"integer\",\"format\":\"int32\"},\"piercing\":{\"type\":\"integer\",\"format\":\"int32\"},\"incendiary\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"faction\":{\"required\":[\"respect\",\"ranked_war_hits\"],\"properties\":{\"respect\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_hits\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"jobs\":{\"required\":[\"job_points_used\",\"trains_received\"],\"properties\":{\"job_points_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"trains_received\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"hospital\":{\"required\":[\"medical_items_used\",\"reviving\"],\"properties\":{\"medical_items_used\":{\"type\":\"integer\",\"format\":\"int32\"},\"reviving\":{\"required\":[\"skill\",\"revives\"],\"properties\":{\"skill\":{\"type\":\"integer\",\"format\":\"int32\"},\"revives\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"crimes\":{\"required\":[\"total\",\"version\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"version\":{\"type\":\"string\"}},\"type\":\"object\"},\"items\":{\"required\":[\"found\",\"used\"],\"properties\":{\"found\":{\"required\":[\"dump\"],\"properties\":{\"dump\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"used\":{\"required\":[\"books\",\"boosters\",\"consumables\",\"candy\",\"alcohol\",\"energy_drinks\",\"stat_enhancers\",\"easter_eggs\"],\"properties\":{\"books\":{\"type\":\"integer\",\"format\":\"int32\"},\"boosters\":{\"type\":\"integer\",\"format\":\"int32\"},\"consumables\":{\"type\":\"integer\",\"format\":\"int32\"},\"candy\":{\"type\":\"integer\",\"format\":\"int32\"},\"alcohol\":{\"type\":\"integer\",\"format\":\"int32\"},\"energy_drinks\":{\"type\":\"integer\",\"format\":\"int32\"},\"stat_enhancers\":{\"type\":\"integer\",\"format\":\"int32\"},\"easter_eggs\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"travel\":{\"required\":[\"total\",\"time_spent\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"time_spent\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"drugs\":{\"required\":[\"cannabis\",\"ecstasy\",\"ketamine\",\"lsd\",\"opium\",\"pcp\",\"shrooms\",\"speed\",\"vicodin\",\"xanax\",\"total\",\"overdoses\",\"rehabilitations\"],\"properties\":{\"cannabis\":{\"type\":\"integer\",\"format\":\"int32\"},\"ecstasy\":{\"type\":\"integer\",\"format\":\"int32\"},\"ketamine\":{\"type\":\"integer\",\"format\":\"int32\"},\"lsd\":{\"type\":\"integer\",\"format\":\"int32\"},\"opium\":{\"type\":\"integer\",\"format\":\"int32\"},\"pcp\":{\"type\":\"integer\",\"format\":\"int32\"},\"shrooms\":{\"type\":\"integer\",\"format\":\"int32\"},\"speed\":{\"type\":\"integer\",\"format\":\"int32\"},\"vicodin\":{\"type\":\"integer\",\"format\":\"int32\"},\"xanax\":{\"type\":\"integer\",\"format\":\"int32\"},\"total\":{\"type\":\"integer\",\"format\":\"int32\"},\"overdoses\":{\"type\":\"integer\",\"format\":\"int32\"},\"rehabilitations\":{\"required\":[\"amount\",\"fees\"],\"properties\":{\"amount\":{\"type\":\"integer\",\"format\":\"int32\"},\"fees\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}},\"type\":\"object\"},\"networth\":{\"required\":[\"total\"],\"properties\":{\"total\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"},\"other\":{\"required\":[\"activity\",\"awards\",\"merits_bought\",\"refills\",\"donator_days\",\"ranked_war_wins\"],\"properties\":{\"activity\":{\"required\":[\"time\",\"streak\"],\"properties\":{\"time\":{\"description\":\"Time played in seconds\",\"type\":\"integer\",\"format\":\"int32\"},\"streak\":{\"required\":[\"best\",\"current\"],\"properties\":{\"best\":{\"type\":\"integer\",\"format\":\"int32\"},\"current\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"type\":\"object\"},\"awards\":{\"type\":\"integer\",\"format\":\"int32\"},\"merits_bought\":{\"type\":\"integer\",\"format\":\"int32\"},\"refills\":{\"required\":[\"energy\",\"nerve\"],\"properties\":{\"energy\":{\"type\":\"integer\",\"format\":\"int32\"},\"nerve\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"donator_days\":{\"type\":\"integer\",\"format\":\"int32\"},\"ranked_war_wins\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"required\":[\"attacking\",\"jobs\",\"hospital\",\"crimes\",\"items\",\"travel\",\"drugs\",\"networth\",\"other\"]}";
             },
-            v3: union(enum) {
-                v0: PersonalStatsAttackingPublic,
-                v1: PersonalStatsJobsPublic,
-                v2: PersonalStatsTrading,
-                v3: PersonalStatsJail,
-                v4: PersonalStatsHospital,
-                v5: PersonalStatsFinishingHits,
-                v6: PersonalStatsCommunication,
-                v7: PersonalStatsCrimes,
-                v8: PersonalStatsBounties,
-                v9: PersonalStatsItems,
-                v10: PersonalStatsTravel,
-                v11: PersonalStatsDrugs,
-                v12: PersonalStatsMissions,
-                v13: PersonalStatsRacing,
-                v14: PersonalStatsNetworthPublic,
-                v15: PersonalStatsOther,
+            value_3: union(enum) {
+                attacking_public: PersonalStatsAttackingPublic,
+                jobs_public: PersonalStatsJobsPublic,
+                trading: PersonalStatsTrading,
+                jail: PersonalStatsJail,
+                hospital: PersonalStatsHospital,
+                finishing_hits: PersonalStatsFinishingHits,
+                communication: PersonalStatsCommunication,
+                crimes: PersonalStatsCrimes,
+                bounties: PersonalStatsBounties,
+                items: PersonalStatsItems,
+                travel: PersonalStatsTravel,
+                drugs: PersonalStatsDrugs,
+                missions: PersonalStatsMissions,
+                racing: PersonalStatsRacing,
+                networth_public: PersonalStatsNetworthPublic,
+                other: PersonalStatsOther,
             },
-            v4: []const PersonalStatsHistoricStat,
+            personal_stats_historic_stat_list: []const PersonalStatsHistoricStat,
         }) = .absent,
         organizedCrime: model.Presence(union(enum) {
-            v0: FactionCrime,
-            v1: UserOrganizedCrimeError,
-            v2: void,
+            faction_crime: FactionCrime,
+            user_organized_crime_error: UserOrganizedCrimeError,
+            null: void,
         }) = .absent,
         itemmods: model.Presence([]const UserItemMod) = .absent,
         attacks: model.Presence(union(enum) {
-            v0: []const Attack,
-            v1: []const AttackSimplified,
+            attack_list: []const Attack,
+            attack_simplified_list: []const AttackSimplified,
         }) = .absent,
         bars: model.Presence(UserBars) = .absent,
         cooldowns: model.Presence(struct {
@@ -3781,16 +4391,23 @@ pub const getMyFactionApplications = struct {
     pub const operation_id = "getMyFactionApplications";
     pub const path = "/faction/applications";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionApplicationsResponse;
     pub const media_type = "application/json";
@@ -3800,24 +4417,31 @@ pub const getMyFactionAttacks = struct {
     pub const operation_id = "getMyFactionAttacks";
     pub const path = "/faction/attacks";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"idFilter\"]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         filters: model.Presence([]const ApiFiltersAttacksRevivesEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = AttacksResponse;
     pub const media_type = "application/json";
@@ -3827,24 +4451,31 @@ pub const getMyFactionAttacksSimplified = struct {
     pub const operation_id = "getMyFactionAttacksSimplified";
     pub const path = "/faction/attacksfull";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"idFilter\"]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":1000,\"maximum\":1000,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         filters: model.Presence([]const ApiFiltersAttacksRevivesEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = AttacksFullResponse;
     pub const media_type = "application/json";
@@ -3854,20 +4485,27 @@ pub const getMyFactionBalance = struct {
     pub const operation_id = "getMyFactionBalance";
     pub const path = "/faction/balance";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"all\",\"current\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        cat: model.Presence(enum {
+        cat: model.Presence(model.Open(enum {
             all,
             current,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionBalanceResponse;
     pub const media_type = "application/json";
@@ -3877,16 +4515,23 @@ pub const getMyFactionBasicInformation = struct {
     pub const operation_id = "getMyFactionBasicInformation";
     pub const path = "/faction/basic";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionBasicResponse;
     pub const media_type = "application/json";
@@ -3896,17 +4541,24 @@ pub const getFactionBasicInformation = struct {
     pub const operation_id = "getFactionBasicInformation";
     pub const path = "/faction/{id}/basic";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionBasicResponse;
     pub const media_type = "application/json";
@@ -3916,16 +4568,23 @@ pub const getMyFactionChain = struct {
     pub const operation_id = "getMyFactionChain";
     pub const path = "/faction/chain";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionOngoingChainResponse;
     pub const media_type = "application/json";
@@ -3935,17 +4594,24 @@ pub const getFactionChain = struct {
     pub const operation_id = "getFactionChain";
     pub const path = "/faction/{id}/chain";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionOngoingChainResponse;
     pub const media_type = "application/json";
@@ -3955,23 +4621,30 @@ pub const getMyFactionCompletedChains = struct {
     pub const operation_id = "getMyFactionCompletedChains";
     pub const path = "/faction/chains";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionChainsResponse;
     pub const media_type = "application/json";
@@ -3981,24 +4654,31 @@ pub const getFactionCompletedChains = struct {
     pub const operation_id = "getFactionCompletedChains";
     pub const path = "/faction/{id}/chains";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionChainsResponse;
     pub const media_type = "application/json";
@@ -4008,16 +4688,23 @@ pub const getMyFactionLatestChainReport = struct {
     pub const operation_id = "getMyFactionLatestChainReport";
     pub const path = "/faction/chainreport";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionChainReportResponse;
     pub const media_type = "application/json";
@@ -4027,17 +4714,24 @@ pub const getChainReport = struct {
     pub const operation_id = "getChainReport";
     pub const path = "/faction/{chainId}/chainreport";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"chainId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         chainId: ChainId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionChainReportResponse;
     pub const media_type = "application/json";
@@ -4047,21 +4741,28 @@ pub const getMyFactionContributors = struct {
     pub const operation_id = "getMyFactionContributors";
     pub const path = "/faction/contributors";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"stat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"medicalitemsused\",\"criminaloffences\",\"organisedcrimerespect\",\"organisedcrimemoney\",\"organisedcrimesuccess\",\"organisedcrimefail\",\"attackswon\",\"attackslost\",\"attackschain\",\"attacksleave\",\"attacksmug\",\"attackshosp\",\"bestchain\",\"busts\",\"revives\",\"jails\",\"hosps\",\"medicalitemrecovery\",\"medicalcooldownused\",\"gymtrains\",\"gymstrength\",\"gymspeed\",\"gymenergy\",\"gymdefense\",\"gymdexterity\",\"candyused\",\"alcoholused\",\"energydrinkused\",\"drugsused\",\"drugoverdoses\",\"rehabs\",\"caymaninterest\",\"traveltimes\",\"traveltime\",\"hunting\",\"attacksdamagehits\",\"attacksdamage\",\"hosptimegiven\",\"hosptimereceived\",\"attacksdamaging\",\"attacksrunaway\",\"highestterritories\",\"territoryrespect\",\"membersamount\"]}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"all\",\"current\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         stat: FactionStatEnum,
-        cat: model.Presence(enum {
+        cat: model.Presence(model.Open(enum {
             all,
             current,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionContributorsResponse;
     pub const media_type = "application/json";
@@ -4071,16 +4772,23 @@ pub const getMyFactionCrimeExp = struct {
     pub const operation_id = "getMyFactionCrimeExp";
     pub const path = "/faction/crimeexp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionCrimeExpResponse;
     pub const media_type = "application/json";
@@ -4090,11 +4798,19 @@ pub const getMyFactionOrganizedCrimes = struct {
     pub const operation_id = "getMyFactionOrganizedCrimes";
     pub const path = "/faction/crimes";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"all\",\"recruiting\",\"planning\",\"failure\",\"successful\",\"expired\",\"available\",\"completed\"]}},{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"created_at\",\"executed_at\",\"ready_at\",\"expired_at\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        cat: model.Presence(enum {
+        cat: model.Presence(model.Open(enum {
             all,
             recruiting,
             planning,
@@ -4103,27 +4819,26 @@ pub const getMyFactionOrganizedCrimes = struct {
             expired,
             available,
             completed,
-        }) = .absent,
-        filters: model.Presence(enum {
+        })) = .absent,
+        filters: model.Presence(model.Open(enum {
             created_at,
             executed_at,
             ready_at,
             expired_at,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionCrimesResponse;
     pub const media_type = "application/json";
@@ -4133,17 +4848,24 @@ pub const getMyFactionOrganizedCrime = struct {
     pub const operation_id = "getMyFactionOrganizedCrime";
     pub const path = "/faction/{crimeId}/crime";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"crimeId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int64\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         crimeId: FactionCrimeId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionCrimeResponse;
     pub const media_type = "application/json";
@@ -4153,16 +4875,23 @@ pub const getWarfareDirtyBombs = struct {
     pub const operation_id = "getWarfareDirtyBombs";
     pub const path = "/faction/dirtybombs";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionWarfareDirtyBombsResponse;
     pub const media_type = "application/json";
@@ -4172,16 +4901,23 @@ pub const getMyFactionHoF = struct {
     pub const operation_id = "getMyFactionHoF";
     pub const path = "/faction/hof";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionHofResponse;
     pub const media_type = "application/json";
@@ -4191,17 +4927,24 @@ pub const getFactionHoF = struct {
     pub const operation_id = "getFactionHoF";
     pub const path = "/faction/{id}/hof";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionHofResponse;
     pub const media_type = "application/json";
@@ -4211,19 +4954,26 @@ pub const getMyFactionInventory = struct {
     pub const operation_id = "getMyFactionInventory";
     pub const path = "/faction/inventory";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = 300;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"weapons\",\"armor\",\"temporary\",\"medical\",\"consumables\",\"drugs\",\"boosters\",\"utilities\",\"loot\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: FactionArmoryCategoryEnum,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionInventoryResponse;
     pub const media_type = "application/json";
@@ -4233,20 +4983,27 @@ pub const getMyFactionMembers = struct {
     pub const operation_id = "getMyFactionMembers";
     pub const path = "/faction/members";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionMembersResponse;
     pub const media_type = "application/json";
@@ -4256,21 +5013,28 @@ pub const getFactionMembers = struct {
     pub const operation_id = "getFactionMembers";
     pub const path = "/faction/{id}/members";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionMembersResponse;
     pub const media_type = "application/json";
@@ -4280,28 +5044,35 @@ pub const getMyFactionNews = struct {
     pub const operation_id = "getMyFactionNews";
     pub const path = "/faction/news";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"false\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"main\",\"attack\",\"armoryDeposit\",\"armoryAction\",\"territoryWar\",\"rankedWar\",\"territoryGain\",\"chain\",\"crime\",\"membership\",\"depositFunds\",\"giveFunds\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         cat: FactionNewsCategory,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = NewsResponse;
     pub const media_type = "application/json";
@@ -4311,16 +5082,23 @@ pub const getMyFactionPositions = struct {
     pub const operation_id = "getMyFactionPositions";
     pub const path = "/faction/positions";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionPositionsResponse;
     pub const media_type = "application/json";
@@ -4330,16 +5108,23 @@ pub const getFactionRackets = struct {
     pub const operation_id = "getFactionRackets";
     pub const path = "/faction/rackets";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionRacketsResponse;
     pub const media_type = "application/json";
@@ -4349,17 +5134,24 @@ pub const getRaidReport = struct {
     pub const operation_id = "getRaidReport";
     pub const path = "/faction/{raidWarId}/raidreport";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"raidWarId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         raidWarId: RaidWarId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionRaidWarReportResponse;
     pub const media_type = "application/json";
@@ -4369,23 +5161,30 @@ pub const getMyFactionRaidsHistory = struct {
     pub const operation_id = "getMyFactionRaidsHistory";
     pub const path = "/faction/raids";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionRaidsResponse;
     pub const media_type = "application/json";
@@ -4395,24 +5194,31 @@ pub const getFactionRaidsHistory = struct {
     pub const operation_id = "getFactionRaidsHistory";
     pub const path = "/faction/{id}/raids";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionRaidsResponse;
     pub const media_type = "application/json";
@@ -4422,24 +5228,31 @@ pub const getMyFactionRankedWarsHistory = struct {
     pub const operation_id = "getMyFactionRankedWarsHistory";
     pub const path = "/faction/rankedwars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionRankedWarResponse;
     pub const media_type = "application/json";
@@ -4449,19 +5262,26 @@ pub const getFactionRankedWarsHistory = struct {
     pub const operation_id = "getFactionRankedWarsHistory";
     pub const path = "/faction/{id}/rankedwars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionRankedWarResponse;
     pub const media_type = "application/json";
@@ -4471,17 +5291,24 @@ pub const getRankedWarReport = struct {
     pub const operation_id = "getRankedWarReport";
     pub const path = "/faction/{rankedWarId}/rankedwarreport";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"rankedWarId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         rankedWarId: RankedWarId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionRankedWarReportResponse;
     pub const media_type = "application/json";
@@ -4491,24 +5318,31 @@ pub const getMyFactionReports = struct {
     pub const operation_id = "getMyFactionReports";
     pub const path = "/faction/reports";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"mostwanted\",\"money\",\"stats\",\"references\",\"friendorfoe\",\"companyfinancials\",\"truelevel\",\"stockanalysis\",\"anonymousbounties\",\"investment\"]}},{\"name\":\"target\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: model.Presence(ReportTypeEnum) = .absent,
         target: model.Presence(UserId) = .absent,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = ReportsResponse;
     pub const media_type = "application/json";
@@ -4518,28 +5352,35 @@ pub const getMyFactionRevives = struct {
     pub const operation_id = "getMyFactionRevives";
     pub const path = "/faction/revives";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"idFilter\"]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         filters: model.Presence([]const ApiFiltersAttacksRevivesEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RevivesResponse;
     pub const media_type = "application/json";
@@ -4549,28 +5390,35 @@ pub const getMyFactionRevivesSimplified = struct {
     pub const operation_id = "getMyFactionRevivesSimplified";
     pub const path = "/faction/revivesFull";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"incoming\",\"outgoing\",\"idFilter\"]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":1000,\"maximum\":1000,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         filters: model.Presence([]const ApiFiltersAttacksRevivesEnum) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RevivesFullResponse;
     pub const media_type = "application/json";
@@ -4580,28 +5428,35 @@ pub const getFactionSearch = struct {
     pub const operation_id = "getFactionSearch";
     pub const path = "/faction/search";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"name\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}},{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"schema\":\"Parameters\",\"oneOf\":[{\"type\":\"string\",\"enum\":[\"destroyed\",\"notDestroyed\",\"recruiting\",\"notRecruiting\"]},{\"type\":\"string\",\"pattern\":\"^(id|respect|members|membersMax):(=|!=|<|<=|>=|>|Equal|NotEqual|Less|LessOrEqual|GreaterOrEqual|Greater):\\\\d+$\"}]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         name: model.Presence([]const u8) = .absent,
         filters: model.Presence([]const union(enum) {
-            v0: enum {
+            named: model.Open(enum {
                 destroyed,
                 notDestroyed,
                 recruiting,
                 notRecruiting,
-            },
-            v1: []const u8,
+            }),
+            pattern: []const u8,
         }) = .absent,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionSearchResponse;
     pub const media_type = "application/json";
@@ -4611,16 +5466,23 @@ pub const getFactionsSnapshot = struct {
     pub const operation_id = "getFactionsSnapshot";
     pub const path = "/faction/snapshot";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = []const u8;
     pub const media_type = "text/csv";
@@ -4630,16 +5492,23 @@ pub const getMyFactionStats = struct {
     pub const operation_id = "getMyFactionStats";
     pub const path = "/faction/stats";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionStatsResponse;
     pub const media_type = "application/json";
@@ -4649,16 +5518,23 @@ pub const getMyFactionTerritory = struct {
     pub const operation_id = "getMyFactionTerritory";
     pub const path = "/faction/territory";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionTerritoriesResponse;
     pub const media_type = "application/json";
@@ -4668,17 +5544,24 @@ pub const getFactionTerritory = struct {
     pub const operation_id = "getFactionTerritory";
     pub const path = "/faction/{id}/territory";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionTerritoriesResponse;
     pub const media_type = "application/json";
@@ -4688,18 +5571,25 @@ pub const getTerritoryOwnership = struct {
     pub const operation_id = "getTerritoryOwnership";
     pub const path = "/faction/territoryownership";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":500,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionTerritoriesOwnershipResponse;
     pub const media_type = "application/json";
@@ -4709,23 +5599,30 @@ pub const getMyFactionTerritoryWarsHistory = struct {
     pub const operation_id = "getMyFactionTerritoryWarsHistory";
     pub const path = "/faction/territorywars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionTerritoryWarsHistoryResponse;
     pub const media_type = "application/json";
@@ -4735,24 +5632,31 @@ pub const getFactionTerritoryWarsHistory = struct {
     pub const operation_id = "getFactionTerritoryWarsHistory";
     pub const path = "/faction/{id}/territorywars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionTerritoryWarsHistoryResponse;
     pub const media_type = "application/json";
@@ -4762,17 +5666,24 @@ pub const getTerritoryWarReport = struct {
     pub const operation_id = "getTerritoryWarReport";
     pub const path = "/faction/{territoryWarId}/territorywarreport";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"territoryWarId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         territoryWarId: TerritoryWarId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionTerritoryWarReportResponse;
     pub const media_type = "application/json";
@@ -4782,16 +5693,23 @@ pub const getMyFactionUpgrades = struct {
     pub const operation_id = "getMyFactionUpgrades";
     pub const path = "/faction/upgrades";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionUpgradesResponse;
     pub const media_type = "application/json";
@@ -4801,27 +5719,34 @@ pub const getWarfareChains = struct {
     pub const operation_id = "getWarfareChains";
     pub const path = "/faction/warfarechains";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"active\",\"complete\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        cat: enum {
+        cat: model.Open(enum {
             active,
             complete,
-        },
+        }),
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionWarfareChainsResponse;
     pub const media_type = "application/json";
@@ -4831,23 +5756,30 @@ pub const getWarfareRaids = struct {
     pub const operation_id = "getWarfareRaids";
     pub const path = "/faction/warfareraids";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionWarfareRaidsResponse;
     pub const media_type = "application/json";
@@ -4857,23 +5789,30 @@ pub const getWarfareRankedWars = struct {
     pub const operation_id = "getWarfareRankedWars";
     pub const path = "/faction/warfareranked";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionWarfareRankedResponse;
     pub const media_type = "application/json";
@@ -4883,23 +5822,30 @@ pub const getWarfareTerritoryWars = struct {
     pub const operation_id = "getWarfareTerritoryWars";
     pub const path = "/faction/warfareterritory";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionWarfareTerritoryWarsResponse;
     pub const media_type = "application/json";
@@ -4909,24 +5855,31 @@ pub const getWarfare = struct {
     pub const operation_id = "getWarfare";
     pub const path = "/faction/warfare";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"ranked\",\"territory\",\"raid\",\"chain\",\"chainOngoing\",\"db\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: FactionWarfareTypeEnum,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionWarfareResponse;
     pub const media_type = "application/json";
@@ -4936,16 +5889,23 @@ pub const getMyFactionWars = struct {
     pub const operation_id = "getMyFactionWars";
     pub const path = "/faction/wars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionWarsResponse;
     pub const media_type = "application/json";
@@ -4955,17 +5915,24 @@ pub const getFactionWars = struct {
     pub const operation_id = "getFactionWars";
     pub const path = "/faction/{id}/wars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: FactionId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionWarsResponse;
     pub const media_type = "application/json";
@@ -4975,16 +5942,23 @@ pub const getFactionLookup = struct {
     pub const operation_id = "getFactionLookup";
     pub const path = "/faction/lookup";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = FactionLookupResponse;
     pub const media_type = "application/json";
@@ -4994,16 +5968,23 @@ pub const getFactionTimestamp = struct {
     pub const operation_id = "getFactionTimestamp";
     pub const path = "/faction/timestamp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TimestampResponse;
     pub const media_type = "application/json";
@@ -5013,29 +5994,37 @@ pub const getFactionGeneric = struct {
     pub const operation_id = "getFactionGeneric";
     pub const path = "/faction";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"applications\",\"attacks\",\"attacksfull\",\"balance\",\"basic\",\"chain\",\"chainreport\",\"chains\",\"contributors\",\"crime\",\"crimes\",\"crimeexp\",\"dirtbombs\",\"hof\",\"lookup\",\"members\",\"news\",\"positions\",\"rackets\",\"raidreport\",\"raids\",\"rankedwars\",\"rankedwarreport\",\"reports\",\"revives\",\"revivesfull\",\"search\",\"stats\",\"territory\",\"territoryownership\",\"territorywarreport\",\"territorywars\",\"timestamp\",\"upgrades\",\"warfarechains\",\"warfareraids\",\"warfareranked\",\"warfareterritory\",\"wars\"]},{\"type\":\"string\"}]}}},{\"name\":\"id\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int64\"},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"}]}},{\"name\":\"legacy\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"applications\",\"attacks\",\"attacksfull\",\"balance\",\"basic\",\"chain\",\"chainreport\",\"chains\",\"contributors\",\"crime\",\"crimes\",\"crimeexp\",\"dirtbombs\",\"hof\",\"lookup\",\"members\",\"news\",\"positions\",\"rackets\",\"raidreport\",\"raids\",\"rankedwars\",\"rankedwarreport\",\"reports\",\"revives\",\"revivesfull\",\"search\",\"stats\",\"territory\",\"territoryownership\",\"territorywarreport\",\"territorywars\",\"timestamp\",\"upgrades\",\"warfarechains\",\"warfareraids\",\"warfareranked\",\"warfareterritory\",\"wars\"]},{\"type\":\"string\"}]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":1}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"all\",\"current\"]},{\"type\":\"string\",\"enum\":[\"all\",\"recruiting\",\"planning\",\"failure\",\"successful\",\"expired\",\"available\",\"completed\"]},{\"type\":\"string\",\"enum\":[\"main\",\"attack\",\"armoryDeposit\",\"armoryAction\",\"territoryWar\",\"rankedWar\",\"territoryGain\",\"chain\",\"crime\",\"membership\",\"depositFunds\",\"giveFunds\"]},{\"type\":\"string\",\"enum\":[\"all\",\"ongoing\"]},{\"type\":\"string\",\"enum\":[\"weapons\",\"armor\",\"temporary\",\"medical\",\"consumables\",\"drugs\",\"boosters\",\"utilities\",\"loot\"]},{\"type\":\"string\",\"enum\":[\"mostwanted\",\"money\",\"stats\",\"references\",\"friendorfoe\",\"companyfinancials\",\"truelevel\",\"stockanalysis\",\"anonymousbounties\",\"investment\"]},{\"type\":\"string\",\"enum\":[\"ranked\",\"territory\",\"raid\",\"chain\",\"chainOngoing\",\"db\"]},{\"type\":\"string\",\"enum\":[\"finsihed\",\"ongoing\"]}]}},{\"name\":\"stat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"medicalitemsused\",\"criminaloffences\",\"organisedcrimerespect\",\"organisedcrimemoney\",\"organisedcrimesuccess\",\"organisedcrimefail\",\"attackswon\",\"attackslost\",\"attackschain\",\"attacksleave\",\"attacksmug\",\"attackshosp\",\"bestchain\",\"busts\",\"revives\",\"jails\",\"hosps\",\"medicalitemrecovery\",\"medicalcooldownused\",\"gymtrains\",\"gymstrength\",\"gymspeed\",\"gymenergy\",\"gymdefense\",\"gymdexterity\",\"candyused\",\"alcoholused\",\"energydrinkused\",\"drugsused\",\"drugoverdoses\",\"rehabs\",\"caymaninterest\",\"traveltimes\",\"traveltime\",\"hunting\",\"attacksdamagehits\",\"attacksdamage\",\"hosptimegiven\",\"hosptimereceived\",\"attacksdamaging\",\"attacksrunaway\",\"highestterritories\",\"territoryrespect\",\"membersamount\"]}},{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"created_at\",\"executed_at\",\"ready_at\",\"expired_at\",\"incoming\",\"outgoing\"]}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const FactionSelectionName) = .absent,
         id: model.Presence(union(enum) {
-            v0: FactionId,
-            v1: FactionCrimeId,
-            v2: ChainId,
-            v3: RankedWarId,
-            v4: TerritoryWarId,
-            v5: RaidWarId,
+            faction: FactionId,
+            faction_crime: FactionCrimeId,
+            chain: ChainId,
+            ranked_war: RankedWarId,
+            territory_war: TerritoryWarId,
+            raid_war: RaidWarId,
         }) = .absent,
         legacy: model.Presence([]const FactionSelectionName) = .absent,
         limit: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         cat: model.Presence(union(enum) {
-            v0: enum {
+            named: model.Open(enum {
                 all,
                 current,
-            },
-            v1: enum {
+            }),
+            named_1: model.Open(enum {
                 all,
                 recruiting,
                 planning,
@@ -5044,38 +6033,37 @@ pub const getFactionGeneric = struct {
                 expired,
                 available,
                 completed,
-            },
-            v2: FactionNewsCategory,
-            v3: FactionRankedWarsCategoryEnum,
-            v4: FactionArmoryCategoryEnum,
-            v5: ReportTypeEnum,
-            v6: FactionWarfareTypeEnum,
-            v7: FactionTerritoryWarsCategoryEnum,
+            }),
+            faction_news_category: FactionNewsCategory,
+            faction_ranked_wars_category: FactionRankedWarsCategoryEnum,
+            faction_armory_category: FactionArmoryCategoryEnum,
+            report_type: ReportTypeEnum,
+            faction_warfare_type: FactionWarfareTypeEnum,
+            faction_territory_wars_category: FactionTerritoryWarsCategoryEnum,
         }) = .absent,
         stat: model.Presence(FactionStatEnum) = .absent,
-        filters: model.Presence(enum {
+        filters: model.Presence(model.Open(enum {
             created_at,
             executed_at,
             ready_at,
             expired_at,
             incoming,
             outgoing,
-        }) = .absent,
-        striptags: model.Presence(enum {
+        })) = .absent,
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
-        sort: model.Presence(enum {
+        })) = .absent,
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         hof: model.Presence(FactionHofStats) = .absent,
@@ -5085,17 +6073,17 @@ pub const getFactionGeneric = struct {
         wars: model.Presence(FactionWars) = .absent,
         news: model.Presence([]const News) = .absent,
         _metadata: model.Presence(union(enum) {
-            v0: RequestMetadataWithLinks,
-            v1: RequestMetadataWithLinksAndTotal,
+            links: RequestMetadataWithLinks,
+            links_and_total: RequestMetadataWithLinksAndTotal,
         }) = .absent,
         revives: model.Presence(union(enum) {
-            v0: []const Revive,
-            v1: []const ReviveSimplified,
+            revive_list: []const Revive,
+            revive_simplified_list: []const ReviveSimplified,
         }) = .absent,
         territorywars: model.Presence([]const FactionTerritoryWarFinished) = .absent,
         attacks: model.Presence(union(enum) {
-            v0: []const Attack,
-            v1: []const AttackSimplified,
+            attack_list: []const Attack,
+            attack_simplified_list: []const AttackSimplified,
         }) = .absent,
         balance: model.Presence(FactionBalance) = .absent,
         raidreport: model.Presence(FactionRaidReport) = .absent,
@@ -5109,11 +6097,11 @@ pub const getFactionGeneric = struct {
         crime: model.Presence(FactionCrime) = .absent,
         raids: model.Presence([]const FactionRaidWarfare) = .absent,
         warfare: model.Presence(union(enum) {
-            v0: []const FactionRankedWarDetails,
-            v1: []const FactionTerritoryWarfare,
-            v2: []const FactionChainWarfare,
-            v3: []const FactionRaidWarfare,
-            v4: []const FactionWarfareDirtyBomb,
+            ranked_war_details_list: []const FactionRankedWarDetails,
+            territory_warfare_list: []const FactionTerritoryWarfare,
+            chain_warfare_list: []const FactionChainWarfare,
+            raid_warfare_list: []const FactionRaidWarfare,
+            warfare_dirty_bomb_list: []const FactionWarfareDirtyBomb,
         }) = .absent,
         rankedwarreport: model.Presence(struct {
             id: RankedWarId,
@@ -5181,16 +6169,23 @@ pub const getMyCompanyApplications = struct {
     pub const operation_id = "getMyCompanyApplications";
     pub const path = "/company/applications";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompanyApplicationsResponse;
     pub const media_type = "application/json";
@@ -5200,20 +6195,27 @@ pub const getMyCompanyEmployees = struct {
     pub const operation_id = "getMyCompanyEmployees";
     pub const path = "/company/employees";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompanyEmployeesResponse;
     pub const media_type = "application/json";
@@ -5223,21 +6225,28 @@ pub const getCompanyEmployees = struct {
     pub const operation_id = "getCompanyEmployees";
     pub const path = "/company/{id}/employees";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: CompanyId,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompanyEmployeesResponseBasic;
     pub const media_type = "application/json";
@@ -5247,28 +6256,35 @@ pub const getMyCompanyNews = struct {
     pub const operation_id = "getMyCompanyNews";
     pub const path = "/company/news";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"false\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"main\",\"funds\",\"training\",\"employees\",\"all\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         cat: CompanyNewsCategory,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = NewsResponse;
     pub const media_type = "application/json";
@@ -5278,23 +6294,30 @@ pub const getCompaniesList = struct {
     pub const operation_id = "getCompaniesList";
     pub const path = "/company/{typeId}/companies";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"typeId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         typeId: CompanyTypeId,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompaniesResponse;
     pub const media_type = "application/json";
@@ -5304,20 +6327,27 @@ pub const getMyCompanyProfile = struct {
     pub const operation_id = "getMyCompanyProfile";
     pub const path = "/company/profile";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompanyProfileResponseMixed;
     pub const media_type = "application/json";
@@ -5327,21 +6357,28 @@ pub const getCompanyProfile = struct {
     pub const operation_id = "getCompanyProfile";
     pub const path = "/company/{id}/profile";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: CompanyId,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompanyProfileResponse;
     pub const media_type = "application/json";
@@ -5351,26 +6388,33 @@ pub const getCompaniesSearch = struct {
     pub const operation_id = "getCompaniesSearch";
     pub const path = "/company/search";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"name\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}},{\"name\":\"filters\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"schema\":\"CompanySearchParameter\",\"oneOf\":[{\"type\":\"string\",\"enum\":[\"recruiting\",\"notRecruiting\"]},{\"type\":\"string\",\"pattern\":\"^(id|type|daysOld|rating|dailyIncome|weeklyIncome|dailyCustomers|weeklyCustomers):(=|!=|<|<=|>=|>|Equal|NotEqual|Less|LessOrEqual|GreaterOrEqual|Greater):\\\\d+$\"}]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         name: model.Presence([]const u8) = .absent,
         filters: model.Presence([]const union(enum) {
-            v0: enum {
+            named: model.Open(enum {
                 recruiting,
                 notRecruiting,
-            },
-            v1: []const u8,
+            }),
+            pattern: []const u8,
         }) = .absent,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompaniesSearchResponse;
     pub const media_type = "application/json";
@@ -5380,16 +6424,23 @@ pub const getCompaniesSnapshot = struct {
     pub const operation_id = "getCompaniesSnapshot";
     pub const path = "/company/snapshot";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = []const u8;
     pub const media_type = "text/csv";
@@ -5399,16 +6450,23 @@ pub const getMyCompanyStock = struct {
     pub const operation_id = "getMyCompanyStock";
     pub const path = "/company/stock";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .limited;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompanyStockResponse;
     pub const media_type = "application/json";
@@ -5418,16 +6476,23 @@ pub const getCompanyLookup = struct {
     pub const operation_id = "getCompanyLookup";
     pub const path = "/company/lookup";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = CompanyLookupResponse;
     pub const media_type = "application/json";
@@ -5437,16 +6502,23 @@ pub const getCompanyTimestamp = struct {
     pub const operation_id = "getCompanyTimestamp";
     pub const path = "/company/timestamp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TimestampResponse;
     pub const media_type = "application/json";
@@ -5456,47 +6528,54 @@ pub const getCompanyGeneric = struct {
     pub const operation_id = "getCompanyGeneric";
     pub const path = "/company";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"applications\",\"companies\",\"employees\",\"lookup\",\"news\",\"profile\",\"snapshot\",\"stock\",\"timestamp\"]},{\"type\":\"string\"}]}}},{\"name\":\"id\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"}]}},{\"name\":\"legacy\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"applications\",\"companies\",\"employees\",\"lookup\",\"news\",\"profile\",\"snapshot\",\"stock\",\"timestamp\"]},{\"type\":\"string\"}]}}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"main\",\"funds\",\"training\",\"employees\",\"all\"]}]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":1}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const CompanySelectionName) = .absent,
         id: model.Presence(union(enum) {
-            v0: CompanyId,
+            company_id: CompanyId,
         }) = .absent,
         legacy: model.Presence([]const CompanySelectionName) = .absent,
         cat: model.Presence(union(enum) {
-            v0: CompanyNewsCategory,
+            company_news_category: CompanyNewsCategory,
         }) = .absent,
         limit: model.Presence(i64) = .absent,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         applications: model.Presence([]const CompanyApplication) = .absent,
         employees: model.Presence(union(enum) {
-            v0: []const union(enum) {
-                v0: CompanyEmployee,
-                v1: CompanyEmployeeExtended,
-                v2: CompanyEmployeeFull,
+            array: []const union(enum) {
+                employee: CompanyEmployee,
+                employee_extended: CompanyEmployeeExtended,
+                employee_full: CompanyEmployeeFull,
             },
-            v1: []const CompanyEmployee,
+            company_employee_list: []const CompanyEmployee,
         }) = .absent,
         profile: model.Presence(union(enum) {
-            v0: union(enum) {
-                v0: CompanyProfile,
-                v1: CompanyProfileExtended,
+            value: union(enum) {
+                profile: CompanyProfile,
+                profile_extended: CompanyProfileExtended,
             },
-            v1: CompanyProfile,
+            company_profile: CompanyProfile,
         }) = .absent,
         news: model.Presence([]const News) = .absent,
         _metadata: model.Presence(RequestMetadataWithLinks) = .absent,
@@ -5512,16 +6591,23 @@ pub const getForumCategories = struct {
     pub const operation_id = "getForumCategories";
     pub const path = "/forum/categories";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = ForumCategoriesResponse;
     pub const media_type = "application/json";
@@ -5531,28 +6617,35 @@ pub const getForumThreadPosts = struct {
     pub const operation_id = "getForumThreadPosts";
     pub const path = "/forum/{threadId}/posts";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"threadId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         offset: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         threadId: ForumThreadId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = ForumPostsResponse;
     pub const media_type = "application/json";
@@ -5562,17 +6655,24 @@ pub const getForumThread = struct {
     pub const operation_id = "getForumThread";
     pub const path = "/forum/{threadId}/thread";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"threadId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         threadId: ForumThreadId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = ForumThreadResponse;
     pub const media_type = "application/json";
@@ -5582,23 +6682,30 @@ pub const getForumAllThreads = struct {
     pub const operation_id = "getForumAllThreads";
     pub const path = "/forum/threads";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = ForumThreadsResponse;
     pub const media_type = "application/json";
@@ -5608,24 +6715,31 @@ pub const getForumThreads = struct {
     pub const operation_id = "getForumThreads";
     pub const path = "/forum/{categoryIds}/threads";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"categoryIds\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int32\"}}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         categoryIds: []const ForumId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = ForumThreadsResponse;
     pub const media_type = "application/json";
@@ -5635,16 +6749,23 @@ pub const getForumLookup = struct {
     pub const operation_id = "getForumLookup";
     pub const path = "/forum/lookup";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = ForumLookupResponse;
     pub const media_type = "application/json";
@@ -5654,16 +6775,23 @@ pub const getForumTimestamp = struct {
     pub const operation_id = "getForumTimestamp";
     pub const path = "/forum/timestamp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TimestampResponse;
     pub const media_type = "application/json";
@@ -5673,33 +6801,40 @@ pub const getForumGeneric = struct {
     pub const operation_id = "getForumGeneric";
     pub const path = "/forum";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"categories\",\"lookup\",\"posts\",\"thread\",\"threads\",\"timestamp\"]},{\"type\":\"string\"}]}}},{\"name\":\"id\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int32\"}}]}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const ForumSelectionName) = .absent,
         id: model.Presence(union(enum) {
-            v0: ForumThreadId,
-            v1: []const ForumId,
+            thread: ForumThreadId,
+            id_list: []const ForumId,
         }) = .absent,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         categories: model.Presence([]const struct {
@@ -5724,18 +6859,25 @@ pub const getKeyLog = struct {
     pub const operation_id = "getKeyLog";
     pub const path = "/key/log";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = KeyLogResponse;
     pub const media_type = "application/json";
@@ -5745,16 +6887,23 @@ pub const getKeyInfo = struct {
     pub const operation_id = "getKeyInfo";
     pub const path = "/key/info";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = KeyInfoResponse;
     pub const media_type = "application/json";
@@ -5764,19 +6913,26 @@ pub const getKeyGeneric = struct {
     pub const operation_id = "getKeyGeneric";
     pub const path = "/key";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"info\",\"log\"]},{\"type\":\"string\"}]}}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const KeySelectionName) = .absent,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         info: model.Presence(struct {
@@ -5817,9 +6973,9 @@ pub const getKeyGeneric = struct {
             type: []const u8,
             selections: []const u8,
             id: union(enum) {
-                v0: i64,
-                v1: []const u8,
-                v2: void,
+                integer: i64,
+                string: []const u8,
+                null: void,
             },
             comment: model.Presence(?[]const u8) = .absent,
             ip: []const u8,
@@ -5834,17 +6990,24 @@ pub const getMarketAuctionHouseListing = struct {
     pub const operation_id = "getMarketAuctionHouseListing";
     pub const path = "/market/{id}/auctionhouselisting";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: AuctionListingId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = AuctionHouseListingResponse;
     pub const media_type = "application/json";
@@ -5854,24 +7017,31 @@ pub const getMarketAuctionHouseItem = struct {
     pub const operation_id = "getMarketAuctionHouseItem";
     pub const path = "/market/{id}/auctionhouse";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int64\"}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: ItemId,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = AuctionHouseResponse;
     pub const media_type = "application/json";
@@ -5881,23 +7051,30 @@ pub const getMarketAuctionHouse = struct {
     pub const operation_id = "getMarketAuctionHouse";
     pub const path = "/market/auctionhouse";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         from: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = AuctionHouseResponse;
     pub const media_type = "application/json";
@@ -5907,17 +7084,24 @@ pub const getMarketBazaar = struct {
     pub const operation_id = "getMarketBazaar";
     pub const path = "/market/bazaar";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"Alcohol\",\"Artifact\",\"Booster\",\"Candy\",\"Car\",\"Clothing\",\"Collectible\",\"Defensive\",\"Drug\",\"Energy Drink\",\"Enhancer\",\"Flower\",\"Jewelry\",\"Material\",\"Medical\",\"Melee\",\"Other\",\"Plushie\",\"Primary\",\"Secondary\",\"Special\",\"Supply Pack\",\"Temporary\",\"Tool\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: model.Presence(MarketSpecializedBazaarCategoryEnum) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = BazaarResponse;
     pub const media_type = "application/json";
@@ -5927,17 +7111,24 @@ pub const getMarketBazaarItem = struct {
     pub const operation_id = "getMarketBazaarItem";
     pub const path = "/market/{id}/bazaar";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int64\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: ItemId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = BazaarResponseSpecialized;
     pub const media_type = "application/json";
@@ -5947,20 +7138,27 @@ pub const getMarketItemMarketItem = struct {
     pub const operation_id = "getMarketItemMarketItem";
     pub const path = "/market/{id}/itemmarket";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int64\"}},{\"name\":\"bonus\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"Any\",\"Double\",\"Yellow\",\"Orange\",\"Red\",\"Achilles\",\"Assassinate\",\"Backstab\",\"Berserk\",\"Bleed\",\"Blindfire\",\"Blindside\",\"Bloodlust\",\"Burn\",\"Comeback\",\"Conserve\",\"Cripple\",\"Crusher\",\"Cupid\",\"Deadeye\",\"Deadly\",\"Demoralize\",\"Disarm\",\"Double-edged\",\"Double Tap\",\"Emasculate\",\"Empower\",\"Eviscerate\",\"Execute\",\"Expose\",\"Finale\",\"Focus\",\"Freeze\",\"Frenzy\",\"Fury\",\"Grace\",\"Hazardous\",\"Home run\",\"Irradiate\",\"Lacerate\",\"Motivation\",\"Paralyze\",\"Parry\",\"Penetrate\",\"Plunder\",\"Poison\",\"Powerful\",\"Proficience\",\"Puncture\",\"Quicken\",\"Rage\",\"Revitalize\",\"Roshambo\",\"Shock\",\"Sleep\",\"Slow\",\"Smash\",\"Smurf\",\"Specialist\",\"Spray\",\"Storage\",\"Stricken\",\"Stun\",\"Suppress\",\"Sure Shot\",\"Throttle\",\"Toxin\",\"Warlord\",\"Weaken\",\"Wind-up\",\"Wither\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: ItemId,
         bonus: model.Presence(WeaponBonusEnum) = .absent,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = MarketItemMarketResponse;
     pub const media_type = "application/json";
@@ -5970,23 +7168,30 @@ pub const getMarketProperties = struct {
     pub const operation_id = "getMarketProperties";
     pub const path = "/market/{propertyTypeId}/properties";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"propertyTypeId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         propertyTypeId: PropertyTypeId,
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = MarketPropertiesResponse;
     pub const media_type = "application/json";
@@ -5996,16 +7201,23 @@ pub const getMarketPoints = struct {
     pub const operation_id = "getMarketPoints";
     pub const path = "/market/pointsmarket";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = PointsMarketResponse;
     pub const media_type = "application/json";
@@ -6015,23 +7227,30 @@ pub const getMarketPropertiesRental = struct {
     pub const operation_id = "getMarketPropertiesRental";
     pub const path = "/market/{propertyTypeId}/rentals";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"propertyTypeId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         propertyTypeId: PropertyTypeId,
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = MarketRentalsResponse;
     pub const media_type = "application/json";
@@ -6041,16 +7260,23 @@ pub const getMarketLookup = struct {
     pub const operation_id = "getMarketLookup";
     pub const path = "/market/lookup";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = MarketLookupResponse;
     pub const media_type = "application/json";
@@ -6060,16 +7286,23 @@ pub const getMarketTimestamp = struct {
     pub const operation_id = "getMarketTimestamp";
     pub const path = "/market/timestamp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TimestampResponse;
     pub const media_type = "application/json";
@@ -6079,44 +7312,51 @@ pub const getMarketGeneric = struct {
     pub const operation_id = "getMarketGeneric";
     pub const path = "/market";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"auctionhouse\",\"auctionhouselisting\",\"bazaar\",\"itemmarket\",\"pointsmarket\",\"properties\",\"rentals\",\"lookup\",\"timestamp\"]},{\"type\":\"string\"}]}}},{\"name\":\"id\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int64\"},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"}]}},{\"name\":\"legacy\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"auctionhouse\",\"auctionhouselisting\",\"bazaar\",\"itemmarket\",\"pointsmarket\",\"properties\",\"rentals\",\"lookup\",\"timestamp\"]},{\"type\":\"string\"}]}}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"Alcohol\",\"Artifact\",\"Booster\",\"Candy\",\"Car\",\"Clothing\",\"Collectible\",\"Defensive\",\"Drug\",\"Energy Drink\",\"Enhancer\",\"Flower\",\"Jewelry\",\"Material\",\"Medical\",\"Melee\",\"Other\",\"Plushie\",\"Primary\",\"Secondary\",\"Special\",\"Supply Pack\",\"Temporary\",\"Tool\"]}},{\"name\":\"bonus\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"Any\",\"Double\",\"Yellow\",\"Orange\",\"Red\",\"Achilles\",\"Assassinate\",\"Backstab\",\"Berserk\",\"Bleed\",\"Blindfire\",\"Blindside\",\"Bloodlust\",\"Burn\",\"Comeback\",\"Conserve\",\"Cripple\",\"Crusher\",\"Cupid\",\"Deadeye\",\"Deadly\",\"Demoralize\",\"Disarm\",\"Double-edged\",\"Double Tap\",\"Emasculate\",\"Empower\",\"Eviscerate\",\"Execute\",\"Expose\",\"Finale\",\"Focus\",\"Freeze\",\"Frenzy\",\"Fury\",\"Grace\",\"Hazardous\",\"Home run\",\"Irradiate\",\"Lacerate\",\"Motivation\",\"Paralyze\",\"Parry\",\"Penetrate\",\"Plunder\",\"Poison\",\"Powerful\",\"Proficience\",\"Puncture\",\"Quicken\",\"Rage\",\"Revitalize\",\"Roshambo\",\"Shock\",\"Sleep\",\"Slow\",\"Smash\",\"Smurf\",\"Specialist\",\"Spray\",\"Storage\",\"Stricken\",\"Stun\",\"Suppress\",\"Sure Shot\",\"Throttle\",\"Toxin\",\"Warlord\",\"Weaken\",\"Wind-up\",\"Wither\"]}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":100,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const MarketSelectionName) = .absent,
         id: model.Presence(union(enum) {
-            v0: ItemId,
-            v1: AuctionListingId,
-            v2: PropertyTypeId,
+            item: ItemId,
+            auction_listing: AuctionListingId,
+            property_type: PropertyTypeId,
         }) = .absent,
         legacy: model.Presence([]const MarketSelectionName) = .absent,
         cat: model.Presence(MarketSpecializedBazaarCategoryEnum) = .absent,
         bonus: model.Presence(WeaponBonusEnum) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         bazaar: model.Presence(union(enum) {
-            v0: union(enum) {
-                v0: BazaarWeekly,
-                v1: BazaarSpecialized,
+            value: union(enum) {
+                weekly: BazaarWeekly,
+                specialized: BazaarSpecialized,
             },
-            v1: BazaarSpecialized,
+            bazaar_specialized: BazaarSpecialized,
         }) = .absent,
         itemmarket: model.Presence(ItemMarket) = .absent,
         _metadata: model.Presence(union(enum) {
-            v0: RequestMetadataWithLinksAndTotal,
-            v1: RequestMetadataWithLinks,
+            links_and_total: RequestMetadataWithLinksAndTotal,
+            links: RequestMetadataWithLinks,
         }) = .absent,
         rentals: model.Presence(MarketRentalDetails) = .absent,
         rentals_timestamp: model.Presence(i64) = .absent,
@@ -6144,16 +7384,23 @@ pub const getRacingCars = struct {
     pub const operation_id = "getRacingCars";
     pub const path = "/racing/cars";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RacingCarsResponse;
     pub const media_type = "application/json";
@@ -6163,16 +7410,23 @@ pub const getRacingCarUpgrades = struct {
     pub const operation_id = "getRacingCarUpgrades";
     pub const path = "/racing/carupgrades";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RacingCarUpgradesResponse;
     pub const media_type = "application/json";
@@ -6182,24 +7436,31 @@ pub const getRacingRaces = struct {
     pub const operation_id = "getRacingRaces";
     pub const path = "/racing/races";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"DESC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"official\",\"custom\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         cat: model.Presence(RacingRaceTypeEnum) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RacingRacesResponse;
     pub const media_type = "application/json";
@@ -6209,17 +7470,24 @@ pub const getRacingRaceDetails = struct {
     pub const operation_id = "getRacingRaceDetails";
     pub const path = "/racing/{raceId}/race";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"raceId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         raceId: RaceId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RacingRaceDetailsResponse;
     pub const media_type = "application/json";
@@ -6229,18 +7497,25 @@ pub const getRacingTrackRecords = struct {
     pub const operation_id = "getRacingTrackRecords";
     pub const path = "/racing/{trackId}/records";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"trackId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"A\",\"B\",\"C\",\"D\",\"E\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         trackId: RaceTrackId,
         cat: RaceClassEnum,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RacingTrackRecordsResponse;
     pub const media_type = "application/json";
@@ -6250,16 +7525,23 @@ pub const getRacingTracks = struct {
     pub const operation_id = "getRacingTracks";
     pub const path = "/racing/tracks";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RacingTracksResponse;
     pub const media_type = "application/json";
@@ -6269,16 +7551,23 @@ pub const getRacingLookup = struct {
     pub const operation_id = "getRacingLookup";
     pub const path = "/racing/lookup";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = RacingLookupResponse;
     pub const media_type = "application/json";
@@ -6288,16 +7577,23 @@ pub const getRacingTimestamp = struct {
     pub const operation_id = "getRacingTimestamp";
     pub const path = "/racing/timestamp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TimestampResponse;
     pub const media_type = "application/json";
@@ -6307,33 +7603,40 @@ pub const getRacingGeneric = struct {
     pub const operation_id = "getRacingGeneric";
     pub const path = "/racing";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"cars\",\"carupgrades\",\"lookup\",\"race\",\"races\",\"records\",\"timestamp\",\"tracks\"]},{\"type\":\"string\"}]}}},{\"name\":\"id\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"}]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":1}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"official\",\"custom\"]},{\"type\":\"string\",\"enum\":[\"A\",\"B\",\"C\",\"D\",\"E\"]}]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const RacingSelectionName) = .absent,
         id: model.Presence(union(enum) {
-            v0: RaceId,
-            v1: RaceTrackId,
+            id: RaceId,
+            track: RaceTrackId,
         }) = .absent,
         limit: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
         cat: model.Presence(union(enum) {
-            v0: RacingRaceTypeEnum,
-            v1: RaceClassEnum,
+            racing_race_type: RacingRaceTypeEnum,
+            race_class: RaceClassEnum,
         }) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         races: model.Presence([]const Race) = .absent,
@@ -6354,17 +7657,24 @@ pub const getProperty = struct {
     pub const operation_id = "getProperty";
     pub const path = "/property/{id}/property";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int64\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: PropertyId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = PropertyPropertyResponse;
     pub const media_type = "application/json";
@@ -6374,16 +7684,23 @@ pub const getPropertyLookup = struct {
     pub const operation_id = "getPropertyLookup";
     pub const path = "/property/lookup";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = PropertyLookupResponse;
     pub const media_type = "application/json";
@@ -6393,16 +7710,23 @@ pub const getPropertyTimestamp = struct {
     pub const operation_id = "getPropertyTimestamp";
     pub const path = "/property/timestamp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TimestampResponse;
     pub const media_type = "application/json";
@@ -6412,18 +7736,25 @@ pub const getPropertyGeneric = struct {
     pub const operation_id = "getPropertyGeneric";
     pub const path = "/property";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"property\",\"lookup\",\"timestamp\"]},{\"type\":\"string\"}]}}},{\"name\":\"id\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int64\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const PropertySelectionName) = .absent,
         id: PropertyId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         property: model.Presence(UserPropertyDetails) = .absent,
@@ -6438,26 +7769,33 @@ pub const getTornAttackLog = struct {
     pub const operation_id = "getTornAttackLog";
     pub const path = "/torn/attacklog";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"log\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\"}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"true\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         log: AttackCode,
         offset: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
-        striptags: model.Presence(enum {
+        })) = .absent,
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = AttackLogResponse;
     pub const media_type = "application/json";
@@ -6467,16 +7805,23 @@ pub const getTornBank = struct {
     pub const operation_id = "getTornBank";
     pub const path = "/torn/bank";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornBankResponse;
     pub const media_type = "application/json";
@@ -6486,18 +7831,25 @@ pub const getTornBounties = struct {
     pub const operation_id = "getTornBounties";
     pub const path = "/torn/bounties";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornBountiesResponse;
     pub const media_type = "application/json";
@@ -6507,16 +7859,23 @@ pub const getTornCalendar = struct {
     pub const operation_id = "getTornCalendar";
     pub const path = "/torn/calendar";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornCalendarResponse;
     pub const media_type = "application/json";
@@ -6526,16 +7885,23 @@ pub const getTornCards = struct {
     pub const operation_id = "getTornCards";
     pub const path = "/torn/cards";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornCardsResponse;
     pub const media_type = "application/json";
@@ -6545,16 +7911,23 @@ pub const getTornCityShops = struct {
     pub const operation_id = "getTornCityShops";
     pub const path = "/torn/cityshops";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornCityShopsResponse;
     pub const media_type = "application/json";
@@ -6564,17 +7937,24 @@ pub const getTornCityShopSpecific = struct {
     pub const operation_id = "getTornCityShopSpecific";
     pub const path = "/torn/{shopId}/cityshops";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"shopId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         shopId: CityShopId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornCityShopsResponse;
     pub const media_type = "application/json";
@@ -6584,16 +7964,23 @@ pub const getTornCompanies = struct {
     pub const operation_id = "getTornCompanies";
     pub const path = "/torn/companies";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornCompaniesResponse;
     pub const media_type = "application/json";
@@ -6603,17 +7990,24 @@ pub const getTornCompaniesSpecific = struct {
     pub const operation_id = "getTornCompaniesSpecific";
     pub const path = "/torn/{typeId}/companies";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"typeId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         typeId: CompanyTypeId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornCompaniesResponse;
     pub const media_type = "application/json";
@@ -6623,16 +8017,23 @@ pub const getTornCrimes = struct {
     pub const operation_id = "getTornCrimes";
     pub const path = "/torn/crimes";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornCrimesResponse;
     pub const media_type = "application/json";
@@ -6642,16 +8043,23 @@ pub const getTornEducation = struct {
     pub const operation_id = "getTornEducation";
     pub const path = "/torn/education";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornEducationResponse;
     pub const media_type = "application/json";
@@ -6661,16 +8069,23 @@ pub const getTornElimination = struct {
     pub const operation_id = "getTornElimination";
     pub const path = "/torn/elimination";
     pub const stability = "Unstable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornEliminationTeamsResponse;
     pub const media_type = "application/json";
@@ -6680,19 +8095,26 @@ pub const getTornEliminationTeam = struct {
     pub const operation_id = "getTornEliminationTeam";
     pub const path = "/torn/{id}/eliminationteam";
     pub const stability = "Unstable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"id\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         id: EliminationTeamId,
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornEliminationTeamPlayersResponse;
     pub const media_type = "application/json";
@@ -6702,19 +8124,26 @@ pub const getTornFactionHoF = struct {
     pub const operation_id = "getTornFactionHoF";
     pub const path = "/torn/factionhof";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"respect\",\"chains\",\"rank\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         cat: TornFactionHofCategory,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornFactionHofResponse;
     pub const media_type = "application/json";
@@ -6724,16 +8153,23 @@ pub const getTornFactionTree = struct {
     pub const operation_id = "getTornFactionTree";
     pub const path = "/torn/factiontree";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornFactionTreeResponse;
     pub const media_type = "application/json";
@@ -6743,16 +8179,23 @@ pub const getTornGyms = struct {
     pub const operation_id = "getTornGyms";
     pub const path = "/torn/gyms";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornGymsResponse;
     pub const media_type = "application/json";
@@ -6762,16 +8205,23 @@ pub const getTornHalloween = struct {
     pub const operation_id = "getTornHalloween";
     pub const path = "/torn/halloween";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .minimal;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornHalloweenResponse;
     pub const media_type = "application/json";
@@ -6781,22 +8231,29 @@ pub const getTornHonors = struct {
     pub const operation_id = "getTornHonors";
     pub const path = "/torn/honors";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornHonorsResponse;
     pub const media_type = "application/json";
@@ -6806,17 +8263,24 @@ pub const getTornHonorsSpecific = struct {
     pub const operation_id = "getTornHonorsSpecific";
     pub const path = "/torn/{ids}/honors";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"ids\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int32\"}}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         ids: []const HonorId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornHonorsResponse;
     pub const media_type = "application/json";
@@ -6826,19 +8290,26 @@ pub const getTornHoF = struct {
     pub const operation_id = "getTornHoF";
     pub const path = "/torn/hof";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":100,\"maximum\":100,\"minimum\":1}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"cat\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\",\"enum\":[\"level\",\"busts\",\"rank\",\"traveltime\",\"workstats\",\"networth\",\"revives\",\"defends\",\"offences\",\"attacks\",\"awards\",\"racingwins\",\"racingpoints\",\"racingskill\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         limit: model.Presence(i64) = .absent,
         offset: model.Presence(i64) = .absent,
         cat: TornHofCategory,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornHofResponse;
     pub const media_type = "application/json";
@@ -6848,16 +8319,23 @@ pub const getTornItemAmmo = struct {
     pub const operation_id = "getTornItemAmmo";
     pub const path = "/torn/itemammo";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornItemAmmoResponse;
     pub const media_type = "application/json";
@@ -6867,17 +8345,24 @@ pub const getTornItemDetails = struct {
     pub const operation_id = "getTornItemDetails";
     pub const path = "/torn/{ids}/itemdetails";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"ids\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int64\"}}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         ids: []const ItemUid,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornItemDetailsResponse;
     pub const media_type = "application/json";
@@ -6887,16 +8372,23 @@ pub const getTornItemMods = struct {
     pub const operation_id = "getTornItemMods";
     pub const path = "/torn/itemmods";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornItemModsResponse;
     pub const media_type = "application/json";
@@ -6906,17 +8398,24 @@ pub const getTornItemStats = struct {
     pub const operation_id = "getTornItemStats";
     pub const path = "/torn/{ids}/itemstats";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"ids\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int64\"}}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         ids: []const ItemUid,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornItemStatsResponse;
     pub const media_type = "application/json";
@@ -6926,21 +8425,28 @@ pub const getTornItems = struct {
     pub const operation_id = "getTornItems";
     pub const path = "/torn/items";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"All\",\"Alcohol\",\"Armor\",\"Artifact\",\"Book\",\"Booster\",\"Candy\",\"Car\",\"Clothing\",\"Collectible\",\"Defensive\",\"Drug\",\"Energy Drink\",\"Enhancer\",\"Flower\",\"Jewelry\",\"Material\",\"Medical\",\"Melee\",\"Other\",\"Plushie\",\"Primary\",\"Secondary\",\"Special\",\"Supply Pack\",\"Temporary\",\"Tool\",\"Unused\",\"Weapon\"]}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"ASC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         cat: model.Presence(TornItemCategory) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornItemsResponse;
     pub const media_type = "application/json";
@@ -6950,21 +8456,28 @@ pub const getTornItemsSpecific = struct {
     pub const operation_id = "getTornItemsSpecific";
     pub const path = "/torn/{ids}/items";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"ids\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int64\"}}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"default\":\"ASC\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         ids: []const ItemId,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornItemsResponse;
     pub const media_type = "application/json";
@@ -6974,16 +8487,23 @@ pub const getTornLogCategories = struct {
     pub const operation_id = "getTornLogCategories";
     pub const path = "/torn/logcategories";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornLogCategoriesResponse;
     pub const media_type = "application/json";
@@ -6993,16 +8513,23 @@ pub const getTornLogTypes = struct {
     pub const operation_id = "getTornLogTypes";
     pub const path = "/torn/logtypes";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornLogTypesResponse;
     pub const media_type = "application/json";
@@ -7012,17 +8539,24 @@ pub const getTornLogTypesSpecific = struct {
     pub const operation_id = "getTornLogTypesSpecific";
     pub const path = "/torn/{logCategoryId}/logtypes";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"logCategoryId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         logCategoryId: LogCategoryId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornLogTypesResponse;
     pub const media_type = "application/json";
@@ -7032,16 +8566,23 @@ pub const getTornMedals = struct {
     pub const operation_id = "getTornMedals";
     pub const path = "/torn/medals";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornMedalsResponse;
     pub const media_type = "application/json";
@@ -7051,17 +8592,24 @@ pub const getTornMedalsSpecific = struct {
     pub const operation_id = "getTornMedalsSpecific";
     pub const path = "/torn/{ids}/medals";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"ids\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int32\"}}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         ids: []const MedalId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornMedalsResponse;
     pub const media_type = "application/json";
@@ -7071,16 +8619,23 @@ pub const getTornMerits = struct {
     pub const operation_id = "getTornMerits";
     pub const path = "/torn/merits";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornMeritsResponse;
     pub const media_type = "application/json";
@@ -7090,16 +8645,23 @@ pub const getTornMuseum = struct {
     pub const operation_id = "getTornMuseum";
     pub const path = "/torn/museum";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornMuseumResponse;
     pub const media_type = "application/json";
@@ -7109,16 +8671,23 @@ pub const getTornOrganizedCrimes = struct {
     pub const operation_id = "getTornOrganizedCrimes";
     pub const path = "/torn/organizedcrimes";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornOrganizedCrimeResponse;
     pub const media_type = "application/json";
@@ -7128,16 +8697,23 @@ pub const getTornPokerTables = struct {
     pub const operation_id = "getTornPokerTables";
     pub const path = "/torn/pokertables";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornPokerTablesResponse;
     pub const media_type = "application/json";
@@ -7147,16 +8723,23 @@ pub const getTornProperties = struct {
     pub const operation_id = "getTornProperties";
     pub const path = "/torn/properties";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornProperties;
     pub const media_type = "application/json";
@@ -7166,16 +8749,23 @@ pub const getTornRps = struct {
     pub const operation_id = "getTornRps";
     pub const path = "/torn/rockpaperscissors";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornRockPaperScissorsResponse;
     pub const media_type = "application/json";
@@ -7185,16 +8775,23 @@ pub const getTornSearchForCash = struct {
     pub const operation_id = "getTornSearchForCash";
     pub const path = "/torn/searchforcash";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornSearchForCashResponse;
     pub const media_type = "application/json";
@@ -7204,16 +8801,23 @@ pub const getTornShoplifting = struct {
     pub const operation_id = "getTornShoplifting";
     pub const path = "/torn/shoplifting";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornShopliftingResponse;
     pub const media_type = "application/json";
@@ -7223,16 +8827,23 @@ pub const getTornCityStats = struct {
     pub const operation_id = "getTornCityStats";
     pub const path = "/torn/stats";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornCityStatsResponse;
     pub const media_type = "application/json";
@@ -7242,16 +8853,23 @@ pub const getTornStocks = struct {
     pub const operation_id = "getTornStocks";
     pub const path = "/torn/stocks";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornStocksResponse;
     pub const media_type = "application/json";
@@ -7261,17 +8879,24 @@ pub const getSpecificTornStock = struct {
     pub const operation_id = "getSpecificTornStock";
     pub const path = "/torn/{stockId}/stocks";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"stockId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         stockId: StockId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornStockDetailedResponse;
     pub const media_type = "application/json";
@@ -7281,17 +8906,24 @@ pub const getTornSubcrimes = struct {
     pub const operation_id = "getTornSubcrimes";
     pub const path = "/torn/{crimeId}/subcrimes";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"crimeId\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         crimeId: TornCrimeId,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornSubcrimesResponse;
     pub const media_type = "application/json";
@@ -7301,19 +8933,26 @@ pub const getTornTerritory = struct {
     pub const operation_id = "getTornTerritory";
     pub const path = "/torn/territory";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = true;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"ids\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"AAB\",\"AAC\",\"AAD\",\"AAE\",\"AAF\",\"AAG\",\"ABA\",\"ABB\",\"ABC\",\"ABD\",\"ABE\",\"ABF\",\"ACA\",\"ACB\",\"ACC\",\"ACD\",\"ACE\",\"ACF\",\"ACG\",\"ADA\",\"ADB\",\"ADC\",\"ADD\",\"ADE\",\"ADF\",\"ADG\",\"AEA\",\"AEB\",\"AEC\",\"AED\",\"AEE\",\"AEF\",\"AFA\",\"AFB\",\"AFC\",\"AFD\",\"AFE\",\"AFF\",\"AFG\",\"AGA\",\"AGB\",\"AGC\",\"AGD\",\"AGE\",\"AGF\",\"AGG\",\"AHA\",\"AHB\",\"AHC\",\"AHD\",\"AHE\",\"AHF\",\"AIA\",\"AIB\",\"AIC\",\"AID\",\"AIE\",\"AIF\",\"AJA\",\"AJB\",\"AJC\",\"AJD\",\"AJE\",\"AJF\",\"AKA\",\"AKB\",\"AKC\",\"AKD\",\"AKE\",\"AKF\",\"ALA\",\"ALB\",\"ALC\",\"ALD\",\"ALE\",\"ALF\",\"AMA\",\"AMB\",\"AMC\",\"AMD\",\"AME\",\"AMF\",\"ANB\",\"ANC\",\"AND\",\"ANE\",\"ANF\",\"ANG\",\"AOB\",\"AOC\",\"AOD\",\"AOE\",\"AOF\",\"AOG\",\"APB\",\"APC\",\"APD\",\"APE\",\"APF\",\"APG\",\"AQB\",\"AQC\",\"AQD\",\"AQE\",\"AQF\",\"AQG\",\"ARB\",\"ARC\",\"ARD\",\"ARE\",\"ARF\",\"ASB\",\"ASC\",\"ASD\",\"ASE\",\"ASF\",\"ASG\",\"ATB\",\"ATC\",\"ATD\",\"ATE\",\"ATF\",\"ATG\",\"AUB\",\"AUC\",\"AUD\",\"AUE\",\"AUF\",\"AUG\",\"AVB\",\"AVC\",\"AVD\",\"AVE\",\"AVF\",\"AVG\",\"AWB\",\"AWC\",\"AWD\",\"AWE\",\"AWF\",\"AWG\",\"AXB\",\"AXC\",\"AXD\",\"AXE\",\"AXF\",\"AXG\",\"AYB\",\"AYC\",\"AYD\",\"AYE\",\"AYF\",\"AYG\",\"AZB\",\"AZC\",\"AZD\",\"AZE\",\"AZF\",\"AZG\",\"BAA\",\"BAB\",\"BAC\",\"BAD\",\"BAE\",\"BAF\",\"BAG\",\"BBA\",\"BBB\",\"BBC\",\"BBD\",\"BBE\",\"BBF\",\"BBG\",\"BCA\",\"BCB\",\"BCC\",\"BCD\",\"BCE\",\"BCF\",\"BCG\",\"BDA\",\"BDB\",\"BDC\",\"BDD\",\"BDE\",\"BDF\",\"BDG\",\"BEA\",\"BEB\",\"BEC\",\"BED\",\"BEE\",\"BEF\",\"BFA\",\"BFB\",\"BFC\",\"BFD\",\"BFE\",\"BFF\",\"BFG\",\"BGA\",\"BGB\",\"BGC\",\"BGD\",\"BGE\",\"BGF\",\"BGG\",\"BHA\",\"BHB\",\"BHC\",\"BHD\",\"BHE\",\"BHF\",\"BIA\",\"BIB\",\"BIC\",\"BID\",\"BIE\",\"BIF\",\"BJA\",\"BJB\",\"BJC\",\"BJD\",\"BJE\",\"BJF\",\"BKA\",\"BKB\",\"BKC\",\"BKD\",\"BKE\",\"BKF\",\"BLA\",\"BLB\",\"BLC\",\"BLD\",\"BLE\",\"BLF\",\"BMA\",\"BMB\",\"BMC\",\"BMD\",\"BME\",\"BMF\",\"BNB\",\"BNC\",\"BND\",\"BNE\",\"BNF\",\"BNG\",\"BOB\",\"BOC\",\"BOD\",\"BOE\",\"BOF\",\"BPB\",\"BPC\",\"BPD\",\"BPE\",\"BPF\",\"BPG\",\"BQB\",\"BQC\",\"BQD\",\"BQF\",\"BQG\",\"BRB\",\"BRC\",\"BRD\",\"BRE\",\"BRF\",\"BRG\",\"BSB\",\"BSC\",\"BSD\",\"BSE\",\"BSF\",\"BTB\",\"BTC\",\"BTD\",\"BTE\",\"BTF\",\"BTG\",\"BUB\",\"BUC\",\"BUD\",\"BUE\",\"BUF\",\"BUG\",\"BVB\",\"BVC\",\"BVD\",\"BVE\",\"BVF\",\"BVG\",\"BWB\",\"BWC\",\"BWD\",\"BWE\",\"BWF\",\"BWG\",\"BXB\",\"BXC\",\"BXD\",\"BXE\",\"BXF\",\"BXG\",\"BYB\",\"BYC\",\"BYD\",\"BYE\",\"BYF\",\"BYG\",\"BZB\",\"BZC\",\"BZD\",\"BZE\",\"BZF\",\"BZG\",\"CAA\",\"CAB\",\"CAC\",\"CAD\",\"CAE\",\"CAF\",\"CAG\",\"CBA\",\"CBB\",\"CBC\",\"CBD\",\"CBE\",\"CBF\",\"CBG\",\"CCA\",\"CCB\",\"CCC\",\"CCD\",\"CCE\",\"CCF\",\"CCG\",\"CDA\",\"CDB\",\"CDC\",\"CDD\",\"CDE\",\"CDF\",\"CDG\",\"CEA\",\"CEB\",\"CEC\",\"CED\",\"CEE\",\"CEF\",\"CFA\",\"CFB\",\"CFC\",\"CFD\",\"CFE\",\"CFG\",\"CGA\",\"CGB\",\"CGC\",\"CGD\",\"CGE\",\"CGF\",\"CGG\",\"CHA\",\"CHB\",\"CHC\",\"CHD\",\"CHE\",\"CHF\",\"CIA\",\"CIB\",\"CIC\",\"CID\",\"CIE\",\"CIF\",\"CJA\",\"CJB\",\"CJC\",\"CJD\",\"CJE\",\"CJF\",\"CKA\",\"CKB\",\"CKC\",\"CKD\",\"CKE\",\"CKF\",\"CLA\",\"CLB\",\"CLC\",\"CLD\",\"CLE\",\"CLF\",\"CMA\",\"CMB\",\"CMC\",\"CMD\",\"CME\",\"CMF\",\"CNB\",\"CNC\",\"CND\",\"CNE\",\"CNF\",\"CNG\",\"COB\",\"COC\",\"COD\",\"COE\",\"COF\",\"COG\",\"CPB\",\"CPC\",\"CPD\",\"CPE\",\"CPF\",\"CPG\",\"CQB\",\"CQC\",\"CQD\",\"CQF\",\"CQG\",\"CRB\",\"CRC\",\"CRD\",\"CRE\",\"CRF\",\"CRG\",\"CSB\",\"CSC\",\"CSD\",\"CSE\",\"CSF\",\"CSG\",\"CTB\",\"CTC\",\"CTD\",\"CTE\",\"CTF\",\"CTG\",\"CUB\",\"CUC\",\"CUD\",\"CUE\",\"CUF\",\"CUG\",\"CVB\",\"CVC\",\"CVD\",\"CVE\",\"CVF\",\"CVG\",\"CWB\",\"CWC\",\"CWD\",\"CWE\",\"CWF\",\"CWG\",\"CXB\",\"CXC\",\"CXD\",\"CXE\",\"CXF\",\"CXG\",\"CYB\",\"CYC\",\"CYD\",\"CYE\",\"CYF\",\"CZB\",\"CZC\",\"CZD\",\"CZE\",\"CZF\",\"CZG\",\"DAA\",\"DAB\",\"DAC\",\"DAD\",\"DAE\",\"DAF\",\"DAG\",\"DBA\",\"DBB\",\"DBC\",\"DBD\",\"DBE\",\"DBF\",\"DBG\",\"DCA\",\"DCB\",\"DCC\",\"DCD\",\"DCE\",\"DCF\",\"DCG\",\"DDA\",\"DDB\",\"DDC\",\"DDD\",\"DDE\",\"DDF\",\"DDG\",\"DEA\",\"DEB\",\"DEC\",\"DED\",\"DEE\",\"DEF\",\"DFA\",\"DFB\",\"DFC\",\"DFD\",\"DFE\",\"DFF\",\"DFG\",\"DGA\",\"DGB\",\"DGC\",\"DGD\",\"DGE\",\"DGF\",\"DGG\",\"DHA\",\"DHB\",\"DHC\",\"DHD\",\"DHE\",\"DHF\",\"DIA\",\"DIB\",\"DIC\",\"DID\",\"DIE\",\"DIF\",\"DJA\",\"DJB\",\"DJC\",\"DJD\",\"DJE\",\"DKA\",\"DKB\",\"DKC\",\"DKD\",\"DKE\",\"DKF\",\"DLA\",\"DLB\",\"DLC\",\"DLD\",\"DLE\",\"DLF\",\"DMA\",\"DMB\",\"DMC\",\"DMD\",\"DME\",\"DMF\",\"DNB\",\"DNC\",\"DND\",\"DNE\",\"DNF\",\"DNG\",\"DOB\",\"DOC\",\"DOD\",\"DOE\",\"DOF\",\"DOG\",\"DPB\",\"DPC\",\"DPD\",\"DPE\",\"DPF\",\"DPG\",\"DQB\",\"DQC\",\"DQD\",\"DQF\",\"DQG\",\"DRB\",\"DRC\",\"DRD\",\"DRE\",\"DRF\",\"DRG\",\"DSB\",\"DSC\",\"DSD\",\"DSE\",\"DSF\",\"DSG\",\"DTB\",\"DTC\",\"DTD\",\"DTE\",\"DTF\",\"DTG\",\"DUB\",\"DUC\",\"DUD\",\"DUE\",\"DUF\",\"DUG\",\"DVB\",\"DVC\",\"DVD\",\"DVE\",\"DVF\",\"DVG\",\"DWB\",\"DWC\",\"DWD\",\"DWE\",\"DWF\",\"DWG\",\"DXB\",\"DXC\",\"DXD\",\"DXE\",\"DXF\",\"DXG\",\"DYB\",\"DYC\",\"DYD\",\"DYE\",\"DYF\",\"DYG\",\"DZB\",\"DZC\",\"DZD\",\"DZE\",\"DZF\",\"DZG\",\"EAA\",\"EAB\",\"EAC\",\"EAD\",\"EAE\",\"EAF\",\"EAG\",\"EBA\",\"EBB\",\"EBC\",\"EBD\",\"EBE\",\"EBF\",\"EBG\",\"ECA\",\"ECB\",\"ECC\",\"ECD\",\"ECE\",\"ECF\",\"ECG\",\"EDA\",\"EDB\",\"EDC\",\"EDD\",\"EDE\",\"EDF\",\"EDG\",\"EEA\",\"EEB\",\"EEC\",\"EED\",\"EEE\",\"EEF\",\"EFA\",\"EFB\",\"EFC\",\"EFD\",\"EFE\",\"EFF\",\"EFG\",\"EGA\",\"EGB\",\"EGC\",\"EGD\",\"EGE\",\"EGF\",\"EHA\",\"EHB\",\"EHC\",\"EHD\",\"EHE\",\"EHF\",\"EIA\",\"EIB\",\"EIC\",\"EID\",\"EIE\",\"EIF\",\"EJA\",\"EJB\",\"EJC\",\"EJD\",\"EJE\",\"EKA\",\"EKB\",\"EKC\",\"EKD\",\"EKE\",\"EKF\",\"ELA\",\"ELB\",\"ELC\",\"ELD\",\"ELE\",\"ELF\",\"EMA\",\"EMB\",\"EMC\",\"EMD\",\"EME\",\"EMF\",\"ENB\",\"ENC\",\"END\",\"ENE\",\"ENF\",\"ENG\",\"EOB\",\"EOC\",\"EOD\",\"EOE\",\"EOF\",\"EPB\",\"EPC\",\"EPD\",\"EPE\",\"EPF\",\"EPG\",\"EQB\",\"EQC\",\"EQD\",\"EQF\",\"EQG\",\"ERB\",\"ERC\",\"ERD\",\"ERE\",\"ERF\",\"ERG\",\"ESB\",\"ESC\",\"ESD\",\"ESE\",\"ESF\",\"ESG\",\"ETB\",\"ETC\",\"ETD\",\"ETE\",\"ETF\",\"ETG\",\"EUB\",\"EUC\",\"EUD\",\"EUE\",\"EUF\",\"EUG\",\"EVB\",\"EVC\",\"EVD\",\"EVE\",\"EVF\",\"EVG\",\"EWB\",\"EWC\",\"EWD\",\"EWE\",\"EWF\",\"EWG\",\"EXB\",\"EXC\",\"EXD\",\"EXE\",\"EXF\",\"EXG\",\"EYB\",\"EYC\",\"EYD\",\"EYE\",\"EYF\",\"EYG\",\"EZB\",\"EZC\",\"EZD\",\"EZE\",\"EZF\",\"EZG\",\"FAA\",\"FAB\",\"FAC\",\"FAD\",\"FAE\",\"FAF\",\"XAG\",\"FBA\",\"FBB\",\"FBC\",\"FBD\",\"FBF\",\"FBG\",\"FCA\",\"FCB\",\"FCC\",\"FCD\",\"FCE\",\"FCF\",\"FCG\",\"FDA\",\"FDB\",\"FDC\",\"FDD\",\"FDE\",\"FDF\",\"FDG\",\"FEA\",\"FEB\",\"FEC\",\"FED\",\"FEE\",\"FEF\",\"FFA\",\"FFB\",\"FFC\",\"FFD\",\"FFE\",\"FFF\",\"FFG\",\"FGA\",\"FGB\",\"FGC\",\"FGD\",\"FGE\",\"FGF\",\"FGG\",\"FHA\",\"FHB\",\"FHC\",\"FHD\",\"FHE\",\"FHF\",\"FIA\",\"FIB\",\"FIC\",\"FID\",\"FIE\",\"FIF\",\"FJA\",\"FJB\",\"FJC\",\"FJD\",\"FJE\",\"FJF\",\"FKA\",\"FKB\",\"FKC\",\"FKD\",\"FKE\",\"FKF\",\"FLA\",\"FLB\",\"FLC\",\"FLD\",\"FLE\",\"FLF\",\"FMA\",\"FMC\",\"FMD\",\"FME\",\"FMF\",\"FNB\",\"FNC\",\"FND\",\"FNE\",\"FNF\",\"FNG\",\"FOB\",\"FOC\",\"FOD\",\"FOE\",\"FOF\",\"FPB\",\"FPC\",\"FPD\",\"FPE\",\"FPF\",\"FPG\",\"FQB\",\"FQC\",\"FQD\",\"FQF\",\"FQG\",\"FRB\",\"FRC\",\"FRD\",\"FRE\",\"FRF\",\"FRG\",\"FSB\",\"FSC\",\"FSD\",\"FSE\",\"FSF\",\"FSG\",\"FTB\",\"FTC\",\"FTD\",\"FTE\",\"FTF\",\"FTG\",\"FUB\",\"FUC\",\"FUD\",\"FUE\",\"FUF\",\"FUG\",\"FVB\",\"FVC\",\"FVD\",\"FVE\",\"FVF\",\"FVG\",\"FWB\",\"FWC\",\"FWD\",\"FWE\",\"FWF\",\"FWG\",\"FXB\",\"FXC\",\"FXD\",\"FXE\",\"FXF\",\"FXG\",\"FYB\",\"FYC\",\"FYD\",\"FYE\",\"FYF\",\"FYG\",\"FZB\",\"FZC\",\"FZD\",\"FZE\",\"FZF\",\"FZG\",\"GAA\",\"GAB\",\"GAC\",\"GAD\",\"GAE\",\"GAF\",\"GAG\",\"GBA\",\"GBB\",\"GBC\",\"GBD\",\"GBE\",\"GBF\",\"GCA\",\"GCB\",\"GCC\",\"GCD\",\"GCE\",\"GCF\",\"GCG\",\"GDA\",\"GDB\",\"GDC\",\"GDD\",\"GDE\",\"GDF\",\"GDG\",\"GEA\",\"GEB\",\"GEC\",\"GED\",\"GEE\",\"GEF\",\"GFA\",\"GFB\",\"GFC\",\"GFD\",\"GFE\",\"GFF\",\"GFG\",\"GGA\",\"GGB\",\"GGC\",\"GGD\",\"GGE\",\"GGF\",\"GHA\",\"GHB\",\"GHC\",\"GHD\",\"GHE\",\"GHF\",\"GIA\",\"GIB\",\"GIC\",\"GID\",\"GIE\",\"GJA\",\"GJB\",\"GJC\",\"GJD\",\"GJE\",\"GJF\",\"GKA\",\"GKB\",\"GKC\",\"GKD\",\"GKE\",\"GKF\",\"GLA\",\"GLB\",\"GLC\",\"GLD\",\"GLE\",\"GLF\",\"GMA\",\"GMC\",\"GMD\",\"GME\",\"GMF\",\"GNB\",\"GNC\",\"GND\",\"GNE\",\"GNF\",\"GNG\",\"GOB\",\"GOC\",\"GOD\",\"GOE\",\"GOF\",\"GPB\",\"GPC\",\"GPD\",\"GPE\",\"GPF\",\"GPG\",\"GQC\",\"GQD\",\"GQF\",\"GQG\",\"GRB\",\"GRC\",\"GRD\",\"GRE\",\"GRF\",\"GRG\",\"GSB\",\"GSC\",\"GSD\",\"GSE\",\"GSF\",\"GSG\",\"GTB\",\"GTC\",\"GTD\",\"GTE\",\"GTF\",\"GTG\",\"GUB\",\"GUC\",\"GUD\",\"GUF\",\"GUG\",\"GVB\",\"GVC\",\"GVD\",\"GVE\",\"GVF\",\"GVG\",\"GWB\",\"GWC\",\"GWD\",\"GWE\",\"GWF\",\"GWG\",\"GXB\",\"GXC\",\"GXD\",\"GXE\",\"GXF\",\"GXG\",\"GYB\",\"GYC\",\"GYD\",\"GYE\",\"GYF\",\"GYG\",\"GZB\",\"GZC\",\"GZD\",\"GZE\",\"GZF\",\"GZG\",\"HAA\",\"HAB\",\"HAC\",\"HAD\",\"HAE\",\"HAF\",\"HAG\",\"HBA\",\"HBB\",\"HBC\",\"HBD\",\"HBE\",\"HBF\",\"HCA\",\"HCB\",\"HCC\",\"HCD\",\"HCE\",\"HCF\",\"HCG\",\"HDA\",\"HDB\",\"HDC\",\"HDD\",\"HDE\",\"HDF\",\"HDG\",\"HEA\",\"HEB\",\"HEC\",\"HED\",\"HEE\",\"HEF\",\"HFA\",\"HFB\",\"HFC\",\"HFD\",\"HFE\",\"HFF\",\"HGA\",\"HGB\",\"HGC\",\"HGD\",\"HGE\",\"HGF\",\"HHA\",\"HHB\",\"HHC\",\"HHD\",\"HHE\",\"HHF\",\"HIA\",\"HIB\",\"HIC\",\"HID\",\"HIE\",\"HJA\",\"HJB\",\"HJC\",\"HJD\",\"HJE\",\"HJF\",\"HKA\",\"HKB\",\"HKC\",\"HKD\",\"HKE\",\"HKF\",\"HLA\",\"HLB\",\"HLC\",\"HLD\",\"HLE\",\"HLF\",\"HMA\",\"HMC\",\"HMD\",\"HME\",\"HMF\",\"HNB\",\"HNC\",\"HND\",\"HNE\",\"HNF\",\"HNG\",\"HOB\",\"HOC\",\"HOD\",\"HOE\",\"HOF\",\"HPB\",\"HPC\",\"HPD\",\"HPE\",\"HPF\",\"HPG\",\"HQB\",\"HQC\",\"HQD\",\"HQF\",\"HQG\",\"HRB\",\"HRC\",\"HRD\",\"HRE\",\"HRF\",\"HRG\",\"HSB\",\"HSC\",\"HSD\",\"HSE\",\"HSF\",\"HSG\",\"HTB\",\"HTC\",\"HTD\",\"HTE\",\"HTF\",\"HTG\",\"HUB\",\"HUC\",\"HUD\",\"HUE\",\"HUF\",\"HUG\",\"HVB\",\"HVC\",\"HVD\",\"HVE\",\"HVF\",\"HVG\",\"HWB\",\"HWC\",\"HWD\",\"HWE\",\"HWF\",\"HWG\",\"HXB\",\"HXC\",\"HXD\",\"HXE\",\"HXF\",\"HXG\",\"HYB\",\"HYC\",\"HYD\",\"HYE\",\"HYF\",\"HYG\",\"HZB\",\"HZC\",\"HZD\",\"HZE\",\"HZF\",\"HZG\",\"IAA\",\"IAB\",\"IAC\",\"IAD\",\"IAE\",\"IAF\",\"IAG\",\"IBA\",\"IBB\",\"IBC\",\"IBD\",\"IBE\",\"IBF\",\"ICA\",\"ICB\",\"ICC\",\"ICD\",\"ICE\",\"ICF\",\"ICG\",\"IDA\",\"IDB\",\"IDC\",\"IDD\",\"IDE\",\"IDF\",\"IDG\",\"IEA\",\"IEB\",\"IEC\",\"IED\",\"IEE\",\"IEF\",\"IFA\",\"IFB\",\"IFC\",\"IFD\",\"IFE\",\"IFF\",\"IFG\",\"IGA\",\"IGB\",\"IGC\",\"IGD\",\"IGE\",\"IGF\",\"IGG\",\"IHA\",\"IHB\",\"IHC\",\"IHD\",\"IHE\",\"IHF\",\"IIA\",\"IIB\",\"IIC\",\"IID\",\"IIE\",\"IJA\",\"IJB\",\"IJC\",\"IJD\",\"IJE\",\"IJF\",\"IKA\",\"IKB\",\"IKC\",\"IKD\",\"IKE\",\"IKF\",\"ILA\",\"ILB\",\"ILC\",\"ILD\",\"ILE\",\"ILF\",\"IMA\",\"IMB\",\"IMC\",\"IMD\",\"IME\",\"IMF\",\"INB\",\"INC\",\"IND\",\"INE\",\"INF\",\"ING\",\"IOB\",\"IOC\",\"IOD\",\"IOE\",\"IOF\",\"IPB\",\"IPC\",\"IPD\",\"IPE\",\"IPF\",\"IPG\",\"IQB\",\"IQC\",\"IQD\",\"IQF\",\"IQG\",\"IRB\",\"IRC\",\"IRD\",\"IRE\",\"IRF\",\"IRG\",\"ISB\",\"ISC\",\"ISD\",\"ISE\",\"ISF\",\"ISG\",\"ITB\",\"ITC\",\"ITD\",\"ITE\",\"ITF\",\"ITG\",\"IUB\",\"IUC\",\"IUD\",\"IUE\",\"IUF\",\"IUG\",\"IVB\",\"IVC\",\"IVD\",\"IVE\",\"IVF\",\"IVG\",\"IWB\",\"IWC\",\"IWD\",\"IWE\",\"IWF\",\"IWG\",\"IXB\",\"IXC\",\"IXD\",\"IXE\",\"IXF\",\"IXG\",\"IYB\",\"IYC\",\"IYD\",\"IYE\",\"IYF\",\"IYG\",\"IZB\",\"IZC\",\"IZD\",\"IZE\",\"IZF\",\"IZG\",\"JAA\",\"JAB\",\"JAC\",\"JAD\",\"JAE\",\"JAF\",\"JAG\",\"JBA\",\"JBB\",\"JBC\",\"JBD\",\"JBE\",\"JBF\",\"JCA\",\"JCB\",\"JCC\",\"JCD\",\"JCE\",\"JCF\",\"JCG\",\"JDA\",\"JDB\",\"JDC\",\"JDD\",\"JDE\",\"JDF\",\"JDG\",\"JEA\",\"JEB\",\"JEC\",\"JED\",\"JEE\",\"JEF\",\"JFA\",\"JFB\",\"JFC\",\"JFD\",\"JFE\",\"JFF\",\"JFG\",\"JGA\",\"JGB\",\"JGC\",\"JGD\",\"JGE\",\"JGF\",\"JHA\",\"JHB\",\"JHC\",\"JHD\",\"JHE\",\"JHF\",\"JIA\",\"JIB\",\"JIC\",\"JID\",\"JIE\",\"JIF\",\"JJA\",\"JJB\",\"JJC\",\"JJD\",\"JJE\",\"JJF\",\"JKA\",\"JKB\",\"JKC\",\"JKD\",\"JKE\",\"JKF\",\"JLA\",\"JLB\",\"JLC\",\"JLD\",\"JLE\",\"JLF\",\"JMA\",\"JMC\",\"JMD\",\"JME\",\"JMF\",\"JNB\",\"JNC\",\"JND\",\"JNE\",\"JNF\",\"JNG\",\"JOB\",\"JOC\",\"JOD\",\"JOE\",\"JOF\",\"JPB\",\"JPC\",\"JPD\",\"JPE\",\"JPF\",\"JPG\",\"JQB\",\"JQC\",\"JQD\",\"JQF\",\"JQG\",\"JRB\",\"JRC\",\"JRD\",\"JRE\",\"JRF\",\"JRG\",\"JSB\",\"JSC\",\"JSD\",\"JSE\",\"JSF\",\"JSG\",\"JTB\",\"JTC\",\"JTD\",\"JTE\",\"JTF\",\"JTG\",\"JUB\",\"JUC\",\"JUD\",\"JUE\",\"JUF\",\"JUG\",\"JVB\",\"JVC\",\"JVD\",\"JVE\",\"JVF\",\"JVG\",\"JWB\",\"JWC\",\"JWD\",\"JWE\",\"JWF\",\"JWG\",\"JXB\",\"JXC\",\"JXD\",\"JXE\",\"JXF\",\"JXG\",\"JYB\",\"JYC\",\"JYD\",\"JYE\",\"JYF\",\"JYG\",\"JZB\",\"JZC\",\"JZD\",\"JZE\",\"JZF\",\"JZG\",\"KAA\",\"KAB\",\"KAC\",\"KAD\",\"KAE\",\"KAF\",\"KAG\",\"KBA\",\"KBB\",\"KBC\",\"KBD\",\"KBE\",\"KBF\",\"KBG\",\"KCA\",\"KCB\",\"KCC\",\"KCD\",\"KCE\",\"KCF\",\"KCG\",\"KDA\",\"KDB\",\"KDC\",\"KDD\",\"KDE\",\"KEA\",\"KEB\",\"KEC\",\"KED\",\"KEE\",\"KEF\",\"KFA\",\"KFB\",\"KFC\",\"KFD\",\"KFE\",\"KFF\",\"KFG\",\"KGA\",\"KGB\",\"KGC\",\"KGD\",\"KGE\",\"KGF\",\"KGG\",\"KHA\",\"KHB\",\"KHC\",\"KHD\",\"KHE\",\"KHF\",\"KIA\",\"KIB\",\"KIC\",\"KID\",\"KIE\",\"KIF\",\"KJA\",\"KJB\",\"KJC\",\"KJD\",\"KJE\",\"KJF\",\"KKA\",\"KKB\",\"KKC\",\"KKD\",\"KKE\",\"KKF\",\"KLA\",\"KLB\",\"KLC\",\"KLD\",\"KLE\",\"KLF\",\"KMA\",\"KMC\",\"KMD\",\"KME\",\"KMF\",\"KNB\",\"KNC\",\"KND\",\"KNE\",\"KNF\",\"KNG\",\"KOB\",\"KOC\",\"KOD\",\"KOE\",\"KOF\",\"KPB\",\"KPC\",\"KPD\",\"KPE\",\"KPF\",\"KPG\",\"KQB\",\"KQC\",\"KQD\",\"KQE\",\"KQF\",\"KQG\",\"KRB\",\"KRC\",\"KRD\",\"KRE\",\"KRF\",\"KRG\",\"KSB\",\"KSC\",\"KSD\",\"KSE\",\"KSF\",\"KSG\",\"KTB\",\"KTC\",\"KTD\",\"KTE\",\"KTF\",\"KTG\",\"KUB\",\"KUC\",\"KUD\",\"KUE\",\"KUF\",\"KUG\",\"KVB\",\"KVC\",\"KVD\",\"KVE\",\"KVF\",\"KVG\",\"KWB\",\"KWC\",\"KWD\",\"KWE\",\"KWF\",\"KWG\",\"KXB\",\"KXC\",\"KXD\",\"KXE\",\"KXF\",\"KXG\",\"KYB\",\"KYC\",\"KYD\",\"KYE\",\"KYF\",\"KYG\",\"KZB\",\"KZC\",\"KZD\",\"KZE\",\"KZF\",\"KZG\",\"LAA\",\"LAB\",\"LAC\",\"LAD\",\"LAE\",\"LAF\",\"LAG\",\"LBA\",\"LBB\",\"LBC\",\"LBD\",\"LBE\",\"LBF\",\"LBG\",\"LCA\",\"LCB\",\"LCC\",\"LCD\",\"LCE\",\"LCF\",\"LCG\",\"LDA\",\"LDB\",\"LDC\",\"LDD\",\"LDE\",\"LDF\",\"LEA\",\"LEB\",\"LEC\",\"LED\",\"LEE\",\"LEF\",\"LFA\",\"LFB\",\"LFC\",\"LFD\",\"LFE\",\"LFF\",\"LFG\",\"LGA\",\"LGB\",\"LGC\",\"LGD\",\"LGE\",\"LGF\",\"LGG\",\"LHA\",\"LHB\",\"LHC\",\"LHD\",\"LHE\",\"LHF\",\"LIA\",\"LIB\",\"LIC\",\"LID\",\"LIE\",\"LIF\",\"LJA\",\"LJB\",\"LJC\",\"LJD\",\"LJE\",\"LJF\",\"LKA\",\"LKB\",\"LKC\",\"LKD\",\"LKE\",\"LKF\",\"LLA\",\"LLB\",\"LLC\",\"LLD\",\"LLE\",\"LLF\",\"LMA\",\"LMC\",\"LMD\",\"LME\",\"LMF\",\"LNB\",\"LNC\",\"LND\",\"LNE\",\"LNF\",\"LNG\",\"LOB\",\"LOC\",\"LOD\",\"LOE\",\"LOF\",\"LPB\",\"LPC\",\"LPD\",\"LPE\",\"LPF\",\"LPG\",\"LQB\",\"LQC\",\"LQD\",\"LQE\",\"LQF\",\"LQG\",\"LRB\",\"LRC\",\"LRD\",\"LRE\",\"LRF\",\"LRG\",\"LSB\",\"LSC\",\"LSD\",\"LSE\",\"LSF\",\"LSG\",\"LTB\",\"LTC\",\"LTD\",\"LTE\",\"LTF\",\"LTG\",\"LUB\",\"LUC\",\"LUD\",\"LUE\",\"LUF\",\"LUG\",\"LVB\",\"LVC\",\"LVD\",\"LVE\",\"LVF\",\"LVG\",\"LWB\",\"LWC\",\"LWD\",\"LWE\",\"LWF\",\"LWG\",\"LXB\",\"LXC\",\"LXD\",\"LXE\",\"LXF\",\"LXG\",\"LYB\",\"LYC\",\"LYD\",\"LYE\",\"LYF\",\"LYG\",\"LZB\",\"LZC\",\"LZD\",\"LZE\",\"LZF\",\"LZG\",\"MAA\",\"MAB\",\"MAC\",\"MAD\",\"MAE\",\"MAF\",\"MAG\",\"MBA\",\"MBB\",\"MBC\",\"MBD\",\"MBE\",\"MBF\",\"MBG\",\"MCA\",\"MCB\",\"MCC\",\"MCD\",\"MCE\",\"MCF\",\"MCG\",\"MDA\",\"MDB\",\"MDC\",\"MDD\",\"MDE\",\"MDF\",\"MDG\",\"MEA\",\"MEB\",\"MEC\",\"MED\",\"MEE\",\"MEF\",\"MEG\",\"MFA\",\"MFB\",\"MFC\",\"MFD\",\"MFE\",\"MFF\",\"MFG\",\"MGA\",\"MGB\",\"MGC\",\"MGD\",\"MGE\",\"MGF\",\"MGG\",\"MHA\",\"MHB\",\"MHC\",\"MHD\",\"MHE\",\"MHF\",\"MIA\",\"MIB\",\"MIC\",\"MID\",\"MIE\",\"MIF\",\"MJA\",\"MJB\",\"MJC\",\"MJD\",\"MJE\",\"MKA\",\"MKB\",\"MKC\",\"MKD\",\"MKE\",\"MKF\",\"MLA\",\"MLB\",\"MLC\",\"MLD\",\"MLE\",\"MLF\",\"MMA\",\"MMC\",\"MMD\",\"MME\",\"MMF\",\"MNB\",\"MNC\",\"MND\",\"MNE\",\"MNF\",\"MNG\",\"MOB\",\"MOC\",\"MOD\",\"MOE\",\"MOF\",\"MPB\",\"MPC\",\"MPD\",\"MPE\",\"MPF\",\"MPG\",\"MQB\",\"MQC\",\"MQD\",\"MQE\",\"MQF\",\"MQG\",\"MRB\",\"MRC\",\"MRD\",\"MRE\",\"MRF\",\"MRG\",\"MSB\",\"MSC\",\"MSD\",\"MSE\",\"MSF\",\"MSG\",\"MTB\",\"MTC\",\"MTD\",\"MTE\",\"MTF\",\"MTG\",\"MUB\",\"MUC\",\"MUD\",\"MUE\",\"MUF\",\"MUG\",\"MVB\",\"MVC\",\"MVD\",\"MVE\",\"MVF\",\"MVG\",\"MWB\",\"MWC\",\"MWD\",\"MWE\",\"MWF\",\"MWG\",\"MXB\",\"MXC\",\"MXD\",\"MXE\",\"MXF\",\"MXG\",\"MYB\",\"MYC\",\"MYD\",\"MYE\",\"MYF\",\"MYG\",\"MZB\",\"MZC\",\"MZD\",\"MZE\",\"MZF\",\"MZG\",\"NAB\",\"NAC\",\"NAD\",\"NAE\",\"NAF\",\"NAG\",\"NBA\",\"NBB\",\"NBC\",\"NBD\",\"NBE\",\"NBF\",\"NBG\",\"NCA\",\"NCB\",\"NCC\",\"NCD\",\"NCE\",\"NCF\",\"NCG\",\"NDA\",\"NDB\",\"NDC\",\"NDD\",\"NDE\",\"NDF\",\"NDG\",\"NEA\",\"NEB\",\"NEC\",\"NED\",\"NEE\",\"NEF\",\"NEG\",\"NFA\",\"NFB\",\"NFC\",\"NFD\",\"NFE\",\"NFF\",\"NFG\",\"NGA\",\"NGB\",\"NGC\",\"NGD\",\"NGE\",\"NGF\",\"NGG\",\"NHA\",\"NHB\",\"NHC\",\"NHD\",\"NHE\",\"NHF\",\"NIA\",\"NIB\",\"NIC\",\"NID\",\"NIE\",\"NIF\",\"NJA\",\"NJB\",\"NJC\",\"NJD\",\"NJE\",\"NJF\",\"NKA\",\"NKB\",\"NKC\",\"NKD\",\"NKE\",\"NKF\",\"NLA\",\"NLB\",\"NLC\",\"NLD\",\"NLE\",\"NLF\",\"NMA\",\"NMB\",\"NMC\",\"NMD\",\"NME\",\"NMF\",\"NNB\",\"NND\",\"NNE\",\"NNF\",\"NNG\",\"NOB\",\"NOC\",\"NOD\",\"NOE\",\"NOF\",\"NOG\",\"NPB\",\"NPC\",\"NPD\",\"NPE\",\"NPF\",\"NQB\",\"NQC\",\"NQD\",\"NQE\",\"NQF\",\"NQG\",\"NRB\",\"NRC\",\"NRD\",\"NRE\",\"NRF\",\"NRG\",\"NSB\",\"NSC\",\"NSD\",\"NSE\",\"NSF\",\"NSG\",\"NTB\",\"NTC\",\"NTD\",\"NTE\",\"NTF\",\"NTG\",\"NUB\",\"NUC\",\"NUD\",\"NUE\",\"NUF\",\"NUG\",\"NVB\",\"NVC\",\"NVD\",\"NVE\",\"NVF\",\"NVG\",\"NWB\",\"NWC\",\"NWD\",\"NWE\",\"NWF\",\"NWG\",\"NXB\",\"NXC\",\"NXD\",\"NXE\",\"NXF\",\"NXG\",\"NYB\",\"NYC\",\"NYD\",\"NYE\",\"NYF\",\"NYG\",\"NZB\",\"NZC\",\"NZD\",\"NZE\",\"NZF\",\"NZG\",\"OAB\",\"OAC\",\"OAD\",\"OAE\",\"OAF\",\"OAG\",\"OBA\",\"OBB\",\"OBC\",\"OBD\",\"OBE\",\"OBF\",\"OCA\",\"OCB\",\"OCC\",\"OCD\",\"OCE\",\"OCF\",\"OCG\",\"ODA\",\"ODB\",\"ODC\",\"ODD\",\"ODE\",\"ODF\",\"ODG\",\"OEA\",\"OEB\",\"OEC\",\"OED\",\"OEE\",\"OEF\",\"OFA\",\"OFB\",\"OFC\",\"OFD\",\"OFE\",\"OFF\",\"OFG\",\"OGA\",\"OGB\",\"OGC\",\"OGD\",\"OGE\",\"OGF\",\"OGG\",\"OHA\",\"OHB\",\"OHC\",\"OHD\",\"OHE\",\"OHF\",\"OIA\",\"OIB\",\"OIC\",\"OID\",\"OIE\",\"OIF\",\"OJA\",\"OJB\",\"OJC\",\"OJD\",\"OJE\",\"OJF\",\"OKA\",\"OKB\",\"OKC\",\"OKD\",\"OKE\",\"OKF\",\"OLA\",\"OLB\",\"OLC\",\"OLD\",\"OLE\",\"OLF\",\"OMA\",\"OMB\",\"OMC\",\"OMD\",\"OME\",\"OMF\",\"ONB\",\"OND\",\"ONE\",\"ONF\",\"ONG\",\"OOB\",\"OOC\",\"OOD\",\"OOE\",\"OOF\",\"OOG\",\"OPB\",\"OPC\",\"OPD\",\"OPE\",\"OPF\",\"OQB\",\"OQC\",\"OQD\",\"OQE\",\"OQF\",\"OQG\",\"ORB\",\"ORC\",\"ORD\",\"ORE\",\"ORF\",\"ORG\",\"OSB\",\"OSC\",\"OSD\",\"OSE\",\"OSF\",\"OTB\",\"OTC\",\"OTD\",\"OTE\",\"OTG\",\"OUB\",\"OUC\",\"OUD\",\"OUE\",\"OUF\",\"OUG\",\"OVB\",\"OVC\",\"OVD\",\"OVE\",\"OVF\",\"OVG\",\"OWB\",\"OWC\",\"OWD\",\"OWE\",\"OWF\",\"OWG\",\"OXB\",\"OXC\",\"OXD\",\"OXE\",\"OXF\",\"OXG\",\"OYB\",\"OYC\",\"OYD\",\"OYE\",\"OYF\",\"OYG\",\"OZB\",\"OZC\",\"OZD\",\"OZE\",\"OZF\",\"OZG\",\"PAB\",\"PAC\",\"PAD\",\"PAE\",\"PAF\",\"PAG\",\"PBA\",\"PBB\",\"PBC\",\"PBD\",\"PBE\",\"PBF\",\"PCA\",\"PCB\",\"PCC\",\"PCD\",\"PCE\",\"PCF\",\"PCG\",\"PDA\",\"PDB\",\"PDC\",\"PDD\",\"PDE\",\"PDF\",\"PDG\",\"PEA\",\"PEB\",\"PEC\",\"PED\",\"PEE\",\"PEF\",\"PFA\",\"PFB\",\"PFC\",\"PFD\",\"PFE\",\"PFF\",\"PFG\",\"PGA\",\"PGB\",\"PGC\",\"PGD\",\"PGE\",\"PGF\",\"PGG\",\"PHA\",\"PHB\",\"PHC\",\"PHD\",\"PHE\",\"PHF\",\"PIA\",\"PIB\",\"PIC\",\"PID\",\"PIE\",\"PIF\",\"PJA\",\"PJB\",\"PJC\",\"PJD\",\"PJE\",\"PJF\",\"PKA\",\"PKB\",\"PKC\",\"PKD\",\"PKE\",\"PKF\",\"PLA\",\"PLB\",\"PLC\",\"PLD\",\"PLE\",\"PLF\",\"PMA\",\"PMB\",\"PMC\",\"PMD\",\"PME\",\"PMF\",\"PNB\",\"PND\",\"PNE\",\"PNF\",\"PNG\",\"POB\",\"POC\",\"POD\",\"POE\",\"POF\",\"POG\",\"PPB\",\"PPC\",\"PPD\",\"PPE\",\"PPF\",\"PQB\",\"PQC\",\"PQD\",\"PQE\",\"PQF\",\"PQG\",\"PRB\",\"PRC\",\"PRD\",\"PRE\",\"PRF\",\"PRG\",\"PSB\",\"PSC\",\"PSD\",\"PSE\",\"PSF\",\"PTB\",\"PTC\",\"PTD\",\"PTE\",\"PTF\",\"PTG\",\"PUB\",\"PUC\",\"PUD\",\"PUE\",\"PUF\",\"PUG\",\"PVB\",\"PVC\",\"PVD\",\"PVE\",\"PVF\",\"PVG\",\"PWB\",\"PWC\",\"PWD\",\"PWE\",\"PWF\",\"PWG\",\"PXB\",\"PXC\",\"PXD\",\"PXE\",\"PXF\",\"PXG\",\"PYB\",\"PYC\",\"PYD\",\"PYE\",\"PYF\",\"PYG\",\"PZB\",\"PZC\",\"PZD\",\"PZE\",\"PZF\",\"PZG\",\"QAB\",\"QAC\",\"QAD\",\"QAE\",\"QAF\",\"QAG\",\"QBA\",\"QBB\",\"QBC\",\"QBD\",\"QBE\",\"QBF\",\"QCA\",\"QCB\",\"QCC\",\"QCD\",\"QCE\",\"QCF\",\"QCG\",\"QDA\",\"QDB\",\"QDC\",\"QDD\",\"QDE\",\"QDG\",\"QEA\",\"QEB\",\"QEC\",\"QED\",\"QEE\",\"QEF\",\"QFA\",\"QFB\",\"QFC\",\"QFD\",\"QFE\",\"QFF\",\"QFG\",\"QGA\",\"QGB\",\"QGC\",\"QGD\",\"QGE\",\"QGF\",\"QGG\",\"QHA\",\"QHB\",\"QHC\",\"QHD\",\"QHE\",\"QHF\",\"QIA\",\"QIB\",\"QIC\",\"QID\",\"QIE\",\"QIF\",\"QJA\",\"QJB\",\"QJC\",\"QJD\",\"QJE\",\"QJF\",\"QKA\",\"QKB\",\"QKC\",\"QKD\",\"QKE\",\"QKF\",\"QLA\",\"QLB\",\"QLC\",\"QLD\",\"QLE\",\"QLF\",\"QMA\",\"QMB\",\"QMC\",\"QMD\",\"QME\",\"QMF\",\"QNB\",\"QND\",\"QNE\",\"QNF\",\"QNG\",\"QOB\",\"QOC\",\"QOD\",\"QOE\",\"QOF\",\"QOG\",\"QPB\",\"QPC\",\"QPD\",\"QPE\",\"QPF\",\"QQB\",\"QQC\",\"QQD\",\"QQE\",\"QQF\",\"QQG\",\"QRB\",\"QRC\",\"QRD\",\"QRE\",\"QRF\",\"QRG\",\"QSB\",\"QSC\",\"QSD\",\"QSE\",\"QSF\",\"QSG\",\"QTB\",\"QTC\",\"QTD\",\"QTE\",\"QTF\",\"QTG\",\"QUB\",\"QUC\",\"QUD\",\"QUE\",\"QUF\",\"QUG\",\"QVB\",\"QVC\",\"QVD\",\"QVE\",\"QVF\",\"QWB\",\"QWC\",\"QWD\",\"QWE\",\"QWF\",\"QWG\",\"QXB\",\"QXC\",\"QXD\",\"QXE\",\"QXF\",\"QXG\",\"QYB\",\"QYC\",\"QYD\",\"QYE\",\"QYF\",\"QYG\",\"QZB\",\"QZC\",\"QZD\",\"QZE\",\"QZF\",\"QZG\",\"RAB\",\"RAC\",\"RAD\",\"RAE\",\"RAF\",\"RAG\",\"RBA\",\"RBB\",\"RBC\",\"RBD\",\"RBE\",\"RBF\",\"RCA\",\"RCB\",\"RCC\",\"RCD\",\"RCE\",\"RCF\",\"RCG\",\"RDA\",\"RDB\",\"RDC\",\"RDD\",\"RDE\",\"RDF\",\"RDG\",\"REA\",\"REB\",\"REC\",\"RED\",\"REE\",\"REF\",\"RFA\",\"RFB\",\"RFC\",\"RFD\",\"RFE\",\"RFF\",\"RFG\",\"RGA\",\"RGB\",\"RGC\",\"RGD\",\"RGE\",\"RGF\",\"RGG\",\"RHA\",\"RHB\",\"RHC\",\"RHD\",\"RHE\",\"RHF\",\"RIA\",\"RIB\",\"RIC\",\"RID\",\"RIE\",\"RIF\",\"RJA\",\"RJB\",\"RJC\",\"RJD\",\"RJE\",\"RJF\",\"RKA\",\"RKB\",\"RKC\",\"RKD\",\"RKE\",\"RKF\",\"RLA\",\"RLB\",\"RLC\",\"RLD\",\"RLE\",\"RLF\",\"RMA\",\"RMB\",\"RMC\",\"RMD\",\"RME\",\"RMF\",\"RNB\",\"RND\",\"RNE\",\"RNF\",\"RNG\",\"ROB\",\"ROC\",\"ROD\",\"ROE\",\"ROF\",\"ROG\",\"RPB\",\"RPC\",\"RPD\",\"RPE\",\"RPF\",\"RQB\",\"RQC\",\"RQD\",\"RQE\",\"RQF\",\"RQG\",\"RRC\",\"RRD\",\"RRE\",\"RRF\",\"RRG\",\"RSB\",\"RSC\",\"RSD\",\"RSE\",\"RSF\",\"RTB\",\"RTC\",\"RTD\",\"RTE\",\"RTF\",\"RTG\",\"RUB\",\"RUC\",\"RUD\",\"RUE\",\"RUF\",\"RUG\",\"RVB\",\"RVC\",\"RVD\",\"RVE\",\"RVF\",\"RVG\",\"RWB\",\"RWC\",\"RWD\",\"RWE\",\"RWF\",\"RWG\",\"RXB\",\"RXC\",\"RXD\",\"RXE\",\"RXF\",\"RXG\",\"RYB\",\"RYC\",\"RYD\",\"RYE\",\"RYF\",\"RYG\",\"RZB\",\"RZC\",\"RZD\",\"RZE\",\"RZF\",\"RZG\",\"SAB\",\"SAC\",\"SAD\",\"SAE\",\"SAF\",\"SAG\",\"SBA\",\"SBB\",\"SBC\",\"SBD\",\"SBE\",\"SBF\",\"SCA\",\"SCB\",\"SCC\",\"SCD\",\"SCE\",\"SCF\",\"SCG\",\"SDA\",\"SDB\",\"SDC\",\"SDD\",\"SDE\",\"SDF\",\"SDG\",\"SEA\",\"SEB\",\"SEC\",\"SED\",\"SEE\",\"SEF\",\"SFA\",\"SFB\",\"SFC\",\"SFD\",\"SFE\",\"SFF\",\"SFG\",\"SGA\",\"SGB\",\"SGC\",\"SGD\",\"SGE\",\"SGF\",\"SGG\",\"SHA\",\"SHB\",\"SHC\",\"SHD\",\"SHE\",\"SHF\",\"SIA\",\"SIB\",\"SIC\",\"SID\",\"SIE\",\"SIF\",\"SJA\",\"SJB\",\"SJC\",\"SJD\",\"SJE\",\"SJF\",\"SKA\",\"SKB\",\"SKC\",\"SKD\",\"SKE\",\"SKF\",\"SLA\",\"SLB\",\"SLC\",\"SLD\",\"SLE\",\"SLF\",\"SMA\",\"SMB\",\"SMC\",\"SMD\",\"SME\",\"SMF\",\"SNB\",\"SND\",\"SNE\",\"SNF\",\"SNG\",\"SOB\",\"SOC\",\"SOD\",\"SOE\",\"SOF\",\"SOG\",\"SPB\",\"SPC\",\"SPD\",\"SPE\",\"SPF\",\"SPG\",\"SQB\",\"SQC\",\"SQD\",\"SQE\",\"SQF\",\"SQG\",\"SRB\",\"SRC\",\"SRD\",\"SRE\",\"SRF\",\"SRG\",\"SSB\",\"SSC\",\"SSD\",\"SSE\",\"SSF\",\"SSG\",\"STB\",\"STC\",\"STD\",\"STE\",\"STF\",\"STG\",\"SUB\",\"SUC\",\"SUD\",\"SUE\",\"SUF\",\"SUG\",\"SVB\",\"SVC\",\"SVD\",\"SVE\",\"SVF\",\"SVG\",\"SWB\",\"SWC\",\"SWD\",\"SWE\",\"SWF\",\"SWG\",\"SXB\",\"SXC\",\"SXD\",\"SXE\",\"SXF\",\"SXG\",\"SYB\",\"SYC\",\"SYD\",\"SYE\",\"SYF\",\"SYG\",\"SZB\",\"SZC\",\"SZD\",\"SZE\",\"SZF\",\"SZG\",\"TAB\",\"TAC\",\"TAD\",\"TAE\",\"TAF\",\"TAG\",\"TBA\",\"TBB\",\"TBC\",\"TBD\",\"TBE\",\"TBF\",\"TCA\",\"TCB\",\"TCC\",\"TCD\",\"TCE\",\"TCF\",\"TCG\",\"TDA\",\"TDB\",\"TDC\",\"TDD\",\"TDE\",\"TDF\",\"TDG\",\"TEA\",\"TEB\",\"TEC\",\"TED\",\"TEE\",\"TEF\",\"TFA\",\"TFB\",\"TFC\",\"TFD\",\"TFE\",\"TFF\",\"TFG\",\"TGA\",\"TGB\",\"TGC\",\"TGD\",\"TGE\",\"TGF\",\"TGG\",\"THA\",\"THB\",\"THC\",\"THD\",\"THE\",\"THF\",\"TIA\",\"TIB\",\"TIC\",\"TID\",\"TIE\",\"TIF\",\"TJA\",\"TJB\",\"TJC\",\"TJD\",\"TJE\",\"TJF\",\"TKA\",\"TKB\",\"TKC\",\"TKD\",\"TKE\",\"TKF\",\"TLA\",\"TLB\",\"TLC\",\"TLD\",\"TLE\",\"TLF\",\"TMA\",\"TMB\",\"TMC\",\"TMD\",\"TME\",\"TMF\",\"TNB\",\"TNC\",\"TND\",\"TNE\",\"TNF\",\"TNG\",\"TOB\",\"TOC\",\"TOD\",\"TOE\",\"TOF\",\"TOG\",\"TPB\",\"TPC\",\"TPD\",\"TPE\",\"TPF\",\"TPG\",\"TQB\",\"TQC\",\"TQD\",\"TQE\",\"TQF\",\"TQG\",\"TRB\",\"TRC\",\"TRD\",\"TRE\",\"TRF\",\"TRG\",\"TSB\",\"TSC\",\"TSD\",\"TSE\",\"TSF\",\"TSG\",\"TTB\",\"TTC\",\"TTD\",\"TTE\",\"TTF\",\"TTG\",\"TUB\",\"TUD\",\"TUE\",\"TUF\",\"TUG\",\"TVB\",\"TVC\",\"TVD\",\"TVE\",\"TVF\",\"TVG\",\"TWB\",\"TWC\",\"TWD\",\"TWE\",\"TWF\",\"TWG\",\"TXB\",\"TXC\",\"TXD\",\"TXE\",\"TXF\",\"TXG\",\"TYB\",\"TYC\",\"TYD\",\"TYE\",\"TYF\",\"TYG\",\"TZB\",\"TZC\",\"TZD\",\"TZE\",\"TZF\",\"TZG\",\"UAB\",\"UAC\",\"UAD\",\"UAE\",\"UAF\",\"UAG\",\"UBA\",\"UBB\",\"UBC\",\"UBD\",\"UBE\",\"UBF\",\"UCA\",\"UCB\",\"UCC\",\"UCD\",\"UCE\",\"UCF\",\"UCG\",\"UDA\",\"UDB\",\"UDC\",\"UDD\",\"UDE\",\"UDF\",\"UDG\",\"UEA\",\"UEB\",\"UEC\",\"UED\",\"UEE\",\"UEF\",\"UFA\",\"UFB\",\"UFC\",\"UFD\",\"UFF\",\"UFG\",\"UGA\",\"UGB\",\"UGC\",\"UGD\",\"UGE\",\"UGF\",\"UGG\",\"UHA\",\"UHB\",\"UHC\",\"UHD\",\"UHE\",\"UHF\",\"UIA\",\"UIB\",\"UIC\",\"UID\",\"UIE\",\"UIF\",\"UJA\",\"UJB\",\"UJC\",\"UJD\",\"UJE\",\"UJF\",\"UKA\",\"UKB\",\"UKC\",\"UKD\",\"UKE\",\"UKF\",\"ULA\",\"ULB\",\"ULC\",\"ULD\",\"ULE\",\"ULF\",\"UMA\",\"UMB\",\"UMC\",\"UMD\",\"UME\",\"UMF\",\"UNB\",\"UNC\",\"UND\",\"UNE\",\"UNF\",\"UNG\",\"UOB\",\"UOC\",\"UOD\",\"UOE\",\"UOF\",\"UOG\",\"UPB\",\"UPC\",\"UPD\",\"UPE\",\"UPF\",\"UPG\",\"UQB\",\"UQC\",\"UQD\",\"UQE\",\"UQF\",\"UQG\",\"URB\",\"URC\",\"URD\",\"URE\",\"URF\",\"URG\",\"USB\",\"USC\",\"USD\",\"USE\",\"USF\",\"USG\",\"UTB\",\"UTC\",\"UTD\",\"UTE\",\"UTF\",\"UTG\",\"UUB\",\"UUC\",\"UUD\",\"UUE\",\"UUF\",\"UUG\",\"UVB\",\"UVC\",\"UVD\",\"UVE\",\"UVF\",\"UVG\",\"UWB\",\"UWC\",\"UWD\",\"UWE\",\"UWF\",\"UWG\",\"UXB\",\"UXC\",\"UXD\",\"UXE\",\"UXF\",\"UXG\",\"UYB\",\"UYC\",\"UYD\",\"UYE\",\"UYF\",\"UYG\",\"UZB\",\"UZC\",\"UZD\",\"UZE\",\"UZF\",\"UZG\",\"VAB\",\"VAC\",\"VAD\",\"VAE\",\"VAF\",\"VAG\",\"VBA\",\"VBB\",\"VBC\",\"VBD\",\"VBE\",\"VBF\",\"VBG\",\"VCA\",\"VCB\",\"VCC\",\"VCD\",\"VCE\",\"VCF\",\"VCG\",\"VDA\",\"VDB\",\"VDC\",\"VDD\",\"VDE\",\"VDF\",\"VDG\",\"VEA\",\"VEB\",\"VEC\",\"VED\",\"VEE\",\"VEF\",\"VFA\",\"VFB\",\"VFC\",\"VFD\",\"VFE\",\"VFF\",\"VFG\",\"VGA\",\"VGB\",\"VGC\",\"VGD\",\"VGE\",\"VGF\",\"VGG\",\"VHA\",\"VHB\",\"VHC\",\"VHD\",\"VHE\",\"VHF\",\"VIA\",\"VIB\",\"VIC\",\"VID\",\"VIE\",\"VIF\",\"VJA\",\"VJB\",\"VJC\",\"VJD\",\"VJE\",\"VKA\",\"VKB\",\"VKC\",\"VKD\",\"VKE\",\"VKF\",\"VLA\",\"VLB\",\"VLC\",\"VLD\",\"VLE\",\"VLF\",\"VMA\",\"VMB\",\"VMC\",\"VMD\",\"VME\",\"VMF\",\"VNB\",\"VNC\",\"VND\",\"VNE\",\"VNF\",\"VNG\",\"VOB\",\"VOC\",\"VOD\",\"VOE\",\"VOF\",\"VOG\",\"VPB\",\"VPC\",\"VPD\",\"VPE\",\"VPF\",\"VPG\",\"VQB\",\"VQC\",\"VQD\",\"VQE\",\"VQF\",\"VQG\",\"VRB\",\"VRC\",\"VRD\",\"VRE\",\"VRF\",\"VRG\",\"VSB\",\"VSC\",\"VSD\",\"VSE\",\"VSF\",\"VSG\",\"VTB\",\"VTC\",\"VTD\",\"VTE\",\"VTF\",\"VTG\",\"VUB\",\"VUC\",\"VUD\",\"VUE\",\"VUF\",\"VUG\",\"VVB\",\"VVC\",\"VVD\",\"VVE\",\"VVF\",\"VVG\",\"VWB\",\"VWC\",\"VWD\",\"VWE\",\"VWF\",\"VWG\",\"VXC\",\"VXD\",\"VXE\",\"VXF\",\"VXG\",\"VYB\",\"VYC\",\"VYD\",\"VYE\",\"VYF\",\"VYG\",\"VZB\",\"VZC\",\"VZD\",\"VZE\",\"VZF\",\"VZG\",\"WAB\",\"WAC\",\"WAD\",\"WAE\",\"WAF\",\"WAG\",\"WBA\",\"WBB\",\"WBC\",\"WBD\",\"WBE\",\"WBF\",\"WBG\",\"WCA\",\"WCB\",\"WCC\",\"WCD\",\"WCE\",\"WCF\",\"WCG\",\"WDA\",\"WDC\",\"WDD\",\"WDE\",\"WDF\",\"WDG\",\"WEA\",\"WEB\",\"WEC\",\"WED\",\"WEE\",\"WEF\",\"WFA\",\"WFB\",\"WFC\",\"WFD\",\"WFE\",\"WFF\",\"WFG\",\"WGA\",\"WGB\",\"WGC\",\"WGD\",\"WGE\",\"WGF\",\"WGG\",\"WHA\",\"WHB\",\"WHC\",\"WHD\",\"WHE\",\"WHF\",\"WIA\",\"WIB\",\"WIC\",\"WID\",\"WIE\",\"WIF\",\"WJA\",\"WJB\",\"WJC\",\"WJD\",\"WJE\",\"WJF\",\"WKA\",\"WKB\",\"WKC\",\"WKD\",\"WKE\",\"WKF\",\"WLA\",\"WLB\",\"WLC\",\"WLD\",\"WLE\",\"WLF\",\"WMA\",\"WMB\",\"WMC\",\"WMD\",\"WME\",\"WMF\",\"WNB\",\"WNC\",\"WND\",\"WNE\",\"WNF\",\"WNG\",\"WOB\",\"WOC\",\"WOD\",\"WOE\",\"WOF\",\"WOG\",\"WPB\",\"WPC\",\"WPD\",\"WPE\",\"WPF\",\"WPG\",\"WQB\",\"WQC\",\"WQD\",\"WQE\",\"WQF\",\"WQG\",\"WRB\",\"WRC\",\"WRD\",\"WRE\",\"WRF\",\"WRG\",\"WSB\",\"WSC\",\"WSD\",\"WSE\",\"WSF\",\"WSG\",\"WTB\",\"WTC\",\"WTD\",\"WTE\",\"WTF\",\"WTG\",\"WUB\",\"WUC\",\"WUD\",\"WUE\",\"WUF\",\"WUG\",\"WVB\",\"WVC\",\"WVD\",\"WVE\",\"WVF\",\"WVG\",\"WWB\",\"WWC\",\"WWD\",\"WWE\",\"WWF\",\"WWG\",\"WXB\",\"WXC\",\"WXD\",\"WXE\",\"WXF\",\"WXG\",\"WYB\",\"WYC\",\"WYD\",\"WYE\",\"WYF\",\"WYG\",\"WZB\",\"WZC\",\"WZD\",\"WZE\",\"WZF\",\"WZG\",\"XAC\",\"XAD\",\"XAE\",\"XAF\",\"XBA\",\"XBB\",\"XBC\",\"XBD\",\"XBE\",\"XBF\",\"XBG\",\"XCA\",\"XCB\",\"XCC\",\"XCD\",\"XCE\",\"XCF\",\"XCG\",\"XDA\",\"XDB\",\"XDC\",\"XDD\",\"XDE\",\"XDF\",\"XDG\",\"XEA\",\"XEB\",\"XEC\",\"XED\",\"XEE\",\"XEF\",\"XFA\",\"XFB\",\"XFC\",\"XFD\",\"XFE\",\"XFF\",\"XFG\",\"XGA\",\"XGB\",\"XGC\",\"XGD\",\"XGE\",\"XGF\",\"XGG\",\"XHA\",\"XHB\",\"XHC\",\"XHD\",\"XHE\",\"XHF\",\"XIA\",\"XIB\",\"XIC\",\"XID\",\"XIE\",\"XIF\",\"XJA\",\"XJB\",\"XJC\",\"XJD\",\"XJE\",\"XJF\",\"XKA\",\"XKB\",\"XKC\",\"XKD\",\"XKE\",\"XKF\",\"XLA\",\"XLB\",\"XLC\",\"XLD\",\"XLE\",\"XLF\",\"XMA\",\"XMB\",\"XMC\",\"XMD\",\"XME\",\"XMF\",\"XNB\",\"XNC\",\"XND\",\"XNE\",\"XNF\",\"XNG\",\"XOB\",\"XOC\",\"XOD\",\"XOE\",\"XOF\",\"XOG\",\"XPB\",\"XPC\",\"XPD\",\"XPE\",\"XPF\",\"XPG\",\"XQB\",\"XQC\",\"XQD\",\"XQF\",\"XQG\",\"XRB\",\"XRC\",\"XRD\",\"XRE\",\"XRF\",\"XRG\",\"XSB\",\"XSC\",\"XSD\",\"XSE\",\"XSF\",\"XSG\",\"XTB\",\"XTC\",\"XTD\",\"XTE\",\"XTF\",\"XTG\",\"XUB\",\"XUC\",\"XUD\",\"XUE\",\"XUF\",\"XUG\",\"XVB\",\"XVC\",\"XVD\",\"XVE\",\"XVF\",\"XVG\",\"XWB\",\"XWC\",\"XWD\",\"XWE\",\"XWF\",\"XWG\",\"XXB\",\"XXC\",\"XXD\",\"XXE\",\"XXF\",\"XXG\",\"XYB\",\"XYC\",\"XYD\",\"XYE\",\"XYF\",\"XYG\",\"XZB\",\"XZC\",\"XZD\",\"XZE\",\"XZF\",\"XZG\",\"YAB\",\"YAC\",\"YAD\",\"YAE\",\"YAF\",\"YAG\",\"YBA\",\"YBB\",\"YBC\",\"YBD\",\"YBE\",\"YBF\",\"YCA\",\"YCB\",\"YCD\",\"YCE\",\"YCF\",\"YCG\",\"YDA\",\"YDB\",\"YDC\",\"YDD\",\"YDE\",\"YDF\",\"YDG\",\"YEA\",\"YEB\",\"YEC\",\"YED\",\"YEE\",\"YEF\",\"YFA\",\"YFB\",\"YFC\",\"YFD\",\"YFE\",\"YFG\",\"YGA\",\"YGB\",\"YGC\",\"YGD\",\"YGE\",\"YGF\",\"YGG\",\"YHA\",\"YHB\",\"YHC\",\"YHD\",\"YHE\",\"YHF\",\"YIA\",\"YIB\",\"YIC\",\"YID\",\"YIE\",\"YIF\",\"YJA\",\"YJB\",\"YJC\",\"YJD\",\"YJE\",\"YJF\",\"YKA\",\"YKB\",\"YKC\",\"YKD\",\"YKE\",\"YKF\",\"YLA\",\"YLB\",\"YLC\",\"YLD\",\"YLE\",\"YLF\",\"YMA\",\"YMB\",\"YMC\",\"YMD\",\"YME\",\"YMF\",\"YNB\",\"YNC\",\"YND\",\"YNE\",\"YNF\",\"YNG\",\"YOB\",\"YOC\",\"YOD\",\"YOE\",\"YOF\",\"YOG\",\"YPB\",\"YPC\",\"YPD\",\"YPE\",\"YPF\",\"YPG\",\"YQB\",\"YQC\",\"YQD\",\"YQF\",\"YQG\",\"YRB\",\"YRC\",\"YRD\",\"YRE\",\"YRF\",\"YRG\",\"YSB\",\"YSC\",\"YSD\",\"YSE\",\"YSF\",\"YSG\",\"YTB\",\"YTC\",\"YTD\",\"YTE\",\"YTF\",\"YTG\",\"YUB\",\"YUC\",\"YUD\",\"YUE\",\"YUF\",\"YUG\",\"YVB\",\"YVC\",\"YVD\",\"YVE\",\"YVF\",\"YVG\",\"YWB\",\"YWC\",\"YWD\",\"YWE\",\"YWF\",\"YWG\",\"YXB\",\"YXC\",\"YXD\",\"YXE\",\"YXF\",\"YXG\",\"YYB\",\"YYC\",\"YYD\",\"YYE\",\"YYF\",\"YYG\",\"YZB\",\"YZC\",\"YZD\",\"YZE\",\"YZF\",\"YZG\",\"ZAB\",\"ZAD\",\"ZAE\",\"ZAF\",\"ZAG\",\"ZBA\",\"ZBB\",\"ZBC\",\"ZBD\",\"ZBE\",\"ZBF\",\"ZCA\",\"ZCB\",\"ZCC\",\"ZCD\",\"ZCE\",\"ZCF\",\"ZCG\",\"ZDA\",\"ZDB\",\"ZDC\",\"ZDD\",\"ZDE\",\"ZDF\",\"ZDG\",\"ZEA\",\"ZEB\",\"ZEC\",\"ZED\",\"ZEE\",\"ZEF\",\"ZFA\",\"ZFB\",\"ZFC\",\"ZFD\",\"ZFE\",\"ZFF\",\"ZFG\",\"ZGA\",\"ZGB\",\"ZGC\",\"ZGD\",\"ZGE\",\"ZGF\",\"ZGG\",\"ZHA\",\"ZHB\",\"ZHC\",\"ZHD\",\"ZHE\",\"ZHF\",\"ZIA\",\"ZIB\",\"ZIC\",\"ZID\",\"ZIE\",\"ZIF\",\"ZJA\",\"ZJB\",\"ZJC\",\"ZJD\",\"ZJE\",\"ZJF\",\"ZKA\",\"ZKB\",\"ZKC\",\"ZKD\",\"ZKE\",\"ZKF\",\"ZLA\",\"ZLB\",\"ZLC\",\"ZLD\",\"ZLE\",\"ZLF\",\"ZMA\",\"ZMB\",\"ZMC\",\"ZMD\",\"ZME\",\"ZMF\",\"ZNB\",\"ZNC\",\"ZND\",\"ZNE\",\"ZNF\",\"ZNG\",\"ZOB\",\"ZOC\",\"ZOD\",\"ZOE\",\"ZOF\",\"ZPB\",\"ZPC\",\"ZPD\",\"ZPE\",\"ZPF\",\"ZPG\",\"ZQB\",\"ZQC\",\"ZQD\",\"ZQF\",\"ZQG\",\"ZRB\",\"ZRC\",\"ZRD\",\"ZRE\",\"ZRF\",\"ZRG\",\"ZSB\",\"ZSC\",\"ZSD\",\"ZSE\",\"ZSF\",\"ZSG\",\"ZTB\",\"ZTC\",\"ZTD\",\"ZTE\",\"ZTF\",\"ZTG\",\"ZUB\",\"ZUC\",\"ZUD\",\"ZUE\",\"ZUF\",\"ZUG\",\"ZVB\",\"ZVC\",\"ZVD\",\"ZVE\",\"ZVF\",\"ZVG\",\"ZWB\",\"ZWC\",\"ZWD\",\"ZWE\",\"ZWF\",\"ZWG\",\"ZXB\",\"ZXC\",\"ZXD\",\"ZXE\",\"ZXF\",\"ZXG\",\"ZYB\",\"ZYC\",\"ZYD\",\"ZYE\",\"ZYF\",\"ZYG\",\"ZZB\",\"ZZC\",\"ZZD\",\"ZZE\",\"ZZF\",\"ZZG\"]}}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":0,\"minimum\":0}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"default\":20,\"maximum\":250,\"minimum\":1}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         ids: model.Presence([]const FactionTerritoryEnum) = .absent,
         offset: model.Presence(i64) = .absent,
         limit: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornTerritoriesResponse;
     pub const media_type = "application/json";
@@ -7323,16 +8962,23 @@ pub const getTornLookup = struct {
     pub const operation_id = "getTornLookup";
     pub const path = "/torn/lookup";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TornLookupResponse;
     pub const media_type = "application/json";
@@ -7342,16 +8988,23 @@ pub const getTornTimestamp = struct {
     pub const operation_id = "getTornTimestamp";
     pub const path = "/torn/timestamp";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = TimestampResponse;
     pub const media_type = "application/json";
@@ -7361,47 +9014,54 @@ pub const getTornGeneric = struct {
     pub const operation_id = "getTornGeneric";
     pub const path = "/torn";
     pub const stability = "Stable";
+    /// Parsed from the operation description ("Cached selection (N minutes" / "cached for N hour").
     pub const upstream_cache_ttl_seconds: ?u32 = null;
+    /// Minimum key access level from spec/shared/access-levels.json (P6.1).
+    pub const access_level: shared.AccessLevel = .public;
+    /// True when the response carries `_metadata.links` (P7.1 pager support).
+    pub const paginated = false;
+    /// Resolved parameter contracts (without `key`) for allocation-light validation.
+    pub const parameters_json = "[{\"name\":\"selections\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"attacklog\",\"bank\",\"bounties\",\"calendar\",\"cards\",\"cityshops\",\"companies\",\"crimes\",\"education\",\"elimination\",\"eliminationteam\",\"factionhof\",\"factiontree\",\"gyms\",\"halloween\",\"hof\",\"honors\",\"itemammo\",\"itemdetails\",\"itemmods\",\"itemstats\",\"items\",\"logcategories\",\"logtypes\",\"lookup\",\"medals\",\"merits\",\"museum\",\"organizedcrimes\",\"pokertables\",\"properties\",\"rockpaperscissors\",\"searchforcash\",\"shoplifting\",\"stats\",\"stocks\",\"subcrimes\",\"territory\",\"timestamp\",\"competition\",\"organisedcrimes\"]},{\"type\":\"string\"}]}}},{\"name\":\"id\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"integer\",\"format\":\"int64\"},{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int64\"}},{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"type\":\"array\",\"items\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"AAB\",\"AAC\",\"AAD\",\"AAE\",\"AAF\",\"AAG\",\"ABA\",\"ABB\",\"ABC\",\"ABD\",\"ABE\",\"ABF\",\"ACA\",\"ACB\",\"ACC\",\"ACD\",\"ACE\",\"ACF\",\"ACG\",\"ADA\",\"ADB\",\"ADC\",\"ADD\",\"ADE\",\"ADF\",\"ADG\",\"AEA\",\"AEB\",\"AEC\",\"AED\",\"AEE\",\"AEF\",\"AFA\",\"AFB\",\"AFC\",\"AFD\",\"AFE\",\"AFF\",\"AFG\",\"AGA\",\"AGB\",\"AGC\",\"AGD\",\"AGE\",\"AGF\",\"AGG\",\"AHA\",\"AHB\",\"AHC\",\"AHD\",\"AHE\",\"AHF\",\"AIA\",\"AIB\",\"AIC\",\"AID\",\"AIE\",\"AIF\",\"AJA\",\"AJB\",\"AJC\",\"AJD\",\"AJE\",\"AJF\",\"AKA\",\"AKB\",\"AKC\",\"AKD\",\"AKE\",\"AKF\",\"ALA\",\"ALB\",\"ALC\",\"ALD\",\"ALE\",\"ALF\",\"AMA\",\"AMB\",\"AMC\",\"AMD\",\"AME\",\"AMF\",\"ANB\",\"ANC\",\"AND\",\"ANE\",\"ANF\",\"ANG\",\"AOB\",\"AOC\",\"AOD\",\"AOE\",\"AOF\",\"AOG\",\"APB\",\"APC\",\"APD\",\"APE\",\"APF\",\"APG\",\"AQB\",\"AQC\",\"AQD\",\"AQE\",\"AQF\",\"AQG\",\"ARB\",\"ARC\",\"ARD\",\"ARE\",\"ARF\",\"ASB\",\"ASC\",\"ASD\",\"ASE\",\"ASF\",\"ASG\",\"ATB\",\"ATC\",\"ATD\",\"ATE\",\"ATF\",\"ATG\",\"AUB\",\"AUC\",\"AUD\",\"AUE\",\"AUF\",\"AUG\",\"AVB\",\"AVC\",\"AVD\",\"AVE\",\"AVF\",\"AVG\",\"AWB\",\"AWC\",\"AWD\",\"AWE\",\"AWF\",\"AWG\",\"AXB\",\"AXC\",\"AXD\",\"AXE\",\"AXF\",\"AXG\",\"AYB\",\"AYC\",\"AYD\",\"AYE\",\"AYF\",\"AYG\",\"AZB\",\"AZC\",\"AZD\",\"AZE\",\"AZF\",\"AZG\",\"BAA\",\"BAB\",\"BAC\",\"BAD\",\"BAE\",\"BAF\",\"BAG\",\"BBA\",\"BBB\",\"BBC\",\"BBD\",\"BBE\",\"BBF\",\"BBG\",\"BCA\",\"BCB\",\"BCC\",\"BCD\",\"BCE\",\"BCF\",\"BCG\",\"BDA\",\"BDB\",\"BDC\",\"BDD\",\"BDE\",\"BDF\",\"BDG\",\"BEA\",\"BEB\",\"BEC\",\"BED\",\"BEE\",\"BEF\",\"BFA\",\"BFB\",\"BFC\",\"BFD\",\"BFE\",\"BFF\",\"BFG\",\"BGA\",\"BGB\",\"BGC\",\"BGD\",\"BGE\",\"BGF\",\"BGG\",\"BHA\",\"BHB\",\"BHC\",\"BHD\",\"BHE\",\"BHF\",\"BIA\",\"BIB\",\"BIC\",\"BID\",\"BIE\",\"BIF\",\"BJA\",\"BJB\",\"BJC\",\"BJD\",\"BJE\",\"BJF\",\"BKA\",\"BKB\",\"BKC\",\"BKD\",\"BKE\",\"BKF\",\"BLA\",\"BLB\",\"BLC\",\"BLD\",\"BLE\",\"BLF\",\"BMA\",\"BMB\",\"BMC\",\"BMD\",\"BME\",\"BMF\",\"BNB\",\"BNC\",\"BND\",\"BNE\",\"BNF\",\"BNG\",\"BOB\",\"BOC\",\"BOD\",\"BOE\",\"BOF\",\"BPB\",\"BPC\",\"BPD\",\"BPE\",\"BPF\",\"BPG\",\"BQB\",\"BQC\",\"BQD\",\"BQF\",\"BQG\",\"BRB\",\"BRC\",\"BRD\",\"BRE\",\"BRF\",\"BRG\",\"BSB\",\"BSC\",\"BSD\",\"BSE\",\"BSF\",\"BTB\",\"BTC\",\"BTD\",\"BTE\",\"BTF\",\"BTG\",\"BUB\",\"BUC\",\"BUD\",\"BUE\",\"BUF\",\"BUG\",\"BVB\",\"BVC\",\"BVD\",\"BVE\",\"BVF\",\"BVG\",\"BWB\",\"BWC\",\"BWD\",\"BWE\",\"BWF\",\"BWG\",\"BXB\",\"BXC\",\"BXD\",\"BXE\",\"BXF\",\"BXG\",\"BYB\",\"BYC\",\"BYD\",\"BYE\",\"BYF\",\"BYG\",\"BZB\",\"BZC\",\"BZD\",\"BZE\",\"BZF\",\"BZG\",\"CAA\",\"CAB\",\"CAC\",\"CAD\",\"CAE\",\"CAF\",\"CAG\",\"CBA\",\"CBB\",\"CBC\",\"CBD\",\"CBE\",\"CBF\",\"CBG\",\"CCA\",\"CCB\",\"CCC\",\"CCD\",\"CCE\",\"CCF\",\"CCG\",\"CDA\",\"CDB\",\"CDC\",\"CDD\",\"CDE\",\"CDF\",\"CDG\",\"CEA\",\"CEB\",\"CEC\",\"CED\",\"CEE\",\"CEF\",\"CFA\",\"CFB\",\"CFC\",\"CFD\",\"CFE\",\"CFG\",\"CGA\",\"CGB\",\"CGC\",\"CGD\",\"CGE\",\"CGF\",\"CGG\",\"CHA\",\"CHB\",\"CHC\",\"CHD\",\"CHE\",\"CHF\",\"CIA\",\"CIB\",\"CIC\",\"CID\",\"CIE\",\"CIF\",\"CJA\",\"CJB\",\"CJC\",\"CJD\",\"CJE\",\"CJF\",\"CKA\",\"CKB\",\"CKC\",\"CKD\",\"CKE\",\"CKF\",\"CLA\",\"CLB\",\"CLC\",\"CLD\",\"CLE\",\"CLF\",\"CMA\",\"CMB\",\"CMC\",\"CMD\",\"CME\",\"CMF\",\"CNB\",\"CNC\",\"CND\",\"CNE\",\"CNF\",\"CNG\",\"COB\",\"COC\",\"COD\",\"COE\",\"COF\",\"COG\",\"CPB\",\"CPC\",\"CPD\",\"CPE\",\"CPF\",\"CPG\",\"CQB\",\"CQC\",\"CQD\",\"CQF\",\"CQG\",\"CRB\",\"CRC\",\"CRD\",\"CRE\",\"CRF\",\"CRG\",\"CSB\",\"CSC\",\"CSD\",\"CSE\",\"CSF\",\"CSG\",\"CTB\",\"CTC\",\"CTD\",\"CTE\",\"CTF\",\"CTG\",\"CUB\",\"CUC\",\"CUD\",\"CUE\",\"CUF\",\"CUG\",\"CVB\",\"CVC\",\"CVD\",\"CVE\",\"CVF\",\"CVG\",\"CWB\",\"CWC\",\"CWD\",\"CWE\",\"CWF\",\"CWG\",\"CXB\",\"CXC\",\"CXD\",\"CXE\",\"CXF\",\"CXG\",\"CYB\",\"CYC\",\"CYD\",\"CYE\",\"CYF\",\"CZB\",\"CZC\",\"CZD\",\"CZE\",\"CZF\",\"CZG\",\"DAA\",\"DAB\",\"DAC\",\"DAD\",\"DAE\",\"DAF\",\"DAG\",\"DBA\",\"DBB\",\"DBC\",\"DBD\",\"DBE\",\"DBF\",\"DBG\",\"DCA\",\"DCB\",\"DCC\",\"DCD\",\"DCE\",\"DCF\",\"DCG\",\"DDA\",\"DDB\",\"DDC\",\"DDD\",\"DDE\",\"DDF\",\"DDG\",\"DEA\",\"DEB\",\"DEC\",\"DED\",\"DEE\",\"DEF\",\"DFA\",\"DFB\",\"DFC\",\"DFD\",\"DFE\",\"DFF\",\"DFG\",\"DGA\",\"DGB\",\"DGC\",\"DGD\",\"DGE\",\"DGF\",\"DGG\",\"DHA\",\"DHB\",\"DHC\",\"DHD\",\"DHE\",\"DHF\",\"DIA\",\"DIB\",\"DIC\",\"DID\",\"DIE\",\"DIF\",\"DJA\",\"DJB\",\"DJC\",\"DJD\",\"DJE\",\"DKA\",\"DKB\",\"DKC\",\"DKD\",\"DKE\",\"DKF\",\"DLA\",\"DLB\",\"DLC\",\"DLD\",\"DLE\",\"DLF\",\"DMA\",\"DMB\",\"DMC\",\"DMD\",\"DME\",\"DMF\",\"DNB\",\"DNC\",\"DND\",\"DNE\",\"DNF\",\"DNG\",\"DOB\",\"DOC\",\"DOD\",\"DOE\",\"DOF\",\"DOG\",\"DPB\",\"DPC\",\"DPD\",\"DPE\",\"DPF\",\"DPG\",\"DQB\",\"DQC\",\"DQD\",\"DQF\",\"DQG\",\"DRB\",\"DRC\",\"DRD\",\"DRE\",\"DRF\",\"DRG\",\"DSB\",\"DSC\",\"DSD\",\"DSE\",\"DSF\",\"DSG\",\"DTB\",\"DTC\",\"DTD\",\"DTE\",\"DTF\",\"DTG\",\"DUB\",\"DUC\",\"DUD\",\"DUE\",\"DUF\",\"DUG\",\"DVB\",\"DVC\",\"DVD\",\"DVE\",\"DVF\",\"DVG\",\"DWB\",\"DWC\",\"DWD\",\"DWE\",\"DWF\",\"DWG\",\"DXB\",\"DXC\",\"DXD\",\"DXE\",\"DXF\",\"DXG\",\"DYB\",\"DYC\",\"DYD\",\"DYE\",\"DYF\",\"DYG\",\"DZB\",\"DZC\",\"DZD\",\"DZE\",\"DZF\",\"DZG\",\"EAA\",\"EAB\",\"EAC\",\"EAD\",\"EAE\",\"EAF\",\"EAG\",\"EBA\",\"EBB\",\"EBC\",\"EBD\",\"EBE\",\"EBF\",\"EBG\",\"ECA\",\"ECB\",\"ECC\",\"ECD\",\"ECE\",\"ECF\",\"ECG\",\"EDA\",\"EDB\",\"EDC\",\"EDD\",\"EDE\",\"EDF\",\"EDG\",\"EEA\",\"EEB\",\"EEC\",\"EED\",\"EEE\",\"EEF\",\"EFA\",\"EFB\",\"EFC\",\"EFD\",\"EFE\",\"EFF\",\"EFG\",\"EGA\",\"EGB\",\"EGC\",\"EGD\",\"EGE\",\"EGF\",\"EHA\",\"EHB\",\"EHC\",\"EHD\",\"EHE\",\"EHF\",\"EIA\",\"EIB\",\"EIC\",\"EID\",\"EIE\",\"EIF\",\"EJA\",\"EJB\",\"EJC\",\"EJD\",\"EJE\",\"EKA\",\"EKB\",\"EKC\",\"EKD\",\"EKE\",\"EKF\",\"ELA\",\"ELB\",\"ELC\",\"ELD\",\"ELE\",\"ELF\",\"EMA\",\"EMB\",\"EMC\",\"EMD\",\"EME\",\"EMF\",\"ENB\",\"ENC\",\"END\",\"ENE\",\"ENF\",\"ENG\",\"EOB\",\"EOC\",\"EOD\",\"EOE\",\"EOF\",\"EPB\",\"EPC\",\"EPD\",\"EPE\",\"EPF\",\"EPG\",\"EQB\",\"EQC\",\"EQD\",\"EQF\",\"EQG\",\"ERB\",\"ERC\",\"ERD\",\"ERE\",\"ERF\",\"ERG\",\"ESB\",\"ESC\",\"ESD\",\"ESE\",\"ESF\",\"ESG\",\"ETB\",\"ETC\",\"ETD\",\"ETE\",\"ETF\",\"ETG\",\"EUB\",\"EUC\",\"EUD\",\"EUE\",\"EUF\",\"EUG\",\"EVB\",\"EVC\",\"EVD\",\"EVE\",\"EVF\",\"EVG\",\"EWB\",\"EWC\",\"EWD\",\"EWE\",\"EWF\",\"EWG\",\"EXB\",\"EXC\",\"EXD\",\"EXE\",\"EXF\",\"EXG\",\"EYB\",\"EYC\",\"EYD\",\"EYE\",\"EYF\",\"EYG\",\"EZB\",\"EZC\",\"EZD\",\"EZE\",\"EZF\",\"EZG\",\"FAA\",\"FAB\",\"FAC\",\"FAD\",\"FAE\",\"FAF\",\"XAG\",\"FBA\",\"FBB\",\"FBC\",\"FBD\",\"FBF\",\"FBG\",\"FCA\",\"FCB\",\"FCC\",\"FCD\",\"FCE\",\"FCF\",\"FCG\",\"FDA\",\"FDB\",\"FDC\",\"FDD\",\"FDE\",\"FDF\",\"FDG\",\"FEA\",\"FEB\",\"FEC\",\"FED\",\"FEE\",\"FEF\",\"FFA\",\"FFB\",\"FFC\",\"FFD\",\"FFE\",\"FFF\",\"FFG\",\"FGA\",\"FGB\",\"FGC\",\"FGD\",\"FGE\",\"FGF\",\"FGG\",\"FHA\",\"FHB\",\"FHC\",\"FHD\",\"FHE\",\"FHF\",\"FIA\",\"FIB\",\"FIC\",\"FID\",\"FIE\",\"FIF\",\"FJA\",\"FJB\",\"FJC\",\"FJD\",\"FJE\",\"FJF\",\"FKA\",\"FKB\",\"FKC\",\"FKD\",\"FKE\",\"FKF\",\"FLA\",\"FLB\",\"FLC\",\"FLD\",\"FLE\",\"FLF\",\"FMA\",\"FMC\",\"FMD\",\"FME\",\"FMF\",\"FNB\",\"FNC\",\"FND\",\"FNE\",\"FNF\",\"FNG\",\"FOB\",\"FOC\",\"FOD\",\"FOE\",\"FOF\",\"FPB\",\"FPC\",\"FPD\",\"FPE\",\"FPF\",\"FPG\",\"FQB\",\"FQC\",\"FQD\",\"FQF\",\"FQG\",\"FRB\",\"FRC\",\"FRD\",\"FRE\",\"FRF\",\"FRG\",\"FSB\",\"FSC\",\"FSD\",\"FSE\",\"FSF\",\"FSG\",\"FTB\",\"FTC\",\"FTD\",\"FTE\",\"FTF\",\"FTG\",\"FUB\",\"FUC\",\"FUD\",\"FUE\",\"FUF\",\"FUG\",\"FVB\",\"FVC\",\"FVD\",\"FVE\",\"FVF\",\"FVG\",\"FWB\",\"FWC\",\"FWD\",\"FWE\",\"FWF\",\"FWG\",\"FXB\",\"FXC\",\"FXD\",\"FXE\",\"FXF\",\"FXG\",\"FYB\",\"FYC\",\"FYD\",\"FYE\",\"FYF\",\"FYG\",\"FZB\",\"FZC\",\"FZD\",\"FZE\",\"FZF\",\"FZG\",\"GAA\",\"GAB\",\"GAC\",\"GAD\",\"GAE\",\"GAF\",\"GAG\",\"GBA\",\"GBB\",\"GBC\",\"GBD\",\"GBE\",\"GBF\",\"GCA\",\"GCB\",\"GCC\",\"GCD\",\"GCE\",\"GCF\",\"GCG\",\"GDA\",\"GDB\",\"GDC\",\"GDD\",\"GDE\",\"GDF\",\"GDG\",\"GEA\",\"GEB\",\"GEC\",\"GED\",\"GEE\",\"GEF\",\"GFA\",\"GFB\",\"GFC\",\"GFD\",\"GFE\",\"GFF\",\"GFG\",\"GGA\",\"GGB\",\"GGC\",\"GGD\",\"GGE\",\"GGF\",\"GHA\",\"GHB\",\"GHC\",\"GHD\",\"GHE\",\"GHF\",\"GIA\",\"GIB\",\"GIC\",\"GID\",\"GIE\",\"GJA\",\"GJB\",\"GJC\",\"GJD\",\"GJE\",\"GJF\",\"GKA\",\"GKB\",\"GKC\",\"GKD\",\"GKE\",\"GKF\",\"GLA\",\"GLB\",\"GLC\",\"GLD\",\"GLE\",\"GLF\",\"GMA\",\"GMC\",\"GMD\",\"GME\",\"GMF\",\"GNB\",\"GNC\",\"GND\",\"GNE\",\"GNF\",\"GNG\",\"GOB\",\"GOC\",\"GOD\",\"GOE\",\"GOF\",\"GPB\",\"GPC\",\"GPD\",\"GPE\",\"GPF\",\"GPG\",\"GQC\",\"GQD\",\"GQF\",\"GQG\",\"GRB\",\"GRC\",\"GRD\",\"GRE\",\"GRF\",\"GRG\",\"GSB\",\"GSC\",\"GSD\",\"GSE\",\"GSF\",\"GSG\",\"GTB\",\"GTC\",\"GTD\",\"GTE\",\"GTF\",\"GTG\",\"GUB\",\"GUC\",\"GUD\",\"GUF\",\"GUG\",\"GVB\",\"GVC\",\"GVD\",\"GVE\",\"GVF\",\"GVG\",\"GWB\",\"GWC\",\"GWD\",\"GWE\",\"GWF\",\"GWG\",\"GXB\",\"GXC\",\"GXD\",\"GXE\",\"GXF\",\"GXG\",\"GYB\",\"GYC\",\"GYD\",\"GYE\",\"GYF\",\"GYG\",\"GZB\",\"GZC\",\"GZD\",\"GZE\",\"GZF\",\"GZG\",\"HAA\",\"HAB\",\"HAC\",\"HAD\",\"HAE\",\"HAF\",\"HAG\",\"HBA\",\"HBB\",\"HBC\",\"HBD\",\"HBE\",\"HBF\",\"HCA\",\"HCB\",\"HCC\",\"HCD\",\"HCE\",\"HCF\",\"HCG\",\"HDA\",\"HDB\",\"HDC\",\"HDD\",\"HDE\",\"HDF\",\"HDG\",\"HEA\",\"HEB\",\"HEC\",\"HED\",\"HEE\",\"HEF\",\"HFA\",\"HFB\",\"HFC\",\"HFD\",\"HFE\",\"HFF\",\"HGA\",\"HGB\",\"HGC\",\"HGD\",\"HGE\",\"HGF\",\"HHA\",\"HHB\",\"HHC\",\"HHD\",\"HHE\",\"HHF\",\"HIA\",\"HIB\",\"HIC\",\"HID\",\"HIE\",\"HJA\",\"HJB\",\"HJC\",\"HJD\",\"HJE\",\"HJF\",\"HKA\",\"HKB\",\"HKC\",\"HKD\",\"HKE\",\"HKF\",\"HLA\",\"HLB\",\"HLC\",\"HLD\",\"HLE\",\"HLF\",\"HMA\",\"HMC\",\"HMD\",\"HME\",\"HMF\",\"HNB\",\"HNC\",\"HND\",\"HNE\",\"HNF\",\"HNG\",\"HOB\",\"HOC\",\"HOD\",\"HOE\",\"HOF\",\"HPB\",\"HPC\",\"HPD\",\"HPE\",\"HPF\",\"HPG\",\"HQB\",\"HQC\",\"HQD\",\"HQF\",\"HQG\",\"HRB\",\"HRC\",\"HRD\",\"HRE\",\"HRF\",\"HRG\",\"HSB\",\"HSC\",\"HSD\",\"HSE\",\"HSF\",\"HSG\",\"HTB\",\"HTC\",\"HTD\",\"HTE\",\"HTF\",\"HTG\",\"HUB\",\"HUC\",\"HUD\",\"HUE\",\"HUF\",\"HUG\",\"HVB\",\"HVC\",\"HVD\",\"HVE\",\"HVF\",\"HVG\",\"HWB\",\"HWC\",\"HWD\",\"HWE\",\"HWF\",\"HWG\",\"HXB\",\"HXC\",\"HXD\",\"HXE\",\"HXF\",\"HXG\",\"HYB\",\"HYC\",\"HYD\",\"HYE\",\"HYF\",\"HYG\",\"HZB\",\"HZC\",\"HZD\",\"HZE\",\"HZF\",\"HZG\",\"IAA\",\"IAB\",\"IAC\",\"IAD\",\"IAE\",\"IAF\",\"IAG\",\"IBA\",\"IBB\",\"IBC\",\"IBD\",\"IBE\",\"IBF\",\"ICA\",\"ICB\",\"ICC\",\"ICD\",\"ICE\",\"ICF\",\"ICG\",\"IDA\",\"IDB\",\"IDC\",\"IDD\",\"IDE\",\"IDF\",\"IDG\",\"IEA\",\"IEB\",\"IEC\",\"IED\",\"IEE\",\"IEF\",\"IFA\",\"IFB\",\"IFC\",\"IFD\",\"IFE\",\"IFF\",\"IFG\",\"IGA\",\"IGB\",\"IGC\",\"IGD\",\"IGE\",\"IGF\",\"IGG\",\"IHA\",\"IHB\",\"IHC\",\"IHD\",\"IHE\",\"IHF\",\"IIA\",\"IIB\",\"IIC\",\"IID\",\"IIE\",\"IJA\",\"IJB\",\"IJC\",\"IJD\",\"IJE\",\"IJF\",\"IKA\",\"IKB\",\"IKC\",\"IKD\",\"IKE\",\"IKF\",\"ILA\",\"ILB\",\"ILC\",\"ILD\",\"ILE\",\"ILF\",\"IMA\",\"IMB\",\"IMC\",\"IMD\",\"IME\",\"IMF\",\"INB\",\"INC\",\"IND\",\"INE\",\"INF\",\"ING\",\"IOB\",\"IOC\",\"IOD\",\"IOE\",\"IOF\",\"IPB\",\"IPC\",\"IPD\",\"IPE\",\"IPF\",\"IPG\",\"IQB\",\"IQC\",\"IQD\",\"IQF\",\"IQG\",\"IRB\",\"IRC\",\"IRD\",\"IRE\",\"IRF\",\"IRG\",\"ISB\",\"ISC\",\"ISD\",\"ISE\",\"ISF\",\"ISG\",\"ITB\",\"ITC\",\"ITD\",\"ITE\",\"ITF\",\"ITG\",\"IUB\",\"IUC\",\"IUD\",\"IUE\",\"IUF\",\"IUG\",\"IVB\",\"IVC\",\"IVD\",\"IVE\",\"IVF\",\"IVG\",\"IWB\",\"IWC\",\"IWD\",\"IWE\",\"IWF\",\"IWG\",\"IXB\",\"IXC\",\"IXD\",\"IXE\",\"IXF\",\"IXG\",\"IYB\",\"IYC\",\"IYD\",\"IYE\",\"IYF\",\"IYG\",\"IZB\",\"IZC\",\"IZD\",\"IZE\",\"IZF\",\"IZG\",\"JAA\",\"JAB\",\"JAC\",\"JAD\",\"JAE\",\"JAF\",\"JAG\",\"JBA\",\"JBB\",\"JBC\",\"JBD\",\"JBE\",\"JBF\",\"JCA\",\"JCB\",\"JCC\",\"JCD\",\"JCE\",\"JCF\",\"JCG\",\"JDA\",\"JDB\",\"JDC\",\"JDD\",\"JDE\",\"JDF\",\"JDG\",\"JEA\",\"JEB\",\"JEC\",\"JED\",\"JEE\",\"JEF\",\"JFA\",\"JFB\",\"JFC\",\"JFD\",\"JFE\",\"JFF\",\"JFG\",\"JGA\",\"JGB\",\"JGC\",\"JGD\",\"JGE\",\"JGF\",\"JHA\",\"JHB\",\"JHC\",\"JHD\",\"JHE\",\"JHF\",\"JIA\",\"JIB\",\"JIC\",\"JID\",\"JIE\",\"JIF\",\"JJA\",\"JJB\",\"JJC\",\"JJD\",\"JJE\",\"JJF\",\"JKA\",\"JKB\",\"JKC\",\"JKD\",\"JKE\",\"JKF\",\"JLA\",\"JLB\",\"JLC\",\"JLD\",\"JLE\",\"JLF\",\"JMA\",\"JMC\",\"JMD\",\"JME\",\"JMF\",\"JNB\",\"JNC\",\"JND\",\"JNE\",\"JNF\",\"JNG\",\"JOB\",\"JOC\",\"JOD\",\"JOE\",\"JOF\",\"JPB\",\"JPC\",\"JPD\",\"JPE\",\"JPF\",\"JPG\",\"JQB\",\"JQC\",\"JQD\",\"JQF\",\"JQG\",\"JRB\",\"JRC\",\"JRD\",\"JRE\",\"JRF\",\"JRG\",\"JSB\",\"JSC\",\"JSD\",\"JSE\",\"JSF\",\"JSG\",\"JTB\",\"JTC\",\"JTD\",\"JTE\",\"JTF\",\"JTG\",\"JUB\",\"JUC\",\"JUD\",\"JUE\",\"JUF\",\"JUG\",\"JVB\",\"JVC\",\"JVD\",\"JVE\",\"JVF\",\"JVG\",\"JWB\",\"JWC\",\"JWD\",\"JWE\",\"JWF\",\"JWG\",\"JXB\",\"JXC\",\"JXD\",\"JXE\",\"JXF\",\"JXG\",\"JYB\",\"JYC\",\"JYD\",\"JYE\",\"JYF\",\"JYG\",\"JZB\",\"JZC\",\"JZD\",\"JZE\",\"JZF\",\"JZG\",\"KAA\",\"KAB\",\"KAC\",\"KAD\",\"KAE\",\"KAF\",\"KAG\",\"KBA\",\"KBB\",\"KBC\",\"KBD\",\"KBE\",\"KBF\",\"KBG\",\"KCA\",\"KCB\",\"KCC\",\"KCD\",\"KCE\",\"KCF\",\"KCG\",\"KDA\",\"KDB\",\"KDC\",\"KDD\",\"KDE\",\"KEA\",\"KEB\",\"KEC\",\"KED\",\"KEE\",\"KEF\",\"KFA\",\"KFB\",\"KFC\",\"KFD\",\"KFE\",\"KFF\",\"KFG\",\"KGA\",\"KGB\",\"KGC\",\"KGD\",\"KGE\",\"KGF\",\"KGG\",\"KHA\",\"KHB\",\"KHC\",\"KHD\",\"KHE\",\"KHF\",\"KIA\",\"KIB\",\"KIC\",\"KID\",\"KIE\",\"KIF\",\"KJA\",\"KJB\",\"KJC\",\"KJD\",\"KJE\",\"KJF\",\"KKA\",\"KKB\",\"KKC\",\"KKD\",\"KKE\",\"KKF\",\"KLA\",\"KLB\",\"KLC\",\"KLD\",\"KLE\",\"KLF\",\"KMA\",\"KMC\",\"KMD\",\"KME\",\"KMF\",\"KNB\",\"KNC\",\"KND\",\"KNE\",\"KNF\",\"KNG\",\"KOB\",\"KOC\",\"KOD\",\"KOE\",\"KOF\",\"KPB\",\"KPC\",\"KPD\",\"KPE\",\"KPF\",\"KPG\",\"KQB\",\"KQC\",\"KQD\",\"KQE\",\"KQF\",\"KQG\",\"KRB\",\"KRC\",\"KRD\",\"KRE\",\"KRF\",\"KRG\",\"KSB\",\"KSC\",\"KSD\",\"KSE\",\"KSF\",\"KSG\",\"KTB\",\"KTC\",\"KTD\",\"KTE\",\"KTF\",\"KTG\",\"KUB\",\"KUC\",\"KUD\",\"KUE\",\"KUF\",\"KUG\",\"KVB\",\"KVC\",\"KVD\",\"KVE\",\"KVF\",\"KVG\",\"KWB\",\"KWC\",\"KWD\",\"KWE\",\"KWF\",\"KWG\",\"KXB\",\"KXC\",\"KXD\",\"KXE\",\"KXF\",\"KXG\",\"KYB\",\"KYC\",\"KYD\",\"KYE\",\"KYF\",\"KYG\",\"KZB\",\"KZC\",\"KZD\",\"KZE\",\"KZF\",\"KZG\",\"LAA\",\"LAB\",\"LAC\",\"LAD\",\"LAE\",\"LAF\",\"LAG\",\"LBA\",\"LBB\",\"LBC\",\"LBD\",\"LBE\",\"LBF\",\"LBG\",\"LCA\",\"LCB\",\"LCC\",\"LCD\",\"LCE\",\"LCF\",\"LCG\",\"LDA\",\"LDB\",\"LDC\",\"LDD\",\"LDE\",\"LDF\",\"LEA\",\"LEB\",\"LEC\",\"LED\",\"LEE\",\"LEF\",\"LFA\",\"LFB\",\"LFC\",\"LFD\",\"LFE\",\"LFF\",\"LFG\",\"LGA\",\"LGB\",\"LGC\",\"LGD\",\"LGE\",\"LGF\",\"LGG\",\"LHA\",\"LHB\",\"LHC\",\"LHD\",\"LHE\",\"LHF\",\"LIA\",\"LIB\",\"LIC\",\"LID\",\"LIE\",\"LIF\",\"LJA\",\"LJB\",\"LJC\",\"LJD\",\"LJE\",\"LJF\",\"LKA\",\"LKB\",\"LKC\",\"LKD\",\"LKE\",\"LKF\",\"LLA\",\"LLB\",\"LLC\",\"LLD\",\"LLE\",\"LLF\",\"LMA\",\"LMC\",\"LMD\",\"LME\",\"LMF\",\"LNB\",\"LNC\",\"LND\",\"LNE\",\"LNF\",\"LNG\",\"LOB\",\"LOC\",\"LOD\",\"LOE\",\"LOF\",\"LPB\",\"LPC\",\"LPD\",\"LPE\",\"LPF\",\"LPG\",\"LQB\",\"LQC\",\"LQD\",\"LQE\",\"LQF\",\"LQG\",\"LRB\",\"LRC\",\"LRD\",\"LRE\",\"LRF\",\"LRG\",\"LSB\",\"LSC\",\"LSD\",\"LSE\",\"LSF\",\"LSG\",\"LTB\",\"LTC\",\"LTD\",\"LTE\",\"LTF\",\"LTG\",\"LUB\",\"LUC\",\"LUD\",\"LUE\",\"LUF\",\"LUG\",\"LVB\",\"LVC\",\"LVD\",\"LVE\",\"LVF\",\"LVG\",\"LWB\",\"LWC\",\"LWD\",\"LWE\",\"LWF\",\"LWG\",\"LXB\",\"LXC\",\"LXD\",\"LXE\",\"LXF\",\"LXG\",\"LYB\",\"LYC\",\"LYD\",\"LYE\",\"LYF\",\"LYG\",\"LZB\",\"LZC\",\"LZD\",\"LZE\",\"LZF\",\"LZG\",\"MAA\",\"MAB\",\"MAC\",\"MAD\",\"MAE\",\"MAF\",\"MAG\",\"MBA\",\"MBB\",\"MBC\",\"MBD\",\"MBE\",\"MBF\",\"MBG\",\"MCA\",\"MCB\",\"MCC\",\"MCD\",\"MCE\",\"MCF\",\"MCG\",\"MDA\",\"MDB\",\"MDC\",\"MDD\",\"MDE\",\"MDF\",\"MDG\",\"MEA\",\"MEB\",\"MEC\",\"MED\",\"MEE\",\"MEF\",\"MEG\",\"MFA\",\"MFB\",\"MFC\",\"MFD\",\"MFE\",\"MFF\",\"MFG\",\"MGA\",\"MGB\",\"MGC\",\"MGD\",\"MGE\",\"MGF\",\"MGG\",\"MHA\",\"MHB\",\"MHC\",\"MHD\",\"MHE\",\"MHF\",\"MIA\",\"MIB\",\"MIC\",\"MID\",\"MIE\",\"MIF\",\"MJA\",\"MJB\",\"MJC\",\"MJD\",\"MJE\",\"MKA\",\"MKB\",\"MKC\",\"MKD\",\"MKE\",\"MKF\",\"MLA\",\"MLB\",\"MLC\",\"MLD\",\"MLE\",\"MLF\",\"MMA\",\"MMC\",\"MMD\",\"MME\",\"MMF\",\"MNB\",\"MNC\",\"MND\",\"MNE\",\"MNF\",\"MNG\",\"MOB\",\"MOC\",\"MOD\",\"MOE\",\"MOF\",\"MPB\",\"MPC\",\"MPD\",\"MPE\",\"MPF\",\"MPG\",\"MQB\",\"MQC\",\"MQD\",\"MQE\",\"MQF\",\"MQG\",\"MRB\",\"MRC\",\"MRD\",\"MRE\",\"MRF\",\"MRG\",\"MSB\",\"MSC\",\"MSD\",\"MSE\",\"MSF\",\"MSG\",\"MTB\",\"MTC\",\"MTD\",\"MTE\",\"MTF\",\"MTG\",\"MUB\",\"MUC\",\"MUD\",\"MUE\",\"MUF\",\"MUG\",\"MVB\",\"MVC\",\"MVD\",\"MVE\",\"MVF\",\"MVG\",\"MWB\",\"MWC\",\"MWD\",\"MWE\",\"MWF\",\"MWG\",\"MXB\",\"MXC\",\"MXD\",\"MXE\",\"MXF\",\"MXG\",\"MYB\",\"MYC\",\"MYD\",\"MYE\",\"MYF\",\"MYG\",\"MZB\",\"MZC\",\"MZD\",\"MZE\",\"MZF\",\"MZG\",\"NAB\",\"NAC\",\"NAD\",\"NAE\",\"NAF\",\"NAG\",\"NBA\",\"NBB\",\"NBC\",\"NBD\",\"NBE\",\"NBF\",\"NBG\",\"NCA\",\"NCB\",\"NCC\",\"NCD\",\"NCE\",\"NCF\",\"NCG\",\"NDA\",\"NDB\",\"NDC\",\"NDD\",\"NDE\",\"NDF\",\"NDG\",\"NEA\",\"NEB\",\"NEC\",\"NED\",\"NEE\",\"NEF\",\"NEG\",\"NFA\",\"NFB\",\"NFC\",\"NFD\",\"NFE\",\"NFF\",\"NFG\",\"NGA\",\"NGB\",\"NGC\",\"NGD\",\"NGE\",\"NGF\",\"NGG\",\"NHA\",\"NHB\",\"NHC\",\"NHD\",\"NHE\",\"NHF\",\"NIA\",\"NIB\",\"NIC\",\"NID\",\"NIE\",\"NIF\",\"NJA\",\"NJB\",\"NJC\",\"NJD\",\"NJE\",\"NJF\",\"NKA\",\"NKB\",\"NKC\",\"NKD\",\"NKE\",\"NKF\",\"NLA\",\"NLB\",\"NLC\",\"NLD\",\"NLE\",\"NLF\",\"NMA\",\"NMB\",\"NMC\",\"NMD\",\"NME\",\"NMF\",\"NNB\",\"NND\",\"NNE\",\"NNF\",\"NNG\",\"NOB\",\"NOC\",\"NOD\",\"NOE\",\"NOF\",\"NOG\",\"NPB\",\"NPC\",\"NPD\",\"NPE\",\"NPF\",\"NQB\",\"NQC\",\"NQD\",\"NQE\",\"NQF\",\"NQG\",\"NRB\",\"NRC\",\"NRD\",\"NRE\",\"NRF\",\"NRG\",\"NSB\",\"NSC\",\"NSD\",\"NSE\",\"NSF\",\"NSG\",\"NTB\",\"NTC\",\"NTD\",\"NTE\",\"NTF\",\"NTG\",\"NUB\",\"NUC\",\"NUD\",\"NUE\",\"NUF\",\"NUG\",\"NVB\",\"NVC\",\"NVD\",\"NVE\",\"NVF\",\"NVG\",\"NWB\",\"NWC\",\"NWD\",\"NWE\",\"NWF\",\"NWG\",\"NXB\",\"NXC\",\"NXD\",\"NXE\",\"NXF\",\"NXG\",\"NYB\",\"NYC\",\"NYD\",\"NYE\",\"NYF\",\"NYG\",\"NZB\",\"NZC\",\"NZD\",\"NZE\",\"NZF\",\"NZG\",\"OAB\",\"OAC\",\"OAD\",\"OAE\",\"OAF\",\"OAG\",\"OBA\",\"OBB\",\"OBC\",\"OBD\",\"OBE\",\"OBF\",\"OCA\",\"OCB\",\"OCC\",\"OCD\",\"OCE\",\"OCF\",\"OCG\",\"ODA\",\"ODB\",\"ODC\",\"ODD\",\"ODE\",\"ODF\",\"ODG\",\"OEA\",\"OEB\",\"OEC\",\"OED\",\"OEE\",\"OEF\",\"OFA\",\"OFB\",\"OFC\",\"OFD\",\"OFE\",\"OFF\",\"OFG\",\"OGA\",\"OGB\",\"OGC\",\"OGD\",\"OGE\",\"OGF\",\"OGG\",\"OHA\",\"OHB\",\"OHC\",\"OHD\",\"OHE\",\"OHF\",\"OIA\",\"OIB\",\"OIC\",\"OID\",\"OIE\",\"OIF\",\"OJA\",\"OJB\",\"OJC\",\"OJD\",\"OJE\",\"OJF\",\"OKA\",\"OKB\",\"OKC\",\"OKD\",\"OKE\",\"OKF\",\"OLA\",\"OLB\",\"OLC\",\"OLD\",\"OLE\",\"OLF\",\"OMA\",\"OMB\",\"OMC\",\"OMD\",\"OME\",\"OMF\",\"ONB\",\"OND\",\"ONE\",\"ONF\",\"ONG\",\"OOB\",\"OOC\",\"OOD\",\"OOE\",\"OOF\",\"OOG\",\"OPB\",\"OPC\",\"OPD\",\"OPE\",\"OPF\",\"OQB\",\"OQC\",\"OQD\",\"OQE\",\"OQF\",\"OQG\",\"ORB\",\"ORC\",\"ORD\",\"ORE\",\"ORF\",\"ORG\",\"OSB\",\"OSC\",\"OSD\",\"OSE\",\"OSF\",\"OTB\",\"OTC\",\"OTD\",\"OTE\",\"OTG\",\"OUB\",\"OUC\",\"OUD\",\"OUE\",\"OUF\",\"OUG\",\"OVB\",\"OVC\",\"OVD\",\"OVE\",\"OVF\",\"OVG\",\"OWB\",\"OWC\",\"OWD\",\"OWE\",\"OWF\",\"OWG\",\"OXB\",\"OXC\",\"OXD\",\"OXE\",\"OXF\",\"OXG\",\"OYB\",\"OYC\",\"OYD\",\"OYE\",\"OYF\",\"OYG\",\"OZB\",\"OZC\",\"OZD\",\"OZE\",\"OZF\",\"OZG\",\"PAB\",\"PAC\",\"PAD\",\"PAE\",\"PAF\",\"PAG\",\"PBA\",\"PBB\",\"PBC\",\"PBD\",\"PBE\",\"PBF\",\"PCA\",\"PCB\",\"PCC\",\"PCD\",\"PCE\",\"PCF\",\"PCG\",\"PDA\",\"PDB\",\"PDC\",\"PDD\",\"PDE\",\"PDF\",\"PDG\",\"PEA\",\"PEB\",\"PEC\",\"PED\",\"PEE\",\"PEF\",\"PFA\",\"PFB\",\"PFC\",\"PFD\",\"PFE\",\"PFF\",\"PFG\",\"PGA\",\"PGB\",\"PGC\",\"PGD\",\"PGE\",\"PGF\",\"PGG\",\"PHA\",\"PHB\",\"PHC\",\"PHD\",\"PHE\",\"PHF\",\"PIA\",\"PIB\",\"PIC\",\"PID\",\"PIE\",\"PIF\",\"PJA\",\"PJB\",\"PJC\",\"PJD\",\"PJE\",\"PJF\",\"PKA\",\"PKB\",\"PKC\",\"PKD\",\"PKE\",\"PKF\",\"PLA\",\"PLB\",\"PLC\",\"PLD\",\"PLE\",\"PLF\",\"PMA\",\"PMB\",\"PMC\",\"PMD\",\"PME\",\"PMF\",\"PNB\",\"PND\",\"PNE\",\"PNF\",\"PNG\",\"POB\",\"POC\",\"POD\",\"POE\",\"POF\",\"POG\",\"PPB\",\"PPC\",\"PPD\",\"PPE\",\"PPF\",\"PQB\",\"PQC\",\"PQD\",\"PQE\",\"PQF\",\"PQG\",\"PRB\",\"PRC\",\"PRD\",\"PRE\",\"PRF\",\"PRG\",\"PSB\",\"PSC\",\"PSD\",\"PSE\",\"PSF\",\"PTB\",\"PTC\",\"PTD\",\"PTE\",\"PTF\",\"PTG\",\"PUB\",\"PUC\",\"PUD\",\"PUE\",\"PUF\",\"PUG\",\"PVB\",\"PVC\",\"PVD\",\"PVE\",\"PVF\",\"PVG\",\"PWB\",\"PWC\",\"PWD\",\"PWE\",\"PWF\",\"PWG\",\"PXB\",\"PXC\",\"PXD\",\"PXE\",\"PXF\",\"PXG\",\"PYB\",\"PYC\",\"PYD\",\"PYE\",\"PYF\",\"PYG\",\"PZB\",\"PZC\",\"PZD\",\"PZE\",\"PZF\",\"PZG\",\"QAB\",\"QAC\",\"QAD\",\"QAE\",\"QAF\",\"QAG\",\"QBA\",\"QBB\",\"QBC\",\"QBD\",\"QBE\",\"QBF\",\"QCA\",\"QCB\",\"QCC\",\"QCD\",\"QCE\",\"QCF\",\"QCG\",\"QDA\",\"QDB\",\"QDC\",\"QDD\",\"QDE\",\"QDG\",\"QEA\",\"QEB\",\"QEC\",\"QED\",\"QEE\",\"QEF\",\"QFA\",\"QFB\",\"QFC\",\"QFD\",\"QFE\",\"QFF\",\"QFG\",\"QGA\",\"QGB\",\"QGC\",\"QGD\",\"QGE\",\"QGF\",\"QGG\",\"QHA\",\"QHB\",\"QHC\",\"QHD\",\"QHE\",\"QHF\",\"QIA\",\"QIB\",\"QIC\",\"QID\",\"QIE\",\"QIF\",\"QJA\",\"QJB\",\"QJC\",\"QJD\",\"QJE\",\"QJF\",\"QKA\",\"QKB\",\"QKC\",\"QKD\",\"QKE\",\"QKF\",\"QLA\",\"QLB\",\"QLC\",\"QLD\",\"QLE\",\"QLF\",\"QMA\",\"QMB\",\"QMC\",\"QMD\",\"QME\",\"QMF\",\"QNB\",\"QND\",\"QNE\",\"QNF\",\"QNG\",\"QOB\",\"QOC\",\"QOD\",\"QOE\",\"QOF\",\"QOG\",\"QPB\",\"QPC\",\"QPD\",\"QPE\",\"QPF\",\"QQB\",\"QQC\",\"QQD\",\"QQE\",\"QQF\",\"QQG\",\"QRB\",\"QRC\",\"QRD\",\"QRE\",\"QRF\",\"QRG\",\"QSB\",\"QSC\",\"QSD\",\"QSE\",\"QSF\",\"QSG\",\"QTB\",\"QTC\",\"QTD\",\"QTE\",\"QTF\",\"QTG\",\"QUB\",\"QUC\",\"QUD\",\"QUE\",\"QUF\",\"QUG\",\"QVB\",\"QVC\",\"QVD\",\"QVE\",\"QVF\",\"QWB\",\"QWC\",\"QWD\",\"QWE\",\"QWF\",\"QWG\",\"QXB\",\"QXC\",\"QXD\",\"QXE\",\"QXF\",\"QXG\",\"QYB\",\"QYC\",\"QYD\",\"QYE\",\"QYF\",\"QYG\",\"QZB\",\"QZC\",\"QZD\",\"QZE\",\"QZF\",\"QZG\",\"RAB\",\"RAC\",\"RAD\",\"RAE\",\"RAF\",\"RAG\",\"RBA\",\"RBB\",\"RBC\",\"RBD\",\"RBE\",\"RBF\",\"RCA\",\"RCB\",\"RCC\",\"RCD\",\"RCE\",\"RCF\",\"RCG\",\"RDA\",\"RDB\",\"RDC\",\"RDD\",\"RDE\",\"RDF\",\"RDG\",\"REA\",\"REB\",\"REC\",\"RED\",\"REE\",\"REF\",\"RFA\",\"RFB\",\"RFC\",\"RFD\",\"RFE\",\"RFF\",\"RFG\",\"RGA\",\"RGB\",\"RGC\",\"RGD\",\"RGE\",\"RGF\",\"RGG\",\"RHA\",\"RHB\",\"RHC\",\"RHD\",\"RHE\",\"RHF\",\"RIA\",\"RIB\",\"RIC\",\"RID\",\"RIE\",\"RIF\",\"RJA\",\"RJB\",\"RJC\",\"RJD\",\"RJE\",\"RJF\",\"RKA\",\"RKB\",\"RKC\",\"RKD\",\"RKE\",\"RKF\",\"RLA\",\"RLB\",\"RLC\",\"RLD\",\"RLE\",\"RLF\",\"RMA\",\"RMB\",\"RMC\",\"RMD\",\"RME\",\"RMF\",\"RNB\",\"RND\",\"RNE\",\"RNF\",\"RNG\",\"ROB\",\"ROC\",\"ROD\",\"ROE\",\"ROF\",\"ROG\",\"RPB\",\"RPC\",\"RPD\",\"RPE\",\"RPF\",\"RQB\",\"RQC\",\"RQD\",\"RQE\",\"RQF\",\"RQG\",\"RRC\",\"RRD\",\"RRE\",\"RRF\",\"RRG\",\"RSB\",\"RSC\",\"RSD\",\"RSE\",\"RSF\",\"RTB\",\"RTC\",\"RTD\",\"RTE\",\"RTF\",\"RTG\",\"RUB\",\"RUC\",\"RUD\",\"RUE\",\"RUF\",\"RUG\",\"RVB\",\"RVC\",\"RVD\",\"RVE\",\"RVF\",\"RVG\",\"RWB\",\"RWC\",\"RWD\",\"RWE\",\"RWF\",\"RWG\",\"RXB\",\"RXC\",\"RXD\",\"RXE\",\"RXF\",\"RXG\",\"RYB\",\"RYC\",\"RYD\",\"RYE\",\"RYF\",\"RYG\",\"RZB\",\"RZC\",\"RZD\",\"RZE\",\"RZF\",\"RZG\",\"SAB\",\"SAC\",\"SAD\",\"SAE\",\"SAF\",\"SAG\",\"SBA\",\"SBB\",\"SBC\",\"SBD\",\"SBE\",\"SBF\",\"SCA\",\"SCB\",\"SCC\",\"SCD\",\"SCE\",\"SCF\",\"SCG\",\"SDA\",\"SDB\",\"SDC\",\"SDD\",\"SDE\",\"SDF\",\"SDG\",\"SEA\",\"SEB\",\"SEC\",\"SED\",\"SEE\",\"SEF\",\"SFA\",\"SFB\",\"SFC\",\"SFD\",\"SFE\",\"SFF\",\"SFG\",\"SGA\",\"SGB\",\"SGC\",\"SGD\",\"SGE\",\"SGF\",\"SGG\",\"SHA\",\"SHB\",\"SHC\",\"SHD\",\"SHE\",\"SHF\",\"SIA\",\"SIB\",\"SIC\",\"SID\",\"SIE\",\"SIF\",\"SJA\",\"SJB\",\"SJC\",\"SJD\",\"SJE\",\"SJF\",\"SKA\",\"SKB\",\"SKC\",\"SKD\",\"SKE\",\"SKF\",\"SLA\",\"SLB\",\"SLC\",\"SLD\",\"SLE\",\"SLF\",\"SMA\",\"SMB\",\"SMC\",\"SMD\",\"SME\",\"SMF\",\"SNB\",\"SND\",\"SNE\",\"SNF\",\"SNG\",\"SOB\",\"SOC\",\"SOD\",\"SOE\",\"SOF\",\"SOG\",\"SPB\",\"SPC\",\"SPD\",\"SPE\",\"SPF\",\"SPG\",\"SQB\",\"SQC\",\"SQD\",\"SQE\",\"SQF\",\"SQG\",\"SRB\",\"SRC\",\"SRD\",\"SRE\",\"SRF\",\"SRG\",\"SSB\",\"SSC\",\"SSD\",\"SSE\",\"SSF\",\"SSG\",\"STB\",\"STC\",\"STD\",\"STE\",\"STF\",\"STG\",\"SUB\",\"SUC\",\"SUD\",\"SUE\",\"SUF\",\"SUG\",\"SVB\",\"SVC\",\"SVD\",\"SVE\",\"SVF\",\"SVG\",\"SWB\",\"SWC\",\"SWD\",\"SWE\",\"SWF\",\"SWG\",\"SXB\",\"SXC\",\"SXD\",\"SXE\",\"SXF\",\"SXG\",\"SYB\",\"SYC\",\"SYD\",\"SYE\",\"SYF\",\"SYG\",\"SZB\",\"SZC\",\"SZD\",\"SZE\",\"SZF\",\"SZG\",\"TAB\",\"TAC\",\"TAD\",\"TAE\",\"TAF\",\"TAG\",\"TBA\",\"TBB\",\"TBC\",\"TBD\",\"TBE\",\"TBF\",\"TCA\",\"TCB\",\"TCC\",\"TCD\",\"TCE\",\"TCF\",\"TCG\",\"TDA\",\"TDB\",\"TDC\",\"TDD\",\"TDE\",\"TDF\",\"TDG\",\"TEA\",\"TEB\",\"TEC\",\"TED\",\"TEE\",\"TEF\",\"TFA\",\"TFB\",\"TFC\",\"TFD\",\"TFE\",\"TFF\",\"TFG\",\"TGA\",\"TGB\",\"TGC\",\"TGD\",\"TGE\",\"TGF\",\"TGG\",\"THA\",\"THB\",\"THC\",\"THD\",\"THE\",\"THF\",\"TIA\",\"TIB\",\"TIC\",\"TID\",\"TIE\",\"TIF\",\"TJA\",\"TJB\",\"TJC\",\"TJD\",\"TJE\",\"TJF\",\"TKA\",\"TKB\",\"TKC\",\"TKD\",\"TKE\",\"TKF\",\"TLA\",\"TLB\",\"TLC\",\"TLD\",\"TLE\",\"TLF\",\"TMA\",\"TMB\",\"TMC\",\"TMD\",\"TME\",\"TMF\",\"TNB\",\"TNC\",\"TND\",\"TNE\",\"TNF\",\"TNG\",\"TOB\",\"TOC\",\"TOD\",\"TOE\",\"TOF\",\"TOG\",\"TPB\",\"TPC\",\"TPD\",\"TPE\",\"TPF\",\"TPG\",\"TQB\",\"TQC\",\"TQD\",\"TQE\",\"TQF\",\"TQG\",\"TRB\",\"TRC\",\"TRD\",\"TRE\",\"TRF\",\"TRG\",\"TSB\",\"TSC\",\"TSD\",\"TSE\",\"TSF\",\"TSG\",\"TTB\",\"TTC\",\"TTD\",\"TTE\",\"TTF\",\"TTG\",\"TUB\",\"TUD\",\"TUE\",\"TUF\",\"TUG\",\"TVB\",\"TVC\",\"TVD\",\"TVE\",\"TVF\",\"TVG\",\"TWB\",\"TWC\",\"TWD\",\"TWE\",\"TWF\",\"TWG\",\"TXB\",\"TXC\",\"TXD\",\"TXE\",\"TXF\",\"TXG\",\"TYB\",\"TYC\",\"TYD\",\"TYE\",\"TYF\",\"TYG\",\"TZB\",\"TZC\",\"TZD\",\"TZE\",\"TZF\",\"TZG\",\"UAB\",\"UAC\",\"UAD\",\"UAE\",\"UAF\",\"UAG\",\"UBA\",\"UBB\",\"UBC\",\"UBD\",\"UBE\",\"UBF\",\"UCA\",\"UCB\",\"UCC\",\"UCD\",\"UCE\",\"UCF\",\"UCG\",\"UDA\",\"UDB\",\"UDC\",\"UDD\",\"UDE\",\"UDF\",\"UDG\",\"UEA\",\"UEB\",\"UEC\",\"UED\",\"UEE\",\"UEF\",\"UFA\",\"UFB\",\"UFC\",\"UFD\",\"UFF\",\"UFG\",\"UGA\",\"UGB\",\"UGC\",\"UGD\",\"UGE\",\"UGF\",\"UGG\",\"UHA\",\"UHB\",\"UHC\",\"UHD\",\"UHE\",\"UHF\",\"UIA\",\"UIB\",\"UIC\",\"UID\",\"UIE\",\"UIF\",\"UJA\",\"UJB\",\"UJC\",\"UJD\",\"UJE\",\"UJF\",\"UKA\",\"UKB\",\"UKC\",\"UKD\",\"UKE\",\"UKF\",\"ULA\",\"ULB\",\"ULC\",\"ULD\",\"ULE\",\"ULF\",\"UMA\",\"UMB\",\"UMC\",\"UMD\",\"UME\",\"UMF\",\"UNB\",\"UNC\",\"UND\",\"UNE\",\"UNF\",\"UNG\",\"UOB\",\"UOC\",\"UOD\",\"UOE\",\"UOF\",\"UOG\",\"UPB\",\"UPC\",\"UPD\",\"UPE\",\"UPF\",\"UPG\",\"UQB\",\"UQC\",\"UQD\",\"UQE\",\"UQF\",\"UQG\",\"URB\",\"URC\",\"URD\",\"URE\",\"URF\",\"URG\",\"USB\",\"USC\",\"USD\",\"USE\",\"USF\",\"USG\",\"UTB\",\"UTC\",\"UTD\",\"UTE\",\"UTF\",\"UTG\",\"UUB\",\"UUC\",\"UUD\",\"UUE\",\"UUF\",\"UUG\",\"UVB\",\"UVC\",\"UVD\",\"UVE\",\"UVF\",\"UVG\",\"UWB\",\"UWC\",\"UWD\",\"UWE\",\"UWF\",\"UWG\",\"UXB\",\"UXC\",\"UXD\",\"UXE\",\"UXF\",\"UXG\",\"UYB\",\"UYC\",\"UYD\",\"UYE\",\"UYF\",\"UYG\",\"UZB\",\"UZC\",\"UZD\",\"UZE\",\"UZF\",\"UZG\",\"VAB\",\"VAC\",\"VAD\",\"VAE\",\"VAF\",\"VAG\",\"VBA\",\"VBB\",\"VBC\",\"VBD\",\"VBE\",\"VBF\",\"VBG\",\"VCA\",\"VCB\",\"VCC\",\"VCD\",\"VCE\",\"VCF\",\"VCG\",\"VDA\",\"VDB\",\"VDC\",\"VDD\",\"VDE\",\"VDF\",\"VDG\",\"VEA\",\"VEB\",\"VEC\",\"VED\",\"VEE\",\"VEF\",\"VFA\",\"VFB\",\"VFC\",\"VFD\",\"VFE\",\"VFF\",\"VFG\",\"VGA\",\"VGB\",\"VGC\",\"VGD\",\"VGE\",\"VGF\",\"VGG\",\"VHA\",\"VHB\",\"VHC\",\"VHD\",\"VHE\",\"VHF\",\"VIA\",\"VIB\",\"VIC\",\"VID\",\"VIE\",\"VIF\",\"VJA\",\"VJB\",\"VJC\",\"VJD\",\"VJE\",\"VKA\",\"VKB\",\"VKC\",\"VKD\",\"VKE\",\"VKF\",\"VLA\",\"VLB\",\"VLC\",\"VLD\",\"VLE\",\"VLF\",\"VMA\",\"VMB\",\"VMC\",\"VMD\",\"VME\",\"VMF\",\"VNB\",\"VNC\",\"VND\",\"VNE\",\"VNF\",\"VNG\",\"VOB\",\"VOC\",\"VOD\",\"VOE\",\"VOF\",\"VOG\",\"VPB\",\"VPC\",\"VPD\",\"VPE\",\"VPF\",\"VPG\",\"VQB\",\"VQC\",\"VQD\",\"VQE\",\"VQF\",\"VQG\",\"VRB\",\"VRC\",\"VRD\",\"VRE\",\"VRF\",\"VRG\",\"VSB\",\"VSC\",\"VSD\",\"VSE\",\"VSF\",\"VSG\",\"VTB\",\"VTC\",\"VTD\",\"VTE\",\"VTF\",\"VTG\",\"VUB\",\"VUC\",\"VUD\",\"VUE\",\"VUF\",\"VUG\",\"VVB\",\"VVC\",\"VVD\",\"VVE\",\"VVF\",\"VVG\",\"VWB\",\"VWC\",\"VWD\",\"VWE\",\"VWF\",\"VWG\",\"VXC\",\"VXD\",\"VXE\",\"VXF\",\"VXG\",\"VYB\",\"VYC\",\"VYD\",\"VYE\",\"VYF\",\"VYG\",\"VZB\",\"VZC\",\"VZD\",\"VZE\",\"VZF\",\"VZG\",\"WAB\",\"WAC\",\"WAD\",\"WAE\",\"WAF\",\"WAG\",\"WBA\",\"WBB\",\"WBC\",\"WBD\",\"WBE\",\"WBF\",\"WBG\",\"WCA\",\"WCB\",\"WCC\",\"WCD\",\"WCE\",\"WCF\",\"WCG\",\"WDA\",\"WDC\",\"WDD\",\"WDE\",\"WDF\",\"WDG\",\"WEA\",\"WEB\",\"WEC\",\"WED\",\"WEE\",\"WEF\",\"WFA\",\"WFB\",\"WFC\",\"WFD\",\"WFE\",\"WFF\",\"WFG\",\"WGA\",\"WGB\",\"WGC\",\"WGD\",\"WGE\",\"WGF\",\"WGG\",\"WHA\",\"WHB\",\"WHC\",\"WHD\",\"WHE\",\"WHF\",\"WIA\",\"WIB\",\"WIC\",\"WID\",\"WIE\",\"WIF\",\"WJA\",\"WJB\",\"WJC\",\"WJD\",\"WJE\",\"WJF\",\"WKA\",\"WKB\",\"WKC\",\"WKD\",\"WKE\",\"WKF\",\"WLA\",\"WLB\",\"WLC\",\"WLD\",\"WLE\",\"WLF\",\"WMA\",\"WMB\",\"WMC\",\"WMD\",\"WME\",\"WMF\",\"WNB\",\"WNC\",\"WND\",\"WNE\",\"WNF\",\"WNG\",\"WOB\",\"WOC\",\"WOD\",\"WOE\",\"WOF\",\"WOG\",\"WPB\",\"WPC\",\"WPD\",\"WPE\",\"WPF\",\"WPG\",\"WQB\",\"WQC\",\"WQD\",\"WQE\",\"WQF\",\"WQG\",\"WRB\",\"WRC\",\"WRD\",\"WRE\",\"WRF\",\"WRG\",\"WSB\",\"WSC\",\"WSD\",\"WSE\",\"WSF\",\"WSG\",\"WTB\",\"WTC\",\"WTD\",\"WTE\",\"WTF\",\"WTG\",\"WUB\",\"WUC\",\"WUD\",\"WUE\",\"WUF\",\"WUG\",\"WVB\",\"WVC\",\"WVD\",\"WVE\",\"WVF\",\"WVG\",\"WWB\",\"WWC\",\"WWD\",\"WWE\",\"WWF\",\"WWG\",\"WXB\",\"WXC\",\"WXD\",\"WXE\",\"WXF\",\"WXG\",\"WYB\",\"WYC\",\"WYD\",\"WYE\",\"WYF\",\"WYG\",\"WZB\",\"WZC\",\"WZD\",\"WZE\",\"WZF\",\"WZG\",\"XAC\",\"XAD\",\"XAE\",\"XAF\",\"XBA\",\"XBB\",\"XBC\",\"XBD\",\"XBE\",\"XBF\",\"XBG\",\"XCA\",\"XCB\",\"XCC\",\"XCD\",\"XCE\",\"XCF\",\"XCG\",\"XDA\",\"XDB\",\"XDC\",\"XDD\",\"XDE\",\"XDF\",\"XDG\",\"XEA\",\"XEB\",\"XEC\",\"XED\",\"XEE\",\"XEF\",\"XFA\",\"XFB\",\"XFC\",\"XFD\",\"XFE\",\"XFF\",\"XFG\",\"XGA\",\"XGB\",\"XGC\",\"XGD\",\"XGE\",\"XGF\",\"XGG\",\"XHA\",\"XHB\",\"XHC\",\"XHD\",\"XHE\",\"XHF\",\"XIA\",\"XIB\",\"XIC\",\"XID\",\"XIE\",\"XIF\",\"XJA\",\"XJB\",\"XJC\",\"XJD\",\"XJE\",\"XJF\",\"XKA\",\"XKB\",\"XKC\",\"XKD\",\"XKE\",\"XKF\",\"XLA\",\"XLB\",\"XLC\",\"XLD\",\"XLE\",\"XLF\",\"XMA\",\"XMB\",\"XMC\",\"XMD\",\"XME\",\"XMF\",\"XNB\",\"XNC\",\"XND\",\"XNE\",\"XNF\",\"XNG\",\"XOB\",\"XOC\",\"XOD\",\"XOE\",\"XOF\",\"XOG\",\"XPB\",\"XPC\",\"XPD\",\"XPE\",\"XPF\",\"XPG\",\"XQB\",\"XQC\",\"XQD\",\"XQF\",\"XQG\",\"XRB\",\"XRC\",\"XRD\",\"XRE\",\"XRF\",\"XRG\",\"XSB\",\"XSC\",\"XSD\",\"XSE\",\"XSF\",\"XSG\",\"XTB\",\"XTC\",\"XTD\",\"XTE\",\"XTF\",\"XTG\",\"XUB\",\"XUC\",\"XUD\",\"XUE\",\"XUF\",\"XUG\",\"XVB\",\"XVC\",\"XVD\",\"XVE\",\"XVF\",\"XVG\",\"XWB\",\"XWC\",\"XWD\",\"XWE\",\"XWF\",\"XWG\",\"XXB\",\"XXC\",\"XXD\",\"XXE\",\"XXF\",\"XXG\",\"XYB\",\"XYC\",\"XYD\",\"XYE\",\"XYF\",\"XYG\",\"XZB\",\"XZC\",\"XZD\",\"XZE\",\"XZF\",\"XZG\",\"YAB\",\"YAC\",\"YAD\",\"YAE\",\"YAF\",\"YAG\",\"YBA\",\"YBB\",\"YBC\",\"YBD\",\"YBE\",\"YBF\",\"YCA\",\"YCB\",\"YCD\",\"YCE\",\"YCF\",\"YCG\",\"YDA\",\"YDB\",\"YDC\",\"YDD\",\"YDE\",\"YDF\",\"YDG\",\"YEA\",\"YEB\",\"YEC\",\"YED\",\"YEE\",\"YEF\",\"YFA\",\"YFB\",\"YFC\",\"YFD\",\"YFE\",\"YFG\",\"YGA\",\"YGB\",\"YGC\",\"YGD\",\"YGE\",\"YGF\",\"YGG\",\"YHA\",\"YHB\",\"YHC\",\"YHD\",\"YHE\",\"YHF\",\"YIA\",\"YIB\",\"YIC\",\"YID\",\"YIE\",\"YIF\",\"YJA\",\"YJB\",\"YJC\",\"YJD\",\"YJE\",\"YJF\",\"YKA\",\"YKB\",\"YKC\",\"YKD\",\"YKE\",\"YKF\",\"YLA\",\"YLB\",\"YLC\",\"YLD\",\"YLE\",\"YLF\",\"YMA\",\"YMB\",\"YMC\",\"YMD\",\"YME\",\"YMF\",\"YNB\",\"YNC\",\"YND\",\"YNE\",\"YNF\",\"YNG\",\"YOB\",\"YOC\",\"YOD\",\"YOE\",\"YOF\",\"YOG\",\"YPB\",\"YPC\",\"YPD\",\"YPE\",\"YPF\",\"YPG\",\"YQB\",\"YQC\",\"YQD\",\"YQF\",\"YQG\",\"YRB\",\"YRC\",\"YRD\",\"YRE\",\"YRF\",\"YRG\",\"YSB\",\"YSC\",\"YSD\",\"YSE\",\"YSF\",\"YSG\",\"YTB\",\"YTC\",\"YTD\",\"YTE\",\"YTF\",\"YTG\",\"YUB\",\"YUC\",\"YUD\",\"YUE\",\"YUF\",\"YUG\",\"YVB\",\"YVC\",\"YVD\",\"YVE\",\"YVF\",\"YVG\",\"YWB\",\"YWC\",\"YWD\",\"YWE\",\"YWF\",\"YWG\",\"YXB\",\"YXC\",\"YXD\",\"YXE\",\"YXF\",\"YXG\",\"YYB\",\"YYC\",\"YYD\",\"YYE\",\"YYF\",\"YYG\",\"YZB\",\"YZC\",\"YZD\",\"YZE\",\"YZF\",\"YZG\",\"ZAB\",\"ZAD\",\"ZAE\",\"ZAF\",\"ZAG\",\"ZBA\",\"ZBB\",\"ZBC\",\"ZBD\",\"ZBE\",\"ZBF\",\"ZCA\",\"ZCB\",\"ZCC\",\"ZCD\",\"ZCE\",\"ZCF\",\"ZCG\",\"ZDA\",\"ZDB\",\"ZDC\",\"ZDD\",\"ZDE\",\"ZDF\",\"ZDG\",\"ZEA\",\"ZEB\",\"ZEC\",\"ZED\",\"ZEE\",\"ZEF\",\"ZFA\",\"ZFB\",\"ZFC\",\"ZFD\",\"ZFE\",\"ZFF\",\"ZFG\",\"ZGA\",\"ZGB\",\"ZGC\",\"ZGD\",\"ZGE\",\"ZGF\",\"ZGG\",\"ZHA\",\"ZHB\",\"ZHC\",\"ZHD\",\"ZHE\",\"ZHF\",\"ZIA\",\"ZIB\",\"ZIC\",\"ZID\",\"ZIE\",\"ZIF\",\"ZJA\",\"ZJB\",\"ZJC\",\"ZJD\",\"ZJE\",\"ZJF\",\"ZKA\",\"ZKB\",\"ZKC\",\"ZKD\",\"ZKE\",\"ZKF\",\"ZLA\",\"ZLB\",\"ZLC\",\"ZLD\",\"ZLE\",\"ZLF\",\"ZMA\",\"ZMB\",\"ZMC\",\"ZMD\",\"ZME\",\"ZMF\",\"ZNB\",\"ZNC\",\"ZND\",\"ZNE\",\"ZNF\",\"ZNG\",\"ZOB\",\"ZOC\",\"ZOD\",\"ZOE\",\"ZOF\",\"ZPB\",\"ZPC\",\"ZPD\",\"ZPE\",\"ZPF\",\"ZPG\",\"ZQB\",\"ZQC\",\"ZQD\",\"ZQF\",\"ZQG\",\"ZRB\",\"ZRC\",\"ZRD\",\"ZRE\",\"ZRF\",\"ZRG\",\"ZSB\",\"ZSC\",\"ZSD\",\"ZSE\",\"ZSF\",\"ZSG\",\"ZTB\",\"ZTC\",\"ZTD\",\"ZTE\",\"ZTF\",\"ZTG\",\"ZUB\",\"ZUC\",\"ZUD\",\"ZUE\",\"ZUF\",\"ZUG\",\"ZVB\",\"ZVC\",\"ZVD\",\"ZVE\",\"ZVF\",\"ZVG\",\"ZWB\",\"ZWC\",\"ZWD\",\"ZWE\",\"ZWF\",\"ZWG\",\"ZXB\",\"ZXC\",\"ZXD\",\"ZXE\",\"ZXF\",\"ZXG\",\"ZYB\",\"ZYC\",\"ZYD\",\"ZYE\",\"ZYF\",\"ZYG\",\"ZZB\",\"ZZC\",\"ZZD\",\"ZZE\",\"ZZF\",\"ZZG\"]}}]}},{\"name\":\"legacy\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"array\",\"items\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"attacklog\",\"bank\",\"bounties\",\"calendar\",\"cards\",\"cityshops\",\"companies\",\"crimes\",\"education\",\"elimination\",\"eliminationteam\",\"factionhof\",\"factiontree\",\"gyms\",\"halloween\",\"hof\",\"honors\",\"itemammo\",\"itemdetails\",\"itemmods\",\"itemstats\",\"items\",\"logcategories\",\"logtypes\",\"lookup\",\"medals\",\"merits\",\"museum\",\"organizedcrimes\",\"pokertables\",\"properties\",\"rockpaperscissors\",\"searchforcash\",\"shoplifting\",\"stats\",\"stocks\",\"subcrimes\",\"territory\",\"timestamp\",\"competition\",\"organisedcrimes\"]},{\"type\":\"string\"}]}}},{\"name\":\"striptags\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"true\",\"false\"]}},{\"name\":\"limit\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":1}},{\"name\":\"to\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"from\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\"}},{\"name\":\"sort\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\",\"enum\":[\"DESC\",\"ASC\"]}},{\"name\":\"cat\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"string\",\"enum\":[\"respect\",\"chains\",\"rank\"]},{\"type\":\"string\",\"enum\":[\"level\",\"busts\",\"rank\",\"traveltime\",\"workstats\",\"networth\",\"revives\",\"defends\",\"offences\",\"attacks\",\"awards\",\"racingwins\",\"racingpoints\",\"racingskill\"]},{\"type\":\"string\",\"enum\":[\"All\",\"Alcohol\",\"Armor\",\"Artifact\",\"Book\",\"Booster\",\"Candy\",\"Car\",\"Clothing\",\"Collectible\",\"Defensive\",\"Drug\",\"Energy Drink\",\"Enhancer\",\"Flower\",\"Jewelry\",\"Material\",\"Medical\",\"Melee\",\"Other\",\"Plushie\",\"Primary\",\"Secondary\",\"Special\",\"Supply Pack\",\"Temporary\",\"Tool\",\"Unused\",\"Weapon\"]}]}},{\"name\":\"offset\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"integer\",\"format\":\"int32\",\"minimum\":0}},{\"name\":\"timestamp\",\"in\":\"query\",\"required\":false,\"schema\":{\"oneOf\":[{\"type\":\"integer\",\"format\":\"int32\"},{\"type\":\"string\"}]}},{\"name\":\"comment\",\"in\":\"query\",\"required\":false,\"schema\":{\"type\":\"string\"}}]";
     pub const method = "GET";
     pub const Params = @This().Parameters;
+    /// The API key is never a parameter: the runtime sends it as a header (P2.1).
     pub const Parameters = struct {
         selections: model.Presence([]const TornSelectionName) = .absent,
         id: model.Presence(union(enum) {
-            v0: LogCategoryId,
-            v1: TornCrimeId,
-            v2: StockId,
-            v3: EliminationTeamId,
-            v4: CityShopId,
-            v5: ItemUid,
-            v6: []const ItemId,
-            v7: []const MedalId,
-            v8: []const HonorId,
-            v9: []const FactionTerritoryEnum,
+            log_category_id: LogCategoryId,
+            torn_crime_id: TornCrimeId,
+            stock_id: StockId,
+            elimination_team_id: EliminationTeamId,
+            city_shop_id: CityShopId,
+            item_uid: ItemUid,
+            item_id_list: []const ItemId,
+            medal_id_list: []const MedalId,
+            honor_id_list: []const HonorId,
+            faction_territory_list: []const FactionTerritoryEnum,
         }) = .absent,
         legacy: model.Presence([]const TornSelectionName) = .absent,
-        striptags: model.Presence(enum {
+        striptags: model.Presence(model.Open(enum {
             true,
             false,
-        }) = .absent,
+        })) = .absent,
         limit: model.Presence(i64) = .absent,
         to: model.Presence(i64) = .absent,
         from: model.Presence(i64) = .absent,
-        sort: model.Presence(enum {
+        sort: model.Presence(model.Open(enum {
             DESC,
             ASC,
-        }) = .absent,
+        })) = .absent,
         cat: model.Presence(union(enum) {
-            v0: TornFactionHofCategory,
-            v1: TornHofCategory,
-            v2: TornItemCategory,
+            faction_hof: TornFactionHofCategory,
+            hof: TornHofCategory,
+            item: TornItemCategory,
         }) = .absent,
         offset: model.Presence(i64) = .absent,
         timestamp: model.Presence(union(enum) {
-            v0: i64,
-            v1: []const u8,
+            integer: i64,
+            string: []const u8,
         }) = .absent,
         comment: model.Presence([]const u8) = .absent,
-        key: model.Presence([]const u8) = .absent,
     };
     pub const Response = struct {
         subcrimes: model.Presence([]const TornSubcrime) = .absent,
@@ -7413,19 +9073,19 @@ pub const getTornGeneric = struct {
         }) = .absent,
         hof: model.Presence([]const TornHof) = .absent,
         _metadata: model.Presence(union(enum) {
-            v0: RequestMetadataWithLinks,
-            v1: RequestMetadataWithLinksAndTotal,
+            links: RequestMetadataWithLinks,
+            links_and_total: RequestMetadataWithLinksAndTotal,
         }) = .absent,
         factionhof: model.Presence([]const TornFactionHof) = .absent,
         logtypes: model.Presence([]const TornLog) = .absent,
         cards: model.Presence([]const TornCard) = .absent,
         items: model.Presence([]const TornItem) = .absent,
         rockpaperscissors: model.Presence([]const struct {
-            type: enum {
+            type: model.Open(enum {
                 rock,
                 paper,
                 scissors,
-            },
+            }),
             count: i64,
             pub const json_schema = "{\"required\":[\"type\",\"count\"],\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"rock\",\"paper\",\"scissors\"]},\"count\":{\"type\":\"integer\",\"format\":\"int64\"}},\"type\":\"object\"}";
         }) = .absent,
@@ -7595,10 +9255,10 @@ pub const getTornGeneric = struct {
         merits: model.Presence([]const TornMerit) = .absent,
         organizedcrimes: model.Presence([]const TornOrganizedCrime) = .absent,
         itemdetails: model.Presence(union(enum) {
-            v0: []const TornItemStats,
-            v1: union(enum) {
-                v0: []const TornItemDetails,
-                v1: TornItemDetailsDeprecated,
+            torn_item_stats_list: []const TornItemStats,
+            value: union(enum) {
+                details_list: []const TornItemDetails,
+                details_deprecated: TornItemDetailsDeprecated,
             },
         }) = .absent,
         honors: model.Presence([]const TornHonor) = .absent,
@@ -7632,8 +9292,8 @@ pub const getTornGeneric = struct {
         }) = .absent,
         museum: model.Presence([]const TornMuseumSet) = .absent,
         stocks: model.Presence(union(enum) {
-            v0: TornStockDetailed,
-            v1: []const TornStock,
+            stock_detailed: TornStockDetailed,
+            stock_list: []const TornStock,
         }) = .absent,
         territory: model.Presence([]const TornTerritory) = .absent,
         itemmods: model.Presence([]const TornItemMods) = .absent,

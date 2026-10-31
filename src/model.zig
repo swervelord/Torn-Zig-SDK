@@ -18,6 +18,50 @@ pub fn Presence(comptime T: type) type {
         pub const presence_child = T;
     };
 }
+/// Forward-compatible enum (P1.1). Values listed in the contract decode to `.known`;
+/// values Torn adds later decode to `.unknown` with the raw JSON text, borrowed from
+/// the owning result arena. Serialization round-trips unknown text byte-exact.
+pub fn Open(comptime E: type) type {
+    return union(enum) {
+        known: E,
+        unknown: []const u8,
+        /// The closed set of values known when this SDK was generated.
+        pub const Known = E;
+        pub const open_enum = E;
+        /// Every known value, in contract order.
+        pub const known_values = std.enums.values(E);
+        const Self = @This();
+        pub fn of(value: E) Self {
+            return .{ .known = value };
+        }
+        /// Parses wire text; unknown text is borrowed by the returned value.
+        pub fn parse(wire: []const u8) Self {
+            return if (std.meta.stringToEnum(E, wire)) |value| .{ .known = value } else .{ .unknown = wire };
+        }
+        pub fn isKnown(self: Self) bool {
+            return self == .known;
+        }
+        pub fn get(self: Self) ?E {
+            return if (self == .known) self.known else null;
+        }
+        pub fn eql(self: Self, value: E) bool {
+            return self == .known and self.known == value;
+        }
+        /// The wire text of this value (tag name or preserved unknown text).
+        pub fn text(self: Self) []const u8 {
+            return switch (self) {
+                .known => |value| @tagName(value),
+                .unknown => |raw| raw,
+            };
+        }
+        pub fn format(self: Self, writer: *std.Io.Writer) std.Io.Writer.Error!void {
+            try writer.writeAll(self.text());
+        }
+    };
+}
+pub fn isOpenEnum(comptime T: type) bool {
+    return @typeInfo(T) == .@"union" and @hasDecl(T, "open_enum");
+}
 pub fn Map(comptime T: type) type {
     return struct {
         pub const map_child = T;
@@ -63,16 +107,75 @@ pub fn Owned(comptime T: type) type {
     };
 }
 
+/// Decode strictness (P1.3). Tolerant (default) accepts unknown enum values, unknown
+/// properties and fields relaxed by spec overrides. Strict reports all three as errors.
+pub const Mode = enum { tolerant, strict };
+pub const excerpt_capacity = 96;
 pub const Diagnostic = struct {
     checkpoint: ?Checkpoint = null,
+    mode: Mode = .tolerant,
     path: [512]u8 = @splat(0),
     path_len: usize = 0,
     reason: ?anyerror = null,
+    /// Zig type (or schema) expected at `jsonPath()`; static string.
+    expected: ?[]const u8 = null,
+    /// Truncated JSON excerpt of the offending value; control bytes replaced.
+    excerpt_buffer: [excerpt_capacity]u8 = @splat(0),
+    excerpt_len: usize = 0,
     pub fn jsonPath(self: *const Diagnostic) []const u8 {
         return self.path[0..self.path_len];
     }
+    pub fn excerpt(self: *const Diagnostic) []const u8 {
+        return self.excerpt_buffer[0..self.excerpt_len];
+    }
+    /// Starts a fresh diagnostic retaining the caller's checkpoint and mode.
+    pub fn reset(self: *Diagnostic) void {
+        self.* = .{ .checkpoint = self.checkpoint, .mode = self.mode };
+    }
+    /// Records the expected type and an excerpt the first time a leaf fails.
+    pub fn noteFailure(self: *Diagnostic, expected: []const u8, raw: RawValue) void {
+        if (self.expected != null) return;
+        self.expected = expected;
+        var writer: std.Io.Writer = .fixed(&self.excerpt_buffer);
+        std.json.Stringify.value(raw, .{}, &writer) catch {};
+        self.excerpt_len = writer.end;
+        if (self.excerpt_len == self.excerpt_buffer.len) @memcpy(self.excerpt_buffer[self.excerpt_buffer.len - 3 ..], "...");
+        for (self.excerpt_buffer[0..self.excerpt_len]) |*c| if (c.* < 0x20 or c.* == 0x7f) {
+            c.* = '?';
+        };
+    }
+    /// Replaces each occurrence of a secret in the excerpt with `***` (P2.2).
+    pub fn redact(self: *Diagnostic, secret: []const u8) void {
+        if (secret.len == 0) return;
+        var out: [excerpt_capacity]u8 = undefined;
+        var n: usize = 0;
+        var i: usize = 0;
+        const text = self.excerpt();
+        while (i < text.len) {
+            if (std.mem.startsWith(u8, text[i..], secret)) {
+                for ("***") |c| if (n < out.len) {
+                    out[n] = c;
+                    n += 1;
+                };
+                i += secret.len;
+            } else {
+                out[n] = text[i];
+                n += 1;
+                i += 1;
+            }
+        }
+        // Also hide a truncated secret prefix at the excerpt end.
+        var keep = n;
+        var len: usize = @min(secret.len - 1, n);
+        while (len >= 4) : (len -= 1) if (std.mem.endsWith(u8, out[0..n], secret[0..len])) {
+            keep = n - len;
+            break;
+        };
+        @memcpy(self.excerpt_buffer[0..keep], out[0..keep]);
+        self.excerpt_len = keep;
+    }
 };
-pub const DecodeError = error{ Canceled, Timeout, InvalidType, MissingField, AliasCollision, InvalidEnum, InvalidUnion, OutOfRange, NonIntegral, InvalidNumber, OutOfMemory };
+pub const DecodeError = error{ Canceled, Timeout, InvalidType, MissingField, AliasCollision, InvalidEnum, InvalidUnion, OutOfRange, NonIntegral, InvalidNumber, UnknownField, OutOfMemory };
 
 pub fn decode(comptime T: type, allocator: std.mem.Allocator, text: []const u8) !Owned(T) {
     var diagnostic: Diagnostic = .{};
@@ -83,7 +186,7 @@ pub fn decodeChecked(comptime T: type, allocator: std.mem.Allocator, text: []con
     return decodeDetailed(T, allocator, text, &diagnostic);
 }
 pub fn decodeDetailed(comptime T: type, allocator: std.mem.Allocator, text: []const u8, diagnostic: *Diagnostic) !Owned(T) {
-    diagnostic.* = .{ .checkpoint = diagnostic.checkpoint };
+    diagnostic.reset();
     if (diagnostic.checkpoint) |c| try c.check();
     const arena = try allocator.create(std.heap.ArenaAllocator);
     errdefer allocator.destroy(arena);
@@ -215,8 +318,20 @@ fn push(d: *Diagnostic, key: []const u8) usize {
     d.path_len += n;
     return old;
 }
+/// Converts a parsed JSON value into T. In tolerant mode (default) unknown enum
+/// values and unknown properties are accepted; strict mode rejects them (P1.3).
 pub fn convert(comptime T: type, a: std.mem.Allocator, raw: RawValue, d: *Diagnostic) DecodeError!T {
+    return convertValue(T, a, raw, d) catch |err| {
+        switch (err) {
+            error.OutOfMemory, error.Canceled, error.Timeout => {},
+            else => d.noteFailure(@typeName(T), raw),
+        }
+        return err;
+    };
+}
+fn convertValue(comptime T: type, a: std.mem.Allocator, raw: RawValue, d: *Diagnostic) DecodeError!T {
     if (d.checkpoint) |c| try c.check();
+    if (comptime isOpenEnum(T)) return convertOpen(T, raw, d);
     if (T == RawValue) return raw;
     if (T == ExactNumber) return switch (raw) {
         .number_string => |s| if (validNumberSyntax(s)) .{ .lexeme = s } else error.InvalidNumber,
@@ -306,6 +421,8 @@ pub fn convert(comptime T: type, a: std.mem.Allocator, raw: RawValue, d: *Diagno
                 } else return error.MissingField;
                 d.path_len = old;
             }
+            // Missing and mistyped fields are reported before unknown ones.
+            if (d.mode == .strict) try strictStruct(T, raw, d);
             return result;
         },
         .@"union" => |info| {
@@ -339,10 +456,57 @@ pub fn convert(comptime T: type, a: std.mem.Allocator, raw: RawValue, d: *Diagno
         else => @compileError("Unsupported JSON target type: " ++ @typeName(T)),
     }
 }
+fn openKnown(comptime T: type, raw: RawValue) ?T.Known {
+    const name = switch (raw) {
+        .string => |s| s,
+        .number_string => |s| s,
+        else => return null,
+    };
+    if (std.meta.stringToEnum(T.Known, name)) |v| return v;
+    if (raw == .number_string) {
+        var buffer: [32]u8 = undefined;
+        const value = integer(i64, name) catch return null;
+        const canonical = std.fmt.bufPrint(&buffer, "{d}", .{value}) catch return null;
+        return std.meta.stringToEnum(T.Known, canonical);
+    }
+    return null;
+}
+fn convertOpen(comptime T: type, raw: RawValue, d: *Diagnostic) DecodeError!T {
+    if (openKnown(T, raw)) |known| return .{ .known = known };
+    const text = switch (raw) {
+        .string => |s| s,
+        .number_string => |s| if (@hasDecl(T.Known, "json_numeric")) s else return error.InvalidEnum,
+        else => return error.InvalidEnum,
+    };
+    if (d.mode == .strict) return error.InvalidEnum;
+    return .{ .unknown = text };
+}
+/// Strict mode: every property must be modelled, and override-relaxed fields present.
+fn strictStruct(comptime T: type, raw: RawValue, d: *Diagnostic) DecodeError!void {
+    var it = raw.object.iterator();
+    while (it.next()) |entry| {
+        if (!hasField(T, entry.key_ptr.*)) {
+            _ = push(d, entry.key_ptr.*);
+            return error.UnknownField;
+        }
+    }
+    if (comptime hasDecl(T, "relaxed_fields")) inline for (T.relaxed_fields) |name| {
+        if (!raw.object.contains(name)) {
+            _ = push(d, name);
+            return error.MissingField;
+        }
+    };
+}
+fn hasField(comptime T: type, name: []const u8) bool {
+    inline for (@typeInfo(T).@"struct".field_names) |field_name| if (std.mem.eql(u8, field_name, name)) return true;
+    return false;
+}
 fn coverage(comptime T: type, raw: Raw, depth: usize, checkpoint: ?Checkpoint) error{ Canceled, Timeout }!i64 {
     if (checkpoint) |c| try c.check();
     if (depth > 64) return 0;
     if (T == Raw) return -1;
+    // Unknown values decode, but a branch that recognizes the value is preferred.
+    if (comptime isOpenEnum(T)) return if (openKnown(T, raw) != null) 3 else 0;
     if (comptime hasDecl(T, "presence_child")) return coverage(T.presence_child, raw, depth + 1, checkpoint);
     if (comptime hasDecl(T, "map_child")) return 0;
     return switch (@typeInfo(T)) {
@@ -553,6 +717,11 @@ fn toRaw(comptime T: type, a: std.mem.Allocator, value: T, previous: ?Raw, check
     if (checkpoint) |c| try c.check();
     if (T == Raw) return value;
     if (T == ExactNumber) return if (validNumberSyntax(value.lexeme)) .{ .number_string = value.lexeme } else error.InvalidNumber;
+    if (comptime isOpenEnum(T)) return switch (value) {
+        .known => |known| toRaw(T.Known, a, known, previous, checkpoint),
+        // Unknown text is emitted exactly as received.
+        .unknown => |text| if (comptime @hasDecl(T.Known, "json_numeric")) (if (validNumberSyntax(text)) .{ .number_string = text } else .{ .string = text }) else .{ .string = text },
+    };
     if (comptime hasDecl(T, "presence_child")) return switch (value) {
         .absent => .null,
         .null => .null,

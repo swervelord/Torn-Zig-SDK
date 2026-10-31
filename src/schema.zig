@@ -170,12 +170,13 @@ pub fn validate(document: V, contract: V, raw: V) Error!void {
     try validateChecked(document, contract, raw, null);
 }
 pub fn validateChecked(document: V, contract: V, raw: V, checkpoint: ?model.Checkpoint) Error!void {
-    var diagnostic: model.Diagnostic = .{ .checkpoint = checkpoint };
+    var diagnostic: model.Diagnostic = .{ .checkpoint = checkpoint, .mode = .strict };
     try validateDetailed(document, contract, raw, &diagnostic);
 }
-/// The diagnostic owns its bounded JSON-pointer path and retains its checkpoint.
+/// The diagnostic owns its bounded JSON-pointer path and retains its checkpoint and mode.
+/// Callers validating responses against the official contract use `.strict` mode.
 pub fn validateDetailed(document: V, contract: V, raw: V, diagnostic: *model.Diagnostic) Error!void {
-    diagnostic.* = .{ .checkpoint = diagnostic.checkpoint };
+    diagnostic.reset();
     inner(document, contract, raw, 0, diagnostic.checkpoint, diagnostic) catch |err| {
         diagnostic.reason = err;
         return err;
@@ -237,7 +238,8 @@ fn inner(doc: V, s: V, raw: V, depth: usize, checkpoint: ?model.Checkpoint, diag
         for (values.array.items) |v| {
             if (equivalent(v, raw)) found = true;
         }
-        if (!found) return error.InvalidEnum;
+        // Tolerant mode (P1.1) accepts string values added upstream; strict rejects them.
+        if (!found and !(diagnostic.mode == .tolerant and raw == .string)) return error.InvalidEnum;
     }
     if (get(s, "const")) |value| if (!equivalent(value, raw)) return error.InvalidEnum;
     if (raw == .object) {
