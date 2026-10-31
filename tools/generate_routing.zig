@@ -35,7 +35,7 @@ pub fn main(init: std.process.Init) !void {
     try w.writeAll("};\npub const force_direct = [_][]const u8{\n");
     if (overrides_parsed.value.object.get("force_direct")) |entries| for (entries.array.items) |entry| try w.print("    \"{f}\",\n", .{std.zig.fmtString(entry.string)});
     try w.writeAll("};\n");
-    const official_bytes = try dir.readFileAlloc(io, "spec/openapi-6.14.0.json", a, .limited(8 * 1024 * 1024));
+    const official_bytes = try dir.readFileAlloc(io, "spec/openapi-6.15.0.json", a, .limited(8 * 1024 * 1024));
     const official = try std.json.parseFromSlice(std.json.Value, a, official_bytes, .{});
     try w.writeAll("pub const RequiredQuery = struct { resource: []const u8, selection: []const u8, parameter: []const u8, required: bool, choices: []const []const u8 };\npub const required_queries = [_]RequiredQuery{\n");
     var path_it = official.value.object.get("paths").?.object.iterator();
@@ -100,7 +100,7 @@ pub fn main(init: std.process.Init) !void {
     try save(a, io, "src/generated/selections.zig", try selections.toOwnedSlice(), check);
     var coverage: std.Io.Writer.Allocating = .init(a);
     const cw = &coverage.writer;
-    try cw.writeAll("{\n  \"source\": \"spec/routing-manifest.json and routing-overrides.json\",\n  \"evidence\": \"Official v2 response associations plus explicitly maintained compatibility overrides. v1 catalog membership is not an authoritative v1 payload specification.\",\n  \"typed_helpers\": 209,\n  \"raw_helpers\": 204,\n  \"csv_helpers\": 3,\n  \"v1_entries\": 184,\n  \"helpers\": [\n");
+    try cw.writeAll("{\n  \"source\": \"spec/routing-manifest.json and routing-overrides.json\",\n  \"evidence\": \"Official v2 response associations plus explicitly maintained compatibility overrides. v1 catalog membership is not an authoritative v1 payload specification.\",\n  \"typed_helpers\": 210,\n  \"raw_helpers\": 205,\n  \"csv_helpers\": 3,\n  \"v1_entries\": 184,\n  \"helpers\": [\n");
     for (caps, 0..) |cap, i| {
         const obj = cap.object;
         const resource = obj.get("resource").?.string;

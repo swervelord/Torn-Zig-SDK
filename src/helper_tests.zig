@@ -236,7 +236,7 @@ fn exercise(comptime Token: type, doc: V, raw: bool) !bool {
     try std.testing.expectEqual(@as(usize, 1), wire.count);
     return true;
 }
-test "all 209 typed helpers and 204 raw helpers execute independent routing fixtures" {
+test "all 210 typed helpers and 205 raw helpers execute independent routing fixtures" {
     @setEvalBranchQuota(10000000);
     var doc = try std.json.parseFromSlice(V, std.testing.allocator, current.source_json, .{ .parse_numbers = false });
     defer doc.deinit();
@@ -250,6 +250,6 @@ test "all 209 typed helpers and 204 raw helpers execute independent routing fixt
             if (try exercise(Token, doc.value, true)) raw_count += 1;
         }
     }
-    try std.testing.expectEqual(@as(usize, 209), typed_count);
-    try std.testing.expectEqual(@as(usize, 204), raw_count);
+    try std.testing.expectEqual(@as(usize, 210), typed_count);
+    try std.testing.expectEqual(@as(usize, 205), raw_count);
 }

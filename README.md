@@ -12,7 +12,7 @@ facilities.
 Use a published commit to obtain a content-addressed package:
 
 ```sh
-zig fetch --save=torn https://github.com/swervelord/Torn-Zig-SDK/archive/refs/tags/v0.2.0.tar.gz
+zig fetch --save=torn https://github.com/swervelord/Torn-Zig-SDK/archive/refs/tags/v0.3.0.tar.gz
 ```
 
 In your `build.zig`, call `b.dependency("torn", .{ .target = target, .optimize = optimize })`
@@ -111,10 +111,10 @@ report their version without claiming runtime recovery.
 
 ## Contracts and generation
 
-The official v2 snapshot is **6.14.0** (236 exact operations, 719 component schemas).
+The official v2 snapshot is **6.15.0** (237 exact operations, 724 component schemas).
 The distinct frozen namespace preserves **6.13.6** (711 schemas).
-The maintained compatibility namespace has 549 declarations. Routing covers 207
-capabilities, 209 typed selection/alias tokens, 204 JSON selections, three CSV
+The maintained compatibility namespace has 549 declarations. Routing covers 208
+capabilities, 210 typed selection/alias tokens, 205 JSON selections, three CSV
 channels, and an explicit 184-entry v1 catalog.
 
 Upstream inventory cache lifetimes are 900 seconds per user category and 300
@@ -122,6 +122,11 @@ seconds for faction inventory. Exact operations expose `upstream_cache_ttl_secon
 and the verbatim `stability` string. These describe server behavior; the SDK does
 not cache response bodies. The user Halloween stability value is currently
 `Untable` in the official contract.
+
+API 6.15.0 adds `selections.user.travelinventory` and
+`operations.getMyTravelInventory` (official stability `Unstable`; the official
+contract requires a limited access key). Its response is typed down to each slot:
+an empty slot's `item` and a stackable item's `uid` are required-nullable `?T`.
 
 Detailed mappings are generated in
 `docs/routing-coverage.json` and the generated declaration inventories.
@@ -167,16 +172,17 @@ user agent into `spec/openapi-candidate.json`; review changes before replacing a
 pinned contract and its provenance. `spec/refresh-report.json` records the byte
 hash and added/removed/changed paths and schemas. `zig build verify-proxy` explicitly
 checks HTTPS through a local CONNECT relay using the public specification;
-`zig build live-test` is opt-in and reads only `TORN_LIVE_TEST_API_KEY`.
+`zig build live-test` is opt-in and reads only `TORN_LIVE_TEST_API_KEY`; its batch
+includes `travelinventory`, so the key needs at least limited access.
 The generator is Zig-native and verifies
 deterministic formatted outputs. See [provenance](docs/provenance.md) and
 [verification scope](docs/verification.md) for evidence and remaining limits.
 HTTP and HTTPS proxies support plain HTTP and verified HTTPS CONNECT.
 HTTPS proxy TLS is verified before proxy authentication or CONNECT; target TLS is
-verified separately before the API credential is sent. See the API 6.14.0 audit for validation limits. The v1 catalog and compatibility models do
+verified separately before the API credential is sent. See the API 6.15.0 audit for validation limits. The v1 catalog and compatibility models do
 not imply an authoritative specification for every historical payload.
 
-See [the API 6.14.0 feature and typing audit](docs/audit-6.14.0.md) for
+See [the API 6.15.0 feature and typing audit](docs/audit-6.15.0.md) for
 capabilities, typing boundaries and precise validation limits.
 
 MIT License. Copyright (c) 2046 swervelord.

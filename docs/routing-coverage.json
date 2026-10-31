@@ -1,8 +1,8 @@
 {
   "source": "spec/routing-manifest.json and routing-overrides.json",
   "evidence": "Official v2 response associations plus explicitly maintained compatibility overrides. v1 catalog membership is not an authoritative v1 payload specification.",
-  "typed_helpers": 209,
-  "raw_helpers": 204,
+  "typed_helpers": 210,
+  "raw_helpers": 205,
   "csv_helpers": 3,
   "v1_entries": 184,
   "helpers": [
@@ -210,6 +210,7 @@
     {"resource":"user","selection":"trade","token":"selections.user.trade","typed_api":"Client.select(selections.user.trade, target, filters, options)","result":"current.UserTradeResponse","csv":false,"raw_api":"Client.raw(selections.user.trade, target, filters, options)"},
     {"resource":"user","selection":"trades","token":"selections.user.trades","typed_api":"Client.select(selections.user.trades, target, filters, options)","result":"current.UserTradesResponse","csv":false,"raw_api":"Client.raw(selections.user.trades, target, filters, options)"},
     {"resource":"user","selection":"travel","token":"selections.user.travel","typed_api":"Client.select(selections.user.travel, target, filters, options)","result":"current.UserTravelResponse","csv":false,"raw_api":"Client.raw(selections.user.travel, target, filters, options)"},
+    {"resource":"user","selection":"travelinventory","token":"selections.user.travelinventory","typed_api":"Client.select(selections.user.travelinventory, target, filters, options)","result":"current.UserTravelInventoryResponse","csv":false,"raw_api":"Client.raw(selections.user.travelinventory, target, filters, options)"},
     {"resource":"user","selection":"virus","token":"selections.user.virus","typed_api":"Client.select(selections.user.virus, target, filters, options)","result":"current.UserVirusResponse","csv":false,"raw_api":"Client.raw(selections.user.virus, target, filters, options)"},
     {"resource":"user","selection":"weaponexp","token":"selections.user.weaponexp","typed_api":"Client.select(selections.user.weaponexp, target, filters, options)","result":"current.UserWeaponExpResponse","csv":false,"raw_api":"Client.raw(selections.user.weaponexp, target, filters, options)"},
     {"resource":"user","selection":"workstats","token":"selections.user.workstats","typed_api":"Client.select(selections.user.workstats, target, filters, options)","result":"current.UserWorkStatsResponse","csv":false,"raw_api":"Client.raw(selections.user.workstats, target, filters, options)"}

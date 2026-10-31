@@ -134,7 +134,7 @@ fn exercise(comptime Op: type, doc: V) !void {
         return error.ExactValueMismatch;
     }
 }
-test "all 236 exact operations send independently checked paths and decode concrete values" {
+test "all 237 exact operations send independently checked paths and decode concrete values" {
     @setEvalBranchQuota(10000000);
     var parsed = try std.json.parseFromSlice(V, std.testing.allocator, current.source_json, .{ .parse_numbers = false });
     defer parsed.deinit();
@@ -146,5 +146,5 @@ test "all 236 exact operations send independently checked paths and decode concr
             count += 1;
         }
     }
-    try std.testing.expectEqual(@as(usize, 236), count);
+    try std.testing.expectEqual(@as(usize, 237), count);
 }

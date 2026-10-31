@@ -5,16 +5,16 @@ is distinct from branch coverage and from all possible live game states.
 
 | Audited surface | Inventory and verification |
 | --- | --- |
-| Official operations | 236; all invoked with independently checked paths, parameters and responses |
-| Current schemas | 719; 7,444 concrete acceptance/typed-roundtrip samples |
+| Official operations | 237; all invoked with independently checked paths, parameters and responses |
+| Current schemas | 724; 7,461 concrete acceptance/typed-roundtrip samples |
 | Frozen schemas | 711; 7,419 concrete acceptance/typed-roundtrip samples |
 | Compatibility declarations | 549; 76 handwritten scenarios plus focused regressions |
-| Selection capabilities | 207 |
-| Typed helpers/aliases | 209; all invoked with concrete value checks |
-| Raw JSON helpers | 204; all invoked through checked transports |
+| Selection capabilities | 208 |
+| Typed helpers/aliases | 210; all invoked with concrete value checks |
+| Raw JSON helpers | 205; all invoked through checked transports |
 | Dedicated CSV channels | 3; individually checked and mixed with JSON |
 | Explicit v1 entries | 184; all exercised at the transport boundary |
-| Compatible pair cases | 3,132; each checks exactly one actual send |
+| Compatible pair cases | 3,195; each checks exactly one actual send |
 | Complete routing groups | 41 resource/semantic-domain groups; each checks one send |
 
 The model sample producer is independently authored from official contracts. It
@@ -42,10 +42,12 @@ peers before authentication. Pinned fixtures and notices are in
 completed verified HTTPS to the public specification through a local Zig CONNECT
 proxy; `docs/proxy-verification.json` records its result.
 
-The opt-in live check passed on October 25, 2046: concrete profile and job responses
-decoded after exactly one real HTTP send, with retries, split recovery and legacy
-fallback disabled. No account response or credential was persisted. The executable
-reads only `TORN_LIVE_TEST_API_KEY` and prints a result without account data.
+The opt-in live check passed on October 30, 2026 against API 6.15.0: concrete profile,
+job and travel inventory responses decoded from one batched generic call after exactly
+one real HTTP send, with retries, split recovery and legacy fallback disabled. No
+account response or credential was persisted. The executable reads only
+`TORN_LIVE_TEST_API_KEY`, which needs at least limited access for `travelinventory`,
+and prints a result without account data.
 
 The bounded campaign uses fresh OS entropy for 100,000 iterations: 200,000 exact
 numeric checks and 100,000 each of encoding, union, merge and JSON properties.

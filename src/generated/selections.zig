@@ -364,6 +364,11 @@ pub const user = struct {
         pub const name = "travel";
         pub const Response = current.UserTravelResponse;
     };
+    pub const travelinventory = struct {
+        pub const resource = planner.Resource.user;
+        pub const name = "travelinventory";
+        pub const Response = current.UserTravelInventoryResponse;
+    };
     pub const virus = struct {
         pub const resource = planner.Resource.user;
         pub const name = "virus";

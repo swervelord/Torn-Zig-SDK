@@ -1,11 +1,19 @@
 # Contract provenance
 
+On October 30, 2026, `zig build refresh-spec` fetched the official specification
+with the custom user agent `Torn-Zig-SDK-spec-refresh/0.3.0`. The current pinned
+snapshot is API 6.15.0, containing 237 GET operations and 724 component schemas.
+Its 1,422,762 bytes have SHA-256
+`2b8205f8a3da430225e85df5d2d69d73a299296cfcae34809dfaff0c9d0ff872`, identical to
+an independent download made the same day for the update. The candidate was
+promoted unchanged to `spec/openapi-6.15.0.json`. `zig build audit` verifies this
+snapshot as well as the three retained older inputs. The public CONNECT
+verification separately retrieved API 6.15.0 over verified TLS.
+
 On October 27, 2026, the official specification was fetched with the custom user
-agent `Torn-SDK-update/1.0`. The current pinned snapshot is API 6.14.0, containing
+agent `Torn-SDK-update/1.0`. That API 6.14.0 snapshot contains
 236 GET operations and 719 component schemas. Its 1,417,327 bytes have SHA-256
 `53ead35b2c39eaa22fa294f83fe98dba010149f8a2d97e4f69839ed65548b06b`.
-`zig build audit` verifies this snapshot as well as both retained older inputs.
-The public CONNECT verification separately retrieved API 6.14.0 over verified TLS.
 The following paragraphs record the historical evidence for the older inputs.
 
 On October 25, 2026, the live official specification at

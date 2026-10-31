@@ -100,6 +100,11 @@
 {"namespace":"current","location":"#/components/schemas/UserInventoryItem/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/UserInventory/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/UserInventoryResponse/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserTravelInventoryItem/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserTravelInventorySlot/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserTravelInventoryCapacity/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserTravelInventory/*","reason":"unknown object fields retained by Owned raw tree"},
+{"namespace":"current","location":"#/components/schemas/UserTravelInventoryResponse/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/UserTradeResponse/*","reason":"unknown object fields retained by Owned raw tree"},
 {"namespace":"current","location":"#/components/schemas/UserTrade/properties/items","reason":"required property without a narrower value schema"},
 {"namespace":"current","location":"#/components/schemas/UserTrade/*","reason":"unknown object fields retained by Owned raw tree"},
@@ -1948,5 +1953,5 @@
 {"namespace":"compatibility","location":"#/components/schemas/UserWeaponExpEntry/fields/extra/arguments/1","reason":"explicit maintained raw/unknown value contract"},
 {"namespace":"compatibility","location":"#/components/schemas/UserWorkStats/fields/extra/arguments/1","reason":"explicit maintained raw/unknown value contract"}
 ],
-"location_count":1946
+"location_count":1951
 }

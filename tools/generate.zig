@@ -499,7 +499,7 @@ pub fn main(init: std.process.Init) !void {
     const cwd = std.Io.Dir.cwd();
     const args = try init.minimal.args.toSlice(a);
     const check = args.len > 1 and std.mem.eql(u8, args[1], "--check");
-    const inputs = .{ "spec/openapi-6.14.0.json", "spec/openapi-6.13.6.json", "spec/compatibility-models.json", "spec/openapi-6.14.0.json" };
+    const inputs = .{ "spec/openapi-6.15.0.json", "spec/openapi-6.13.6.json", "spec/compatibility-models.json", "spec/openapi-6.15.0.json" };
     const outputs = .{ "src/generated/current.zig", "src/generated/frozen.zig", "src/generated/compatibility.zig", "src/generated/operations.zig" };
     var manifest: Gen = .{ .a = a };
     var typing: Gen = .{ .a = a };
