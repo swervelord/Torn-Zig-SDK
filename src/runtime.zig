@@ -16,8 +16,8 @@ pub const Config = struct {
     base_url_v2: []const u8 = "https://api.torn.com/v2",
     base_url_v1: []const u8 = "https://api.torn.com",
     attempt_timeout_ms: u32 = 30_000,
-    /// Total HTTP sends per logical request, retries included (P4.2). Key failover on
-    /// `rotate_key` codes does not count (it is bounded by the key pool).
+    /// Total HTTP sends per logical request, retries included (P4.2). Key rotations
+    /// (`rotate_key` codes, and code 5 moving to another key) do not count (P2.4a).
     max_attempts: u32 = errors.retry.max_attempts,
     /// Exponential backoff base: delay(n) = backoff_ms * 2^(n-1), capped (P4.2).
     backoff_ms: u32 = errors.retry.base_delay_ms,
@@ -727,6 +727,9 @@ pub const Client = struct {
         const excluded = try self.allocator.alloc(bool, self.keys.len);
         defer self.allocator.free(excluded);
         @memset(excluded, false);
+        const rate_limited = try self.allocator.alloc(bool, self.keys.len);
+        defer self.allocator.free(rate_limited);
+        @memset(rate_limited, false);
         var sends: u32 = 0;
         // Every HTTP send; `sends` excludes key failovers, which do not consume attempts.
         var total: u32 = 0;
@@ -815,7 +818,12 @@ pub const Client = struct {
                         response.deinit();
                         return err;
                     };
-                    if (sends >= max_attempts) return self.finishError(response, selected, total, &event);
+                    // P2.4a: moving to another key does not consume an attempt; the
+                    // same key hitting code 5 again in this request does.
+                    if (!rate_limited[selected.key]) {
+                        rate_limited[selected.key] = true;
+                        sends -= 1;
+                    } else if (sends >= max_attempts) return self.finishError(response, selected, total, &event);
                     last = response;
                     self.hooks.emit("on_retry", &event);
                     continue;
@@ -1523,4 +1531,17 @@ test "native body-read failure retries instead of returning truncated success" {
     try std.testing.expectEqualStrings("{}", response.body);
     try server.await(io);
     try std.testing.expectEqual(@as(usize, 2), state.calls);
+}
+
+test "key rotations on codes 2 and 5 do not consume attempts (P2.4a)" {
+    var state: Scripted = .{ .bodies = &.{ "{\"error\":{\"code\":2}}", "{\"error\":{\"code\":5}}", "{}" } };
+    var client = try Client.init(std.testing.allocator, std.testing.io, .{ .keys = &.{ "a", "b", "c" }, .max_attempts = 1 }, .{ .context = &state, .send_fn = Scripted.sendFn });
+    defer client.deinit();
+    state.attach(&client);
+    var response = try client.execute("http://mock", .{});
+    defer response.deinit();
+    try std.testing.expectEqualStrings("{}", response.body);
+    try std.testing.expectEqualStrings("c", state.keys[2]);
+    try std.testing.expectEqual(@as(u32, 3), response.sends);
+    try std.testing.expectEqual(@as(usize, 0), state.wait_count);
 }

@@ -54,7 +54,7 @@ Classification is by Torn error code (policy generated from `spec/shared/error-c
 | Action | Codes | Behavior |
 | --- | --- | --- |
 | `rotate_key` | 2, 10, 13, 14, 16, 18 | Retry immediately with the next healthy key; no attempt consumed. 2/10/13/18 disable the key for the client lifetime, 14 until the next UTC midnight, 16 only skips it for this request. With every key disabled the response is flagged `no_usable_keys`. |
-| `wait_rate_window` | 5 | Mark the key group rate limited until its window frees; rotate at once to a key with budget, else sleep until the earliest key frees. |
+| `wait_rate_window` | 5 | Mark the key group rate limited until its window frees; rotate at once to a key with budget, else sleep until the earliest key frees. The first code 5 per key in a request does not consume an attempt (P2.4a). |
 | `rotate_route` | 8 | Block the route for `ip_block_ms`; retry only on another unblocked route, never the same IP. |
 | `retry_backoff` | 12, 17, 24, 31; HTTP 429/500/502/503/504; network errors | Exponential backoff `backoff_ms * 2^(n-1)` capped at `max_backoff_ms`, full jitter (`jitter = .none` for tests); `Retry-After` (delta seconds or IMF-fixdate) replaces it, capped at `retry_after_cap_ms`. |
 | `reroute_version` | 22, 23 | Returned to the typed client, which re-plans once on the other API version (P4.3). |

@@ -59,14 +59,8 @@ test "3195 independently specified compatible pairs each cause exactly one actua
 test "full resource and semantic domain groups each execute one contributing call" {
     for (cases.all_groups) |group| {
         const a = std.testing.allocator;
-        const names = try a.dupe([]const u8, group.selections);
-        defer a.free(names);
-        std.mem.sort([]const u8, names, {}, struct {
-            fn less(_: void, x: []const u8, y: []const u8) bool {
-                return std.mem.lessThan(u8, x, y);
-            }
-        }.less);
-        const selections_query = try std.mem.join(a, "%2C", names);
+        // Requests keep the caller's selection order.
+        const selections_query = try std.mem.join(a, "%2C", group.selections);
         defer a.free(selections_query);
         const url = try std.fmt.allocPrint(a, "https://example.invalid/v2{s}?selections={s}{s}", .{ group.path, selections_query, group.query_suffix });
         defer a.free(url);
@@ -92,7 +86,7 @@ test "split recovery retains target and encoded filters and reports successes on
     var engine = try wire.engine();
     defer engine.deinit();
     const c: client.Client = .{ .engine = &engine };
-    var result = try c.execute(.{ .resource = .user, .selections = &.{ "profile", "job" }, .target = &.{.{ .name = "id", .value = "123" }}, .filters = &.{.{ .name = "comment", .value = "check me" }} }, .{});
+    var result = try c.execute(.{ .resource = .user, .selections = &.{ "job", "profile" }, .target = &.{.{ .name = "id", .value = "123" }}, .filters = &.{.{ .name = "comment", .value = "check me" }} }, .{});
     defer result.deinit();
     try std.testing.expect(result.failure == null);
     try std.testing.expectEqual(@as(usize, 3), wire.count);
@@ -110,7 +104,7 @@ test "partial split success and its report survive a later failure" {
     var engine = try wire.engine();
     defer engine.deinit();
     const c: client.Client = .{ .engine = &engine };
-    var result = try c.execute(.{ .resource = .user, .selections = &.{ "profile", "job" } }, .{});
+    var result = try c.execute(.{ .resource = .user, .selections = &.{ "job", "profile" } }, .{});
     defer result.deinit();
     try std.testing.expectEqual(@as(usize, 3), wire.count);
     try std.testing.expectEqual(@as(usize, 1), result.reports.len);
@@ -141,7 +135,7 @@ test "split recovery and version reroute are classified by code, not message tex
     } };
     var text_engine = try text_only.engine();
     defer text_engine.deinit();
-    var text_result = try (client.Client{ .engine = &text_engine }).execute(.{ .resource = .user, .selections = &.{ "profile", "job" } }, .{});
+    var text_result = try (client.Client{ .engine = &text_engine }).execute(.{ .resource = .user, .selections = &.{ "job", "profile" } }, .{});
     defer text_result.deinit();
     try std.testing.expectEqual(@as(?u32, 6), text_result.failure.?.api_code);
     try std.testing.expectEqual(@as(usize, 1), text_only.count);
@@ -153,7 +147,7 @@ test "split recovery and version reroute are classified by code, not message tex
     } };
     var split_engine = try split.engine();
     defer split_engine.deinit();
-    var split_result = try (client.Client{ .engine = &split_engine }).execute(.{ .resource = .user, .selections = &.{ "profile", "job" } }, .{});
+    var split_result = try (client.Client{ .engine = &split_engine }).execute(.{ .resource = .user, .selections = &.{ "job", "profile" } }, .{});
     defer split_result.deinit();
     try std.testing.expect(split_result.failure == null);
     try std.testing.expectEqual(@as(usize, 3), split.count);

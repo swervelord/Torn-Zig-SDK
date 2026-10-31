@@ -87,9 +87,6 @@ fn maxAccess(current: ?AccessLevel, next: ?AccessLevel) ?AccessLevel {
     const c = current orelse return n;
     return if (@backingInt(n) > @backingInt(c)) n else c;
 }
-fn lessThan(_: void, a: []const u8, b: []const u8) bool {
-    return std.mem.lessThan(u8, a, b);
-}
 
 /// RFC 3986 encoding of one path or query value; commas are escaped as data.
 pub fn percentEncode(allocator: std.mem.Allocator, value: []const u8) ![]const u8 {
@@ -325,7 +322,8 @@ fn directCall(a: std.mem.Allocator, input: Input, cap: *const Capability, name: 
     };
 }
 
-/// Build a deterministic plan. All selections share one target and filter set.
+/// Build a deterministic plan (same input, same calls). All selections share one
+/// target and filter set; selections keep their first-occurrence order.
 /// Names this SDK does not know are sent as v2 generic selections (P1.5).
 pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
     try checkpoint(input);
@@ -341,9 +339,12 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
         try checkpoint(input);
         if (name.len == 0) return error.UnknownSelection;
     }
-    std.mem.sort([]const u8, sorted, {}, lessThan);
+    // Selections keep the caller's order (first occurrence wins), so requests and
+    // per-selection splits match the shared conformance contract.
     var names: std.ArrayList([]const u8) = .empty;
-    for (sorted) |name| if (names.items.len == 0 or !same(names.items[names.items.len - 1], name)) try names.append(a, name);
+    for (sorted) |name| {
+        if (!inStrings(names.items, name)) try names.append(a, name);
+    }
     var calls: std.ArrayList(Call) = .empty;
     if (input.mode == .v1) {
         try calls.append(a, try legacyCall(a, input, names.items));
@@ -439,12 +440,12 @@ pub fn build(allocator: std.mem.Allocator, input: Input) !Plan {
     return finishPlan(&arena, &calls, input);
 }
 
-test "profile and job combine, normalize and own all input strings" {
+test "profile and job combine in caller order, drop duplicates and own all input strings" {
     var p = try build(std.testing.allocator, .{ .resource = .user, .selections = &.{ "profile", "job", "profile" }, .target = &.{.{ .name = "id", .value = "123" }} });
     defer p.deinit();
     try std.testing.expectEqual(@as(usize, 1), p.calls.len);
     try std.testing.expectEqualStrings("/user", p.calls[0].path);
-    try std.testing.expectEqualStrings("selections=job%2Cprofile&id=123", p.calls[0].query);
+    try std.testing.expectEqualStrings("selections=profile%2Cjob&id=123", p.calls[0].query);
 }
 
 test "safe encoding" {
@@ -477,7 +478,7 @@ test "domain boundaries reject user versus crime and trade IDs" {
     var plan = try build(std.testing.allocator, .{ .resource = .user, .selections = &.{ "timestamp", "crimes" }, .target = &.{.{ .name = "crimeId", .value = "12" }} });
     defer plan.deinit();
     try std.testing.expectEqual(@as(usize, 1), plan.calls.len);
-    try std.testing.expectEqualStrings("selections=crimes%2Ctimestamp&id=12", plan.calls[0].query);
+    try std.testing.expectEqualStrings("selections=timestamp%2Ccrimes&id=12", plan.calls[0].query);
 }
 
 test "direct company type routing does not disable company batching" {
@@ -490,7 +491,7 @@ test "direct company type routing does not disable company batching" {
     var normal = try build(std.testing.allocator, .{ .resource = .company, .selections = &.{ "profile", "employees", "timestamp" } });
     defer normal.deinit();
     try std.testing.expectEqual(@as(usize, 1), normal.calls.len);
-    try std.testing.expectEqualStrings("selections=employees%2Cprofile%2Ctimestamp", normal.calls[0].query);
+    try std.testing.expectEqualStrings("selections=profile%2Cemployees%2Ctimestamp", normal.calls[0].query);
 }
 
 test "generic spelling overrides and direct-only variants remain distinct" {
@@ -720,7 +721,7 @@ test "item honor medal and auction listing IDs remain separate domains" {
     var plan = try build(std.testing.allocator, .{ .resource = .torn, .selections = &.{ "items", "itemdetails", "itemstats" }, .target = &.{.{ .name = "itemIds", .value = "1,2" }} });
     defer plan.deinit();
     try std.testing.expectEqual(@as(usize, 1), plan.calls.len);
-    try std.testing.expectEqualStrings("selections=itemdetails%2Citems%2Citemstats&id=1%2C2", plan.calls[0].query);
+    try std.testing.expectEqualStrings("selections=items%2Citemdetails%2Citemstats&id=1%2C2", plan.calls[0].query);
 }
 
 test "territory ID list maps generic id and direct query ids correctly" {

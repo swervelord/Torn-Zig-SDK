@@ -18,8 +18,12 @@ Breaking changes are listed under [Migrating from 0.3.x](#migrating-from-03x).
   failures carry operation, selection, JSON path, expected type, a redacted value
   excerpt and the failing body.
 - P1.5 Unknown selection names are sent as v2 generic selections; unknown filters and
-  `comment` are forwarded on v1 and v2. Selections listed in the v2 enum without an
-  exact endpoint (for example `user.bazaar`) ask v2 first.
+  `comment` are forwarded on v1 and v2. Names the v2 selection enum lists as server-side
+  v1 fallbacks (for example `user.bazaar`) ask v2 first (P4.3).
+- P2.4a Key rotations (failover and code 5 moving to another key) do not consume
+  `max_attempts`.
+- P4.5 Code 4 (or HTTP 400/404/501) on a multi-selection request splits it once into
+  per-selection requests; P4.6 `TORN_API_KEYS` takes precedence over `TORN_API_KEY`.
 - P2 v1 authenticates with `key=` on the wire only; generated `Params` have no `key`
   field. Key pool states, failover per `error-codes.json`, `keyStates()`, redacted
   `KeyHint` in every report, hook and error.
@@ -67,7 +71,9 @@ Breaking changes are listed under [Migrating from 0.3.x](#migrating-from-03x).
   trigger on codes/statuses only, not on message text. Code 22 reroutes to v1
   without `.legacy_fallback`.
 - Budgets are sliding windows, not wall-clock minutes; `UsageObserver` is unchanged.
-- `planner.build` no longer rejects unknown selections or filters.
+- `planner.build` no longer rejects unknown selections or filters, and keeps the
+  caller's selection order (first occurrence) instead of sorting: `batch(.{profile, job})`
+  now sends `selections=profile,job`.
 
 
 ## 0.3.0 - 2026-10-30

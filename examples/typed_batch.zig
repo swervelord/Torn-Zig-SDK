@@ -9,7 +9,7 @@ const Mock = struct {
     fn send(ctx: ?*anyopaque, a: std.mem.Allocator, _: std.Io, request: torn.transport.Request) !torn.transport.Response {
         const self: *@This() = @ptrCast(@alignCast(ctx.?));
         self.calls += 1;
-        if (!std.mem.eql(u8, request.url, "https://api.torn.com/v2/user?selections=job%2Cprofile%2Ctimestamp&id=123")) return error.UnexpectedUrl;
+        if (!std.mem.eql(u8, request.url, "https://api.torn.com/v2/user?selections=profile%2Cjob%2Ctimestamp&id=123")) return error.UnexpectedUrl;
         return .{ .allocator = a, .status = 200, .body = try a.dupe(u8, fixture) };
     }
 };

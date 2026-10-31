@@ -93,10 +93,12 @@ switch (result.results[1]) {
 }
 ```
 
-This sends one `/user?selections=job,profile` request. Mixed-resource static batches
+This sends one `/user?selections=profile,job` request (selections keep the caller's
+order; duplicates are dropped). Mixed-resource static batches
 are compile errors; all selections share target and filters. The planner splits
 selections that need dedicated endpoints into separate calls; on Torn code 4 or
-HTTP 400/404/501 a combined call is retried one selection at a time.
+HTTP 400/404/501 a combined call is split once into per-selection requests whose
+results are merged; a selection that still fails reports its own error (P4.5).
 
 ## Pagination
 
@@ -143,7 +145,8 @@ errors are reserved for misuse, out-of-memory and cancellation. `client.Failure`
 - `retry_backoff` codes (12, 17, 24, 31), HTTP 429/500/502/503/504 and network
   errors retry with exponential backoff `500 ms * 2^(n-1)` (max 30 s) and full
   jitter; `Retry-After` is honored up to 120 s. `max_attempts` (default 4) counts
-  sends; key failover does not consume attempts. Codes 22/23 re-plan once on the
+  sends; key rotations (failover, and code 5 moving to another key) do not consume
+  attempts (P2.4a). Codes 22/23 re-plan once on the
   other API version. Classification never uses message text.
 - Deadlines (`Options.request.deadline_ms`) and `std.Io` cancellation abort waits and
   in-flight sends. One pooled `std.http.Client` (keep-alive) serves all direct sends.
@@ -169,7 +172,10 @@ a `validation` failure naming `required_access`.
   official contract and reports unknown enum values, unknown properties and
   override-relaxed fields.
 - Unknown selection names are sent as v2 generic selections; unknown filters and
-  `comment` are forwarded verbatim on v1 and v2.
+  `comment` are forwarded verbatim on v1 and v2. Names the v2 selection enum lists as
+  server-side v1 fallbacks (user `bazaar`, `criminalrecord`, `display`; torn
+  `competition`, `organisedcrimes`) are asked on v2 first; other v1-only selections go
+  straight to v1 (P4.3).
 - The merged raw JSON (`execution.raw`) is kept even when typed decoding fails.
 
 ## Caching

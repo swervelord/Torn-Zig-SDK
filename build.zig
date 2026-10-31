@@ -15,6 +15,8 @@ pub fn build(b: *std.Build) void {
     const conformance = b.addTest(.{ .root_module = b.createModule(.{ .root_source_file = b.path("tests/conformance.zig"), .target = target, .optimize = optimize, .imports = &.{ .{ .name = "torn", .module = torn }, .{ .name = "conformance_options", .module = conformance_options.createModule() } } }) });
     const conformance_run = b.addRunArtifact(conformance);
     conformance_run.setCwd(b.path("."));
+    // Scenario files are read at run time; always rerun so new or changed files count.
+    conformance_run.has_side_effects = true;
     test_step.dependOn(&conformance_run.step);
     b.step("conformance", "Run the shared conformance scenarios").dependOn(&conformance_run.step);
     const check = b.step("check", "Compile public types and runtime");

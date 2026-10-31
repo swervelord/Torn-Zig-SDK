@@ -90,12 +90,12 @@ pub const groups = [_]Groups{
     .{ .resource = .torn, .selections = &.{ "bank", "bounties", "calendar", "cards", "cityshops", "crimes", "education", "elimination", "factiontree", "gyms", "halloween", "honors", "itemammo", "itemmods", "items", "logcategories", "logtypes", "lookup", "medals", "merits", "museum", "organizedcrimes", "pokertables", "properties", "rockpaperscissors", "stats", "stocks", "territory", "timestamp" }, .path = "/torn" },
 };
 
+/// Expected query for the input `{ right, left, right }`: caller order, duplicates dropped.
 pub fn expectedQuery(a: std.mem.Allocator, left: []const u8, right: []const u8) ![]const u8 {
-    const ascending = std.mem.order(u8, left, right) == .lt;
-    return std.fmt.allocPrint(a, "selections={s}%2C{s}", .{ if (ascending) left else right, if (ascending) right else left });
+    return std.fmt.allocPrint(a, "selections={s}%2C{s}", .{ right, left });
 }
 
-test "independent complete compatible pair groups normalize reverse order and duplicates" {
+test "independent complete compatible pair groups keep caller order and drop duplicates" {
     var count: usize = 0;
     for (all_groups) |group| {
         for (group.selections, 0..) |left, i| {

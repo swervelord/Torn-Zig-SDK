@@ -79,7 +79,7 @@ test "travel inventory combines with other user selections in one generic call" 
     defer plan.deinit();
     try std.testing.expectEqual(@as(usize, 1), plan.calls.len);
     try std.testing.expectEqualStrings("/user", plan.calls[0].path);
-    try std.testing.expectEqualStrings("selections=job%2Ctravel%2Ctravelinventory", plan.calls[0].query);
+    try std.testing.expectEqualStrings("selections=travelinventory%2Cjob%2Ctravel", plan.calls[0].query);
     try std.testing.expectEqual(@as(u8, 2), plan.calls[0].version);
 }
 
@@ -100,7 +100,7 @@ const Wire = struct {
 
 test "typed batch decodes travel inventory and a casino Dealer job from one send" {
     var wire: Wire = .{
-        .url = "https://example.invalid/v2/user?selections=job%2Ctimestamp%2Ctravelinventory",
+        .url = "https://example.invalid/v2/user?selections=travelinventory%2Cjob%2Ctimestamp",
         .body =
         \\{"job":{"type":"job","name":"Casino","position":"Dealer"},"timestamp":1000,"travelinventory":{"capacity":{"base":28,"special":0},"inventory":[{"id":1,"item":null}]}}
         ,
