@@ -166,7 +166,8 @@ a `validation` failure naming `required_access`.
   (the raw text, owned by the result arena) and serializes them back byte-exact.
   Use `value.eql(.Name)`, `get()`, `isKnown()`, `text()` and `E.known_values`.
 - `spec/shared/spec-overrides.json` relaxes spec defects proven live
-  (`TornHalloweenUpgrade.type`, `UserTrade.items` are optional).
+  (`TornHalloweenUpgrade.type`, `UserTrade.items` and
+  `UserPropertyDetailsExtendedWithRent.status` are optional).
 - Decoding is tolerant by default: unknown properties are kept in the raw tree.
   `Options.mode = .strict` (and `torn.contracts.*`) also validates against the
   official contract and reports unknown enum values, unknown properties and

@@ -224,3 +224,23 @@ test "exact operations use the upstream cache TTL when a cache is attached (P8.4
     }
     try std.testing.expectEqual(@as(usize, 1), h.mock.sends());
 }
+
+test "property details without status decode in tolerant mode (P1.2 allOf override)" {
+    const a = std.testing.allocator;
+    const payload = "{\"property\":{\"id\":1,\"owner\":{\"id\":2,\"name\":\"Owner\"},\"property\":{\"id\":13,\"name\":\"Private Island\"},\"happy\":100,\"upkeep\":{\"property\":1,\"staff\":0},\"market_price\":1,\"modifications\":[],\"staff\":[],\"used_by\":[]}}";
+    var tolerant = try model.decode(current.PropertyPropertyResponse, a, payload);
+    defer tolerant.deinit();
+    try std.testing.expect(tolerant.value.property.status == .absent);
+    try std.testing.expectEqual(@as(usize, 0), tolerant.value.property.used_by.len);
+    // Strict mode still reports the field the official contract requires (P1.3).
+    try std.testing.expectError(error.MissingField, contracts.decodeCurrent(current.PropertyPropertyResponse, a, payload));
+    var h: Harness = undefined;
+    try h.init(.{ .keys = &.{"KEY_A"} });
+    defer h.deinit();
+    try h.mock.pushJson(payload);
+    var result = try h.api().exact(operations.getProperty, .{ .id = 1 }, .{});
+    defer result.deinit();
+    try std.testing.expect(result.execution.failure == null);
+    try std.testing.expect(result.value.?.property.status == .absent);
+    try std.testing.expectEqualStrings("/v2/property/1/property", h.mock.request(0).path());
+}

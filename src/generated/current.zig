@@ -6768,12 +6768,15 @@ pub const UserPropertyDetailsExtendedWithRent = struct {
         pub const json_schema = "{\"required\":[\"type\",\"amount\"],\"properties\":{\"type\":{\"$ref\":\"#/components/schemas/PropertyStaffEnum\"},\"amount\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}";
     },
     used_by: []const BasicUser,
-    status: model.Open(enum {
+    status: model.Presence(model.Open(enum {
         none,
         in_use,
-    }),
+    })) = .absent,
     rented_by: model.Presence(BasicUser) = .absent,
-    pub const json_schema = "{\"properties\":{\"id\":{\"$ref\":\"#/components/schemas/PropertyId\"},\"owner\":{\"$ref\":\"#/components/schemas/BasicUser\"},\"property\":{\"$ref\":\"#/components/schemas/BasicProperty\"},\"happy\":{\"type\":\"integer\",\"format\":\"int32\"},\"upkeep\":{\"required\":[\"property\",\"staff\"],\"properties\":{\"property\":{\"type\":\"integer\",\"format\":\"int32\"},\"staff\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"},\"market_price\":{\"type\":\"integer\",\"format\":\"int64\"},\"modifications\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PropertyModificationEnum\"}},\"staff\":{\"type\":\"array\",\"items\":{\"required\":[\"type\",\"amount\"],\"properties\":{\"type\":{\"$ref\":\"#/components/schemas/PropertyStaffEnum\"},\"amount\":{\"type\":\"integer\",\"format\":\"int32\"}},\"type\":\"object\"}},\"used_by\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/BasicUser\"}},\"status\":{\"type\":\"string\",\"enum\":[\"none\",\"in_use\"]},\"rented_by\":{\"$ref\":\"#/components/schemas/BasicUser\"}},\"required\":[\"id\",\"owner\",\"property\",\"happy\",\"upkeep\",\"market_price\",\"modifications\",\"staff\",\"status\",\"used_by\"]}";
+    pub const json_schema = "{\"allOf\":[{\"$ref\":\"#/components/schemas/UserPropertyBasicDetails\"},{\"required\":[\"status\",\"used_by\"],\"properties\":{\"used_by\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/BasicUser\"}},\"status\":{\"type\":\"string\",\"enum\":[\"none\",\"in_use\"]},\"rented_by\":{\"$ref\":\"#/components/schemas/BasicUser\"}},\"type\":\"object\"}]}";
+    pub const relaxed_fields = .{
+        "status",
+    };
 };
 pub const UserPropertyDetails = struct {
     id: PropertyId,

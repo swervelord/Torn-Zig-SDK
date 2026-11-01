@@ -10,7 +10,8 @@ Breaking changes are listed under [Migrating from 0.3.x](#migrating-from-03x).
   `eql`, `text`, `parse`, `known_values`. One new enum value no longer fails a whole
   typed call or batch.
 - P1.2 `spec/shared/spec-overrides.json` is applied by the generator:
-  `TornHalloweenUpgrade.type` and `UserTrade.items` are optional.
+  `TornHalloweenUpgrade.type`, `UserTrade.items` and
+  `UserPropertyDetailsExtendedWithRent.status` (inside its `allOf`) are optional.
 - P1.3 Decoding is tolerant by default; `Options.mode = .strict` and
   `torn.contracts.*` report unknown enum values, unknown properties and
   override-relaxed fields.

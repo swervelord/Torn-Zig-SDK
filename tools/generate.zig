@@ -39,30 +39,25 @@ const Gen = struct {
             const change = get(entry, "change").?.string;
             if (copy == null) copy = try v.object.clone(g.a);
             const object = &copy.?;
-            var props: std.json.ObjectMap = if (object.get("properties")) |p| try p.object.clone(g.a) else .{};
-            if (std.mem.eql(u8, change, "optional")) {
-                const required = object.get("required") orelse return error.InvalidSpecOverride;
-                var kept = std.array_list.Managed(V).init(g.a);
-                var found = false;
-                for (required.array.items) |item| {
-                    if (std.mem.eql(u8, item.string, property)) found = true else try kept.append(item);
+            // Top-level object, or the inline `allOf` part that declares the property.
+            if (!try g.relaxObject(object, property, change)) {
+                const all = object.get("allOf") orelse return error.InvalidSpecOverride;
+                var parts = std.array_list.Managed(V).init(g.a);
+                var done = false;
+                for (all.array.items) |part| {
+                    if (!done and part == .object and get(part, "$ref") == null) {
+                        var part_copy = try part.object.clone(g.a);
+                        if (try g.relaxObject(&part_copy, property, change)) {
+                            done = true;
+                            try parts.append(.{ .object = part_copy });
+                            continue;
+                        }
+                    }
+                    try parts.append(part);
                 }
-                if (!found) return error.InvalidSpecOverride;
-                try object.put(g.a, "required", .{ .array = kept });
-                // A required property without a value schema stays a raw value, now optional.
-                if (!props.contains(property)) try props.put(g.a, property, .{ .object = .{} });
-            } else if (std.mem.eql(u8, change, "nullable")) {
-                const prior = props.get(property) orelse return error.InvalidSpecOverride;
-                var alternatives = std.array_list.Managed(V).init(g.a);
-                try alternatives.append(prior);
-                var null_schema: std.json.ObjectMap = .{};
-                try null_schema.put(g.a, "type", .{ .string = "null" });
-                try alternatives.append(.{ .object = null_schema });
-                var wrapped: std.json.ObjectMap = .{};
-                try wrapped.put(g.a, "oneOf", .{ .array = alternatives });
-                try props.put(g.a, property, .{ .object = wrapped });
-            } else return error.UnsupportedSpecOverride;
-            try object.put(g.a, "properties", .{ .object = props });
+                if (!done) return error.InvalidSpecOverride;
+                try object.put(g.a, "allOf", .{ .array = parts });
+            }
             try relaxed.append(g.a, property);
             try g.applied_overrides.append(g.a, try g.overrideKey(entry));
         }
@@ -70,6 +65,35 @@ const Gen = struct {
         g.pending_original = v;
         g.pending_relaxed = relaxed.items;
         return .{ .object = copy.? };
+    }
+    /// Applies one override change to an object schema that declares `property`;
+    /// false when this object does not declare it (as required, or as a property).
+    fn relaxObject(g: *Gen, object: *std.json.ObjectMap, property: []const u8, change: []const u8) !bool {
+        var props: std.json.ObjectMap = if (object.get("properties")) |p| try p.object.clone(g.a) else .{};
+        if (std.mem.eql(u8, change, "optional")) {
+            const required = object.get("required") orelse return false;
+            var kept = std.array_list.Managed(V).init(g.a);
+            var found = false;
+            for (required.array.items) |item| {
+                if (std.mem.eql(u8, item.string, property)) found = true else try kept.append(item);
+            }
+            if (!found) return false;
+            try object.put(g.a, "required", .{ .array = kept });
+            // A required property without a value schema stays a raw value, now optional.
+            if (!props.contains(property)) try props.put(g.a, property, .{ .object = .{} });
+        } else if (std.mem.eql(u8, change, "nullable")) {
+            const prior = props.get(property) orelse return false;
+            var alternatives = std.array_list.Managed(V).init(g.a);
+            try alternatives.append(prior);
+            var null_schema: std.json.ObjectMap = .{};
+            try null_schema.put(g.a, "type", .{ .string = "null" });
+            try alternatives.append(.{ .object = null_schema });
+            var wrapped: std.json.ObjectMap = .{};
+            try wrapped.put(g.a, "oneOf", .{ .array = alternatives });
+            try props.put(g.a, property, .{ .object = wrapped });
+        } else return error.UnsupportedSpecOverride;
+        try object.put(g.a, "properties", .{ .object = props });
+        return true;
     }
     fn add(g: *Gen, s: []const u8) !void {
         try g.out.appendSlice(g.a, s);
